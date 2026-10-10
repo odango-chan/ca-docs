@@ -44,7 +44,8 @@ jobs:
       - name: Commit sanitized snapshot when changed
         shell: bash
         run: |
-          cp data/generated/ca-5gc-sim.json /tmp/ca-5gc-sim.json
+          rm -rf /tmp/ca-docs-generated
+          cp -a data/generated /tmp/ca-docs-generated
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -52,15 +53,16 @@ jobs:
           for attempt in 1 2 3; do
             git fetch origin main
             git reset --hard origin/main
-            cp /tmp/ca-5gc-sim.json data/generated/ca-5gc-sim.json
+            rm -rf data/generated
+            cp -a /tmp/ca-docs-generated data/generated
 
-            if git diff --quiet -- data/generated/ca-5gc-sim.json; then
+            if git diff --quiet -- data/generated; then
               echo "No published snapshot changes."
               exit 0
             fi
 
-            git add data/generated/ca-5gc-sim.json
-            git commit -m "chore: refresh ca-5gc-sim snapshot"
+            git add data/generated
+            git commit -m "chore: refresh public docs snapshots"
 
             if git push origin HEAD:main; then
               exit 0
