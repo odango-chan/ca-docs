@@ -8,7 +8,8 @@
     "factSchema": "schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml",
     "operationSchema": "schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml",
     "httpServer": "internal/httpapi/server.go",
-    "private": true
+    "private": true,
+    "commitDate": null
   },
   "counts": {
     "facts": 8,
@@ -115,8 +116,6 @@
     "documentedOnlyRoutes": []
   },
   "sync": {
-    "mode": "snapshot",
-    "checkedAt": null,
-    "detail": "Checked-in fallback snapshot"
+    "mode": "published"
   }
 }
