@@ -2,9 +2,6 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import yaml from 'js-yaml';
 
-const owner = 'odango-chan';
-const repo = 'ca-5gc-sim';
-const ref = process.env.CA_5GC_SIM_REF || 'main';
 const token = process.env.CA_DOCS_SOURCE_TOKEN || '';
 const strict = process.env.CA_DOCS_SYNC_STRICT === '1';
 const snapshotPath = path.resolve('data/generated/ca-5gc-sim.json');
@@ -18,19 +15,27 @@ async function snapshotExists() {
   }
 }
 
-function githubHeaders(accept = 'application/vnd.github+json') {
+function githubHeaders() {
   const headers = {
-    Accept: accept,
-    'User-Agent': 'ca-docs-build',
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'ca-docs-sync',
   };
   if (token) headers.Authorization = `Bearer ${token}`;
   return headers;
 }
 
-async function fetchRepoText(relativePath) {
+function splitRepository(repository) {
+  const parts = String(repository || '').split('/');
+  if (parts.length !== 2 || parts.some((part) => !part)) {
+    throw new Error(`invalid component repository ${repository}`);
+  }
+  return { owner: parts[0], repo: parts[1] };
+}
+
+async function fetchRepoText(ctx, relativePath) {
   const url =
-    `https://api.github.com/repos/${owner}/${repo}/contents/${relativePath}` +
-    `?ref=${encodeURIComponent(ref)}`;
+    `https://api.github.com/repos/${ctx.owner}/${ctx.repo}/contents/${relativePath}` +
+    `?ref=${encodeURIComponent(ctx.ref)}`;
   const response = await fetch(url, { headers: githubHeaders() });
   if (!response.ok) {
     throw new Error(`failed to fetch ${relativePath}: HTTP ${response.status}`);
@@ -42,9 +47,9 @@ async function fetchRepoText(relativePath) {
   return Buffer.from(payload.content.replace(/\n/g, ''), 'base64').toString('utf8');
 }
 
-async function sourceRevision() {
+async function sourceRevision(ctx) {
   const response = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/branches/${encodeURIComponent(ref)}`,
+    `https://api.github.com/repos/${ctx.owner}/${ctx.repo}/branches/${encodeURIComponent(ctx.ref)}`,
     { headers: githubHeaders() },
   );
   if (!response.ok) {
@@ -60,6 +65,22 @@ async function sourceRevision() {
   };
 }
 
+function requireSource(manifest, role, kind, requiredPublish = []) {
+  const source = (manifest.sources || []).find(
+    (item) => item?.role === role && item?.kind === kind,
+  );
+  if (!source) {
+    throw new Error(`public docs manifest missing ${kind} source role=${role}`);
+  }
+  const publish = new Set(source.publish || []);
+  for (const item of requiredPublish) {
+    if (!publish.has(item)) {
+      throw new Error(`public docs source role=${role} does not allow publish=${item}`);
+    }
+  }
+  return source;
+}
+
 function classifyRoute(routePath) {
   if (routePath.startsWith('/internal/fabric/')) return 'Fabric integration';
   if (routePath.startsWith('/internal/')) return 'Host control';
@@ -67,17 +88,58 @@ function classifyRoute(routePath) {
   return 'Owner API';
 }
 
-function openApiRoutes(document) {
+function resolveLocalSource(originPath, refValue) {
+  if (!refValue || refValue.startsWith('#')) return null;
+  const [base] = refValue.split('#');
+  if (!base || /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(base)) return null;
+  return path.posix.normalize(
+    path.posix.join(path.posix.dirname(originPath), base.replace(/^\.\//, '')),
+  );
+}
+
+function resolveResponse(document, response) {
+  if (response?.$ref?.startsWith('#/components/responses/')) {
+    const name = response.$ref.split('/').at(-1);
+    return document.components?.responses?.[name] || response;
+  }
+  return response;
+}
+
+function openApiRoutes(document, sourcePath) {
   const routes = [];
   for (const [routePath, pathItem] of Object.entries(document.paths || {})) {
     for (const method of ['get', 'post', 'put', 'patch', 'delete', 'head', 'options']) {
-      if (pathItem?.[method]) {
-        routes.push({
-          method: method.toUpperCase(),
-          path: routePath,
-          operationId: pathItem[method].operationId || null,
-        });
-      }
+      const operation = pathItem?.[method];
+      if (!operation) continue;
+
+      const requestSchemaRef =
+        operation.requestBody?.content?.['application/json']?.schema?.$ref || null;
+
+      const responses = Object.entries(operation.responses || {}).map(([status, raw]) => {
+        const response = resolveResponse(document, raw);
+        const responseSchemaRef =
+          response?.content?.['application/json']?.schema?.$ref || null;
+        return {
+          status,
+          description: response?.description || '',
+          schema: resolveLocalSource(sourcePath, responseSchemaRef),
+        };
+      });
+
+      routes.push({
+        method: method.toUpperCase(),
+        path: routePath,
+        operationId: operation.operationId || null,
+        description: operation.description || '',
+        request: requestSchemaRef
+          ? {
+              required: operation.requestBody?.required === true,
+              contentType: 'application/json',
+              schema: resolveLocalSource(sourcePath, requestSchemaRef),
+            }
+          : null,
+        responses,
+      });
     }
   }
   return routes;
@@ -92,20 +154,72 @@ function implementationRoutes(serverSource) {
   return routes;
 }
 
-if (!token) {
-  if (strict) {
-    throw new Error('CA_DOCS_SOURCE_TOKEN is required in strict sync mode');
+function fieldType(node) {
+  if (!node || typeof node !== 'object') return null;
+  if (node.type) return Array.isArray(node.type) ? node.type.join(' | ') : node.type;
+  if (Object.prototype.hasOwnProperty.call(node, 'const')) return 'const';
+  if (node.enum) return 'enum';
+  if (node.$ref) return 'ref';
+  if (node.oneOf) return 'oneOf';
+  if (node.allOf) return 'allOf';
+  return null;
+}
+
+function publicRef(refValue) {
+  if (!refValue || typeof refValue !== 'string') return null;
+  const [base, fragment] = refValue.split('#');
+  if (!base) return fragment ? `#${fragment}` : refValue;
+  return `${path.posix.basename(base)}${fragment ? `#${fragment}` : ''}`;
+}
+
+function collectFields(node, prefix, allowEnums, out) {
+  if (!node || typeof node !== 'object' || !node.properties) return;
+  const required = new Set(Array.isArray(node.required) ? node.required : []);
+  for (const [name, child] of Object.entries(node.properties)) {
+    if (!child || typeof child !== 'object') continue;
+    const fieldPath = prefix ? `${prefix}.${name}` : name;
+    const entry = {
+      path: fieldPath,
+      required: required.has(name),
+      type: fieldType(child),
+      description: child.description || null,
+      ref: publicRef(child.$ref),
+      oneOfRefs: Array.isArray(child.oneOf)
+        ? child.oneOf.map((item) => publicRef(item?.$ref)).filter(Boolean)
+        : [],
+    };
+    if (Object.prototype.hasOwnProperty.call(child, 'const')) entry.const = child.const;
+    if (allowEnums && Array.isArray(child.enum)) entry.enum = child.enum;
+    out.push(entry);
+    collectFields(child, fieldPath, allowEnums, out);
   }
-  if (!(await snapshotExists())) {
-    throw new Error(
-      'CA_DOCS_SOURCE_TOKEN is not configured and no checked-in ca-5gc-sim snapshot exists',
-    );
+}
+
+function summarizeSchema(source, document) {
+  const publish = new Set(source.publish || []);
+  const summary = {
+    kind: source.kind,
+    path: source.path,
+    role: source.role || null,
+    publish: [...publish],
+  };
+  if (publish.has('metadata')) {
+    summary.title = document.title || null;
+    summary.description = document.description || null;
   }
-  const snapshot = JSON.parse(await fs.readFile(snapshotPath, 'utf8'));
-  console.log(
-    `ca-5gc-sim: using published snapshot ${snapshot.source?.commit || snapshot.source?.ref || 'unknown'}`,
-  );
-  process.exit(0);
+  if (publish.has('fields')) {
+    const fields = [];
+    collectFields(document, '', publish.has('enums'), fields);
+    summary.fields = fields;
+  }
+  if (publish.has('enums')) {
+    summary.enums = {};
+    for (const field of summary.fields || []) {
+      if (Array.isArray(field.enum)) summary.enums[field.path] = field.enum;
+    }
+  }
+  summary.examplesAllowed = publish.has('examples');
+  return summary;
 }
 
 async function useSnapshot(reason) {
@@ -117,97 +231,161 @@ async function useSnapshot(reason) {
   );
 }
 
-async function refreshFromUpstream() {
-  const [openApiText, factSchemaText, operationSchemaText, serverSource, revision] =
-    await Promise.all([
-      fetchRepoText('schemas/v1alpha1/fivegc-sim.openapi.yaml'),
-      fetchRepoText('schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml'),
-      fetchRepoText('schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml'),
-      fetchRepoText('internal/httpapi/server.go'),
-      sourceRevision(),
-    ]);
+export async function syncCa5gcSim(component) {
+  const { owner, repo } = splitRepository(component.repository);
+  const ref = process.env.CA_5GC_SIM_REF || component.ref || 'main';
+  const manifestPath = component.manifest || 'docs/public-docs.yaml';
+  const ctx = { owner, repo, ref };
 
-  const openApi = yaml.load(openApiText);
-  const factSchema = yaml.load(factSchemaText);
-  const operationSchema = yaml.load(operationSchemaText);
-
-  const facts = factSchema?.properties?.spec?.properties?.factSemantic?.enum || [];
-  const operations =
-    operationSchema?.properties?.spec?.properties?.operationSemantic?.enum || [];
-
-  if (!facts.length || !operations.length) {
-    throw new Error('upstream schema parsed, but semantic inventories are empty');
+  if (!token) {
+    if (strict) {
+      throw new Error('CA_DOCS_SOURCE_TOKEN is required in strict sync mode');
+    }
+    if (!(await snapshotExists())) {
+      throw new Error(
+        'CA_DOCS_SOURCE_TOKEN is not configured and no checked-in ca-5gc-sim snapshot exists',
+      );
+    }
+    const snapshot = JSON.parse(await fs.readFile(snapshotPath, 'utf8'));
+    console.log(
+      `ca-5gc-sim: using published snapshot ${snapshot.source?.commit || snapshot.source?.ref || 'unknown'}`,
+    );
+    return;
   }
 
-  const documented = openApiRoutes(openApi);
-  const implemented = implementationRoutes(serverSource);
-  const documentedByKey = new Map(
-    documented.map((route) => [`${route.method} ${route.path}`, route]),
-  );
-  const implementedByKey = new Map(
-    implemented.map((route) => [`${route.method} ${route.path}`, route]),
-  );
-  const keys = [...new Set([...documentedByKey.keys(), ...implementedByKey.keys()])].sort();
+  try {
+    const [manifestText, revision] = await Promise.all([
+      fetchRepoText(ctx, manifestPath),
+      sourceRevision(ctx),
+    ]);
+    const manifest = yaml.load(manifestText);
 
-  const routes = keys.map((key) => {
-    const doc = documentedByKey.get(key);
-    const impl = implementedByKey.get(key);
-    const selected = impl || doc;
-    return {
-      method: selected.method,
-      path: selected.path,
-      surface: classifyRoute(selected.path),
-      operationId: doc?.operationId || null,
-      documented: Boolean(doc),
-      implemented: Boolean(impl),
+    if (
+      !manifest ||
+      manifest.apiVersion !== 'connectionagent.io/v1alpha1' ||
+      manifest.kind !== 'PublicDocsManifest' ||
+      manifest.component !== component.id
+    ) {
+      throw new Error(`invalid PublicDocsManifest at ${manifestPath}`);
+    }
+
+    const openApiSource = requireSource(manifest, 'owner-http-api', 'openapi', ['operations']);
+    const factSource = requireSource(manifest, 'fact-inventory', 'json-schema', ['enums']);
+    const operationSource = requireSource(manifest, 'operation-inventory', 'json-schema', ['enums']);
+    const implementationSource = requireSource(
+      manifest,
+      'http-route-registration',
+      'implementation-check',
+      ['implementation-summary'],
+    );
+
+    const publicSchemaSources = (manifest.sources || []).filter(
+      (source) =>
+        source?.kind === 'json-schema' &&
+        (source.publish || []).some((item) => item === 'metadata' || item === 'fields' || item === 'enums'),
+    );
+
+    const texts = await Promise.all([
+      fetchRepoText(ctx, openApiSource.path),
+      fetchRepoText(ctx, factSource.path),
+      fetchRepoText(ctx, operationSource.path),
+      fetchRepoText(ctx, implementationSource.path),
+      ...publicSchemaSources.map((source) => fetchRepoText(ctx, source.path)),
+    ]);
+
+    const [openApiText, factSchemaText, operationSchemaText, serverSource, ...schemaTexts] = texts;
+    const openApi = yaml.load(openApiText);
+    const factSchema = yaml.load(factSchemaText);
+    const operationSchema = yaml.load(operationSchemaText);
+
+    const facts = factSchema?.properties?.spec?.properties?.factSemantic?.enum || [];
+    const operations =
+      operationSchema?.properties?.spec?.properties?.operationSemantic?.enum || [];
+
+    if (!facts.length || !operations.length) {
+      throw new Error('manifest sources parsed, but semantic inventories are empty');
+    }
+
+    const contracts = publicSchemaSources.map((source, index) =>
+      summarizeSchema(source, yaml.load(schemaTexts[index])),
+    );
+
+    const documented = openApiRoutes(openApi, openApiSource.path);
+    const implemented = implementationRoutes(serverSource);
+    const documentedByKey = new Map(
+      documented.map((route) => [`${route.method} ${route.path}`, route]),
+    );
+    const implementedByKey = new Map(
+      implemented.map((route) => [`${route.method} ${route.path}`, route]),
+    );
+    const keys = [...new Set([...documentedByKey.keys(), ...implementedByKey.keys()])].sort();
+
+    const routes = keys.map((key) => {
+      const doc = documentedByKey.get(key);
+      const impl = implementedByKey.get(key);
+      const selected = impl || doc;
+      return {
+        method: selected.method,
+        path: selected.path,
+        surface: classifyRoute(selected.path),
+        operationId: doc?.operationId || null,
+        description: doc?.description || '',
+        request: doc?.request || null,
+        responses: doc?.responses || [],
+        documented: Boolean(doc),
+        implemented: Boolean(impl),
+      };
+    });
+
+    const output = {
+      component: component.id,
+      source: {
+        repository: component.repository,
+        ref,
+        commit: revision.commit,
+        commitDate: revision.commitDate,
+        private: true,
+        publicDocsManifest: manifestPath,
+        openApi: openApiSource.path,
+        factSchema: factSource.path,
+        operationSchema: operationSource.path,
+        httpServer: implementationSource.path,
+      },
+      publicDocs: {
+        apiVersion: manifest.apiVersion,
+        kind: manifest.kind,
+        manifest: manifestPath,
+        contracts,
+      },
+      counts: {
+        facts: facts.length,
+        operations: operations.length,
+        documentedRoutes: documented.length,
+        implementationRoutes: implemented.length,
+      },
+      facts,
+      operations,
+      routes,
+      drift: {
+        implementationOnlyRoutes: routes.filter(
+          (route) => route.implemented && !route.documented,
+        ),
+        documentedOnlyRoutes: routes.filter(
+          (route) => route.documented && !route.implemented,
+        ),
+      },
+      sync: {
+        mode: 'published',
+      },
     };
-  });
 
-  const output = {
-    component: 'ca-5gc-sim',
-    source: {
-      repository: `${owner}/${repo}`,
-      ref,
-      commit: revision.commit,
-      commitDate: revision.commitDate,
-      private: true,
-      openApi: 'schemas/v1alpha1/fivegc-sim.openapi.yaml',
-      factSchema: 'schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml',
-      operationSchema: 'schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml',
-      httpServer: 'internal/httpapi/server.go',
-    },
-    counts: {
-      facts: facts.length,
-      operations: operations.length,
-      documentedRoutes: documented.length,
-      implementationRoutes: implemented.length,
-    },
-    facts,
-    operations,
-    routes,
-    drift: {
-      implementationOnlyRoutes: routes.filter(
-        (route) => route.implemented && !route.documented,
-      ),
-      documentedOnlyRoutes: routes.filter(
-        (route) => route.documented && !route.implemented,
-      ),
-    },
-    sync: {
-      mode: 'published',
-    },
-  };
+    await fs.mkdir(path.dirname(snapshotPath), { recursive: true });
+    await fs.writeFile(snapshotPath, JSON.stringify(output, null, 2) + '\n');
 
-  await fs.mkdir(path.dirname(snapshotPath), { recursive: true });
-  await fs.writeFile(snapshotPath, JSON.stringify(output, null, 2) + '\n');
-
-  console.log(
-    `ca-5gc-sim: refreshed ${facts.length} facts, ${operations.length} operations, ${implemented.length} implementation routes from ${revision.commit}`,
-  );
-}
-
-try {
-  await refreshFromUpstream();
-} catch (error) {
-  await useSnapshot(error instanceof Error ? error : new Error(String(error)));
+    console.log(
+      `ca-5gc-sim: refreshed via ${manifestPath}: ${facts.length} facts, ${operations.length} operations, ${implemented.length} implementation routes from ${revision.commit}`,
+    );
+  } catch (error) {
+    await useSnapshot(error instanceof Error ? error : new Error(String(error)));
+  }
 }
