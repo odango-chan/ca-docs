@@ -15,6 +15,63 @@ const copy: Record<string, { title: string; description: string }> = {
   'POST /internal/fabric/delivery': { title: 'Fabric delivery callback', description: 'Internal callback used by Service Fabric. It is registered in code but is not in OpenAPI yet.' },
 };
 
+const examples: Record<string, string> = {
+  '/v1/facts/read': JSON.stringify({
+    apiVersion: 'connectionagent.io/v1alpha1',
+    kind: 'FiveGCSimFactReadRequest',
+    contractVersion: 'v1',
+    spec: {
+      worldRef: 'world-standalone',
+      worldGeneration: 'g1',
+      factSemantic: 'PDU_SESSION',
+      subjectRef: { kind: 'PDU_SESSION', supi: '001010000000002', pduSessionId: 10 },
+      readMode: { mode: 'CURRENT' },
+    },
+  }, null, 2),
+  '/v1/operations': JSON.stringify({
+    apiVersion: 'connectionagent.io/v1alpha1',
+    kind: 'FiveGCSimOperationRequest',
+    contractVersion: 'v1',
+    spec: {
+      worldRef: 'world-standalone',
+      worldGeneration: 'g1',
+      operationSemantic: 'PDU_SESSION_MODIFY_QOS',
+      subjectRef: { kind: 'PDU_SESSION', supi: '001010000000002', pduSessionId: 10 },
+      params: { fiveQi: 7 },
+      responseWaitBudget: { schedulerBindingRef: 'local-scheduler', logicalDuration: '5s' },
+    },
+  }, null, 2),
+  '/internal/v1/world/reset': JSON.stringify({
+    apiVersion: 'connectionagent.io/v1alpha1',
+    kind: 'FiveGCSimWorldResetRequest',
+    contractVersion: 'v1',
+    spec: {
+      expectedWorldRef: 'world-standalone',
+      expectedWorldGeneration: 'g1',
+      newWorldGeneration: 'g2',
+      newSchedulerBindingRef: 'local-scheduler',
+      seedProfile: 'registered-active-pdu-sessions-v1',
+    },
+  }, null, 2),
+};
+
+const contracts = new Map<string, any>(
+  ((data as any).publicDocs?.contracts ?? []).map((contract: any) => [contract.path, contract]),
+);
+
+const fieldDetail = (field: any) => {
+  if (Object.prototype.hasOwnProperty.call(field, 'const')) return `Fixed: ${String(field.const)}`;
+  if (Array.isArray(field.enum)) return `Values: ${field.enum.join(' / ')}`;
+  if (field.ref) return `Type: ${field.ref}`;
+  if (Array.isArray(field.oneOfRefs) && field.oneOfRefs.length) return `Type: ${field.oneOfRefs.join(' / ')}`;
+  return field.type ? `Type: ${field.type}` : '';
+};
+
+const ruleText = (rule: any) =>
+  Object.entries(rule.when ?? {})
+    .map(([name, values]) => `${name} = ${(values as any[]).join(' / ')}`)
+    .join(', ');
+
 const documented = data.routes.filter((route) => route.documented);
 const implementationOnly = data.routes.filter((route) => route.implemented && !route.documented);
 ---
@@ -23,7 +80,8 @@ const implementationOnly = data.routes.filter((route) => route.implemented && !r
     <span class="eyebrow">ca-5gc-sim / HTTP API</span>
     <h1>HTTP API</h1>
     <p class="lede">
-      Endpoints are documented here directly. Source access is not required to browse the public API surface.
+      This page is generated from the OpenAPI and schema summaries explicitly allowed by
+      <code>{data.source.publicDocsManifest}</code>. Source repository access is not required.
     </p>
     <div class="page-tabs">
       <a href={href('/en/components/ca-5gc-sim/')}>Overview</a>
@@ -37,7 +95,11 @@ const implementationOnly = data.routes.filter((route) => route.implemented && !r
     <div class="api-list">
       {documented.map((route) => {
         const key = `${route.method} ${route.path}`;
-        const item = copy[key] ?? { title: route.operationId ?? route.path, description: '' };
+        const item = copy[key] ?? { title: route.operationId ?? route.path, description: route.description ?? '' };
+        const requestContract = route.request?.schema ? contracts.get(route.request.schema) : null;
+        const requestFields = (requestContract?.fields ?? []).filter((field: any) => field.path !== 'spec');
+        const requestRules = requestContract?.rules ?? [];
+
         return (
           <article class="api-card">
             <div class="api-heading">
@@ -45,32 +107,103 @@ const implementationOnly = data.routes.filter((route) => route.implemented && !r
               <code class="api-path">{route.path}</code>
               <span class="pill">{route.surface}</span>
             </div>
+
             <h3>{item.title}</h3>
             <p>{item.description}</p>
             <div class="api-meta"><span>operationId</span><code>{route.operationId}</code></div>
 
-            {route.path === '/v1/facts/read' && (
+            {route.request && requestContract && (
               <div class="api-block">
                 <strong>Request</strong>
-                <p><code>worldRef</code>, <code>worldGeneration</code>, <code>factSemantic</code>, <code>subjectRef</code>, and <code>readMode</code> are required.</p>
-                <a href={href('/en/components/ca-5gc-sim/facts/')}>Supported factSemantic values →</a>
+                <p class="meta">Schema: <code>{requestContract.title ?? route.request.schema}</code></p>
+                <div style="overflow-x:auto">
+                  <table>
+                    <thead><tr><th>Field</th><th>Required</th><th>Type / values</th></tr></thead>
+                    <tbody>
+                      {requestFields.map((field: any) => (
+                        <tr>
+                          <td><code>{field.path}</code></td>
+                          <td>{field.required ? 'Yes' : 'No'}</td>
+                          <td>{fieldDetail(field)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {requestRules.length > 0 && (
+                  <details class="api-example">
+                    <summary>Semantic-specific field rules</summary>
+                    <div class="rule-list">
+                      {requestRules.map((rule: any) => (
+                        <div class="rule-item">
+                          <strong>{ruleText(rule) || 'Conditional rule'}</strong>
+                          {rule.fields?.length > 0 && (
+                            <div>
+                              {rule.fields.map((field: any) => (
+                                <div><code>{field.path}</code> · {field.required ? 'required' : 'optional'} · {fieldDetail(field)}</div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                )}
+
+                {requestContract.examplesAllowed && examples[route.path] && (
+                  <details class="api-example">
+                    <summary>Request example</summary>
+                    <pre><code>{examples[route.path]}</code></pre>
+                  </details>
+                )}
+
+                {route.path === '/v1/facts/read' && (
+                  <a href={href('/en/components/ca-5gc-sim/facts/')}>Supported factSemantic values →</a>
+                )}
+                {route.path === '/v1/operations' && (
+                  <a href={href('/en/components/ca-5gc-sim/operations/')}>Supported operationSemantic values →</a>
+                )}
               </div>
             )}
 
-            {route.path === '/v1/operations' && (
-              <div class="api-block">
-                <strong>Request</strong>
-                <p><code>worldRef</code>, <code>worldGeneration</code>, <code>operationSemantic</code>, <code>subjectRef</code>, and <code>responseWaitBudget</code> are required. <code>params</code> depends on the operation.</p>
-                <a href={href('/en/components/ca-5gc-sim/operations/')}>Supported operationSemantic values →</a>
+            <div class="api-block">
+              <strong>Responses</strong>
+              <div class="response-list">
+                {(route.responses ?? []).map((response) => {
+                  const responseContract = response.schema ? contracts.get(response.schema) : null;
+                  return (
+                    <div class="response-row">
+                      <code class="status-code">{response.status}</code>
+                      <div>
+                        <div>{response.description}</div>
+                        {responseContract && (
+                          <details class="response-contract">
+                            <summary>{responseContract.title ?? response.schema}</summary>
+                            <div style="overflow-x:auto">
+                              <table>
+                                <thead><tr><th>Field</th><th>Required</th><th>Type / values</th></tr></thead>
+                                <tbody>
+                                  {(responseContract.fields ?? [])
+                                    .filter((field: any) => field.path !== 'spec')
+                                    .map((field: any) => (
+                                      <tr>
+                                        <td><code>{field.path}</code></td>
+                                        <td>{field.required ? 'Yes' : 'No'}</td>
+                                        <td>{fieldDetail(field)}</td>
+                                      </tr>
+                                    ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </details>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            )}
-
-            {route.path === '/internal/v1/world/reset' && (
-              <div class="api-block">
-                <strong>Request</strong>
-                <p>Includes the current world/generation, the new generation, scheduler binding, and seed profile.</p>
-              </div>
-            )}
+            </div>
           </article>
         );
       })}
@@ -94,4 +227,11 @@ const implementationOnly = data.routes.filter((route) => route.implemented && !r
       })}
     </section>
   )}
+
+  <section class="section">
+    <p class="source-note">
+      Source: <code>{data.source.repository}@{data.source.commit?.slice(0, 8)}</code> ·
+      manifest <code>{data.source.publicDocsManifest}</code>
+    </p>
+  </section>
 </SiteLayout>
