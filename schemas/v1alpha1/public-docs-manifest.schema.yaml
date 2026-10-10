@@ -1,0 +1,85 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://connectionagent.io/schemas/v1alpha1/public-docs-manifest.schema.yaml
+title: PublicDocsManifest.v1
+type: object
+additionalProperties: false
+required:
+  - apiVersion
+  - kind
+  - component
+  - sources
+properties:
+  apiVersion:
+    const: connectionagent.io/v1alpha1
+  kind:
+    const: PublicDocsManifest
+  component:
+    type: string
+    pattern: '^ca-[a-z0-9-]+$'
+  title:
+    type: object
+    additionalProperties: false
+    properties:
+      zh: {type: string, minLength: 1}
+      en: {type: string, minLength: 1}
+  sources:
+    type: array
+    minItems: 1
+    items:
+      $ref: '#/$defs/source'
+$defs:
+  source:
+    type: object
+    additionalProperties: false
+    required:
+      - kind
+      - path
+      - publish
+    properties:
+      kind:
+        enum:
+          - openapi
+          - json-schema
+          - markdown
+          - implementation-check
+      path:
+        type: string
+        minLength: 1
+        pattern: '^(?!/)(?!.*\.\./).+$'
+      role:
+        type: string
+        minLength: 1
+      language:
+        enum: [zh, en]
+      publish:
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items:
+          enum:
+            - metadata
+            - operations
+            - fields
+            - enums
+            - examples
+            - body
+            - implementation-summary
+    allOf:
+      - if:
+          properties:
+            kind: {const: implementation-check}
+          required: [kind]
+        then:
+          properties:
+            publish:
+              items:
+                enum: [metadata, implementation-summary]
+      - if:
+          properties:
+            kind: {const: markdown}
+          required: [kind]
+        then:
+          properties:
+            publish:
+              items:
+                enum: [metadata, body]
