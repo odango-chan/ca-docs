@@ -3,8 +3,8 @@
   "source": {
     "repository": "odango-chan/ca-5gc-sim",
     "ref": "main",
-    "commit": "46cfdc495373a34043c8ad4fbee0dc8420d8b0db",
-    "commitDate": "2026-10-10T07:49:47Z",
+    "commit": "6d74335fe6bb5cf5f7995eef4c928f1a4f59a0da",
+    "commitDate": "2026-10-10T08:04:11Z",
     "private": true,
     "publicDocsManifest": "docs/public-docs.yaml",
     "openApi": "schemas/v1alpha1/fivegc-sim.openapi.yaml",
@@ -3335,7 +3335,7 @@
       "path": "/identity",
       "surface": "Diagnostics",
       "operationId": "getProcessIdentity",
-      "description": "",
+      "description": "Returns metadata about this ca-5gc-sim process and the owner contracts\nit supports. Think of this endpoint as \"who is this simulator process\nand what does it serve?\", not \"who is UE-B?\".\n\nThis endpoint never performs user-visible name/alias -> SUPI/IMSI\nresolution. That cross-domain identity mapping belongs to\nca-provider-common and is exposed there as\nPOST /v1/subject-identities/lookup.\n",
       "request": null,
       "responses": [
         {
