@@ -1,0 +1,53 @@
+name: Sync Upstream Contracts
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sync-upstream.yml'
+      - 'scripts/sync-ca-5gc-sim.mjs'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Refresh private upstream snapshot
+        run: npm run sync
+        env:
+          CA_DOCS_SOURCE_TOKEN: ${{ secrets.CA_DOCS_SOURCE_TOKEN }}
+          CA_DOCS_SYNC_STRICT: '1'
+
+      - name: Commit sanitized snapshot when changed
+        shell: bash
+        run: |
+          if git diff --quiet -- data/generated/ca-5gc-sim.json; then
+            echo "No published snapshot changes."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/generated/ca-5gc-sim.json
+          git commit -m "chore: refresh ca-5gc-sim snapshot"
+          git push
