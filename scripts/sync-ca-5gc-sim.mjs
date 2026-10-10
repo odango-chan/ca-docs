@@ -5,26 +5,52 @@ import yaml from 'js-yaml';
 const owner = 'odango-chan';
 const repo = 'ca-5gc-sim';
 const ref = process.env.CA_5GC_SIM_REF || 'main';
-const rawBase = `https://raw.githubusercontent.com/${owner}/${repo}/${ref}`;
+const token = process.env.CA_DOCS_SOURCE_TOKEN || '';
+const snapshotPath = path.resolve('data/generated/ca-5gc-sim.json');
 
-async function fetchText(relativePath) {
-  const response = await fetch(`${rawBase}/${relativePath}`, {
-    headers: { 'User-Agent': 'ca-docs-build' },
-  });
+async function snapshotExists() {
+  try {
+    await fs.access(snapshotPath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function githubHeaders(accept = 'application/vnd.github+json') {
+  const headers = {
+    Accept: accept,
+    'User-Agent': 'ca-docs-build',
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
+
+async function fetchRepoText(relativePath) {
+  const url =
+    `https://api.github.com/repos/${owner}/${repo}/contents/${relativePath}` +
+    `?ref=${encodeURIComponent(ref)}`;
+  const response = await fetch(url, { headers: githubHeaders() });
   if (!response.ok) {
     throw new Error(`failed to fetch ${relativePath}: HTTP ${response.status}`);
   }
-  return response.text();
+  const payload = await response.json();
+  if (!payload?.content || payload.encoding !== 'base64') {
+    throw new Error(`unexpected GitHub contents response for ${relativePath}`);
+  }
+  return Buffer.from(payload.content.replace(/\n/g, ''), 'base64').toString('utf8');
 }
 
 async function sourceCommit() {
   const response = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/commits/${encodeURIComponent(ref)}`,
-    { headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'ca-docs-build' } },
+    `https://api.github.com/repos/${owner}/${repo}/branches/${encodeURIComponent(ref)}`,
+    { headers: githubHeaders() },
   );
-  if (!response.ok) return null;
+  if (!response.ok) {
+    throw new Error(`failed to resolve source ref: HTTP ${response.status}`);
+  }
   const payload = await response.json();
-  return payload.sha || null;
+  return payload?.commit?.sha || null;
 }
 
 function classifyRoute(routePath) {
@@ -59,12 +85,25 @@ function implementationRoutes(serverSource) {
   return routes;
 }
 
+if (!token) {
+  if (!(await snapshotExists())) {
+    throw new Error(
+      'CA_DOCS_SOURCE_TOKEN is not configured and no checked-in ca-5gc-sim snapshot exists',
+    );
+  }
+  const snapshot = JSON.parse(await fs.readFile(snapshotPath, 'utf8'));
+  console.log(
+    `ca-5gc-sim: using checked-in snapshot ${snapshot.source?.commit || snapshot.source?.ref || 'unknown'}`,
+  );
+  process.exit(0);
+}
+
 const [openApiText, factSchemaText, operationSchemaText, serverSource, commit] =
   await Promise.all([
-    fetchText('schemas/v1alpha1/fivegc-sim.openapi.yaml'),
-    fetchText('schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml'),
-    fetchText('schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml'),
-    fetchText('internal/httpapi/server.go'),
+    fetchRepoText('schemas/v1alpha1/fivegc-sim.openapi.yaml'),
+    fetchRepoText('schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml'),
+    fetchRepoText('schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml'),
+    fetchRepoText('internal/httpapi/server.go'),
     sourceCommit(),
   ]);
 
@@ -72,8 +111,7 @@ const openApi = yaml.load(openApiText);
 const factSchema = yaml.load(factSchemaText);
 const operationSchema = yaml.load(operationSchemaText);
 
-const facts =
-  factSchema?.properties?.spec?.properties?.factSemantic?.enum || [];
+const facts = factSchema?.properties?.spec?.properties?.factSemantic?.enum || [];
 const operations =
   operationSchema?.properties?.spec?.properties?.operationSemantic?.enum || [];
 
@@ -111,12 +149,9 @@ const output = {
     repository: `${owner}/${repo}`,
     ref,
     commit,
-    openApi:
-      'schemas/v1alpha1/fivegc-sim.openapi.yaml',
-    factSchema:
-      'schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml',
-    operationSchema:
-      'schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml',
+    openApi: 'schemas/v1alpha1/fivegc-sim.openapi.yaml',
+    factSchema: 'schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml',
+    operationSchema: 'schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml',
     httpServer: 'internal/httpapi/server.go',
   },
   counts: {
@@ -138,18 +173,9 @@ const output = {
   },
 };
 
-const targetDir = path.resolve('data/generated');
-await fs.mkdir(targetDir, { recursive: true });
-await fs.writeFile(
-  path.join(targetDir, 'ca-5gc-sim.json'),
-  JSON.stringify(output, null, 2) + '\n',
-);
+await fs.mkdir(path.dirname(snapshotPath), { recursive: true });
+await fs.writeFile(snapshotPath, JSON.stringify(output, null, 2) + '\n');
 
 console.log(
-  `ca-5gc-sim: ${facts.length} facts, ${operations.length} operations, ${implemented.length} implementation routes`,
+  `ca-5gc-sim: refreshed ${facts.length} facts, ${operations.length} operations, ${implemented.length} implementation routes from ${commit}`,
 );
-if (output.drift.implementationOnlyRoutes.length) {
-  console.log(
-    `route drift: ${output.drift.implementationOnlyRoutes.length} implementation route(s) are not in OpenAPI`,
-  );
-}

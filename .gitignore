@@ -1,5 +1,1 @@
-node_modules/
-dist/
-.astro/
-data/generated/*.json
-.DS_Store
+node_modules/\ndist/\n.astro/\n.DS_Store\n

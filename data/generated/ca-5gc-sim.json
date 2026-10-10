@@ -1,0 +1,116 @@
+{
+  "component": "ca-5gc-sim",
+  "source": {
+    "repository": "odango-chan/ca-5gc-sim",
+    "ref": "main",
+    "commit": "3522c9bc3980cdb58c5c1789b38aa72ee40aafc9",
+    "openApi": "schemas/v1alpha1/fivegc-sim.openapi.yaml",
+    "factSchema": "schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml",
+    "operationSchema": "schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml",
+    "httpServer": "internal/httpapi/server.go"
+  },
+  "counts": {
+    "facts": 8,
+    "operations": 15,
+    "documentedRoutes": 6,
+    "implementationRoutes": 7
+  },
+  "facts": [
+    "UE_REGISTRATION",
+    "UE_REGISTRATION_CONTEXT",
+    "PDU_SESSION",
+    "USER_PLANE_CONNECTIVITY",
+    "PFCP_RESOURCE",
+    "TRANSFER_PARTICIPANTS",
+    "VIRTUAL_GROUP",
+    "TRANSFER_QOS"
+  ],
+  "operations": [
+    "UE_REGISTRATION_ENSURE",
+    "PDU_SESSION_CREATE",
+    "PDU_SESSION_MODIFY_QOS",
+    "PDU_SESSION_RELEASE",
+    "PFCP_RESOURCE_CLEANUP",
+    "EDGE_CACHE_ENSURE",
+    "EDGE_CACHE_RECONCILE",
+    "VIRTUAL_GROUP_CREATE",
+    "VIRTUAL_GROUP_RECONCILE_CREATE",
+    "VIRTUAL_GROUP_ASSIGN_MEMBERS",
+    "VIRTUAL_GROUP_RECONCILE_MEMBERS",
+    "VIRTUAL_GROUP_RELEASE",
+    "VIRTUAL_GROUP_RECONCILE_RELEASE",
+    "TRANSFER_QOS_BOOST",
+    "TRANSFER_QOS_RECONCILE"
+  ],
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/healthz",
+      "surface": "Diagnostics",
+      "operationId": "getProcessHealth",
+      "documented": true,
+      "implemented": true
+    },
+    {
+      "method": "GET",
+      "path": "/identity",
+      "surface": "Diagnostics",
+      "operationId": "getProcessIdentity",
+      "documented": true,
+      "implemented": true
+    },
+    {
+      "method": "GET",
+      "path": "/v1/world",
+      "surface": "Owner API",
+      "operationId": "getWorld",
+      "documented": true,
+      "implemented": true
+    },
+    {
+      "method": "POST",
+      "path": "/internal/fabric/delivery",
+      "surface": "Fabric integration",
+      "operationId": null,
+      "documented": false,
+      "implemented": true
+    },
+    {
+      "method": "POST",
+      "path": "/internal/v1/world/reset",
+      "surface": "Host control",
+      "operationId": "resetWorld",
+      "documented": true,
+      "implemented": true
+    },
+    {
+      "method": "POST",
+      "path": "/v1/facts/read",
+      "surface": "Owner API",
+      "operationId": "readFact",
+      "documented": true,
+      "implemented": true
+    },
+    {
+      "method": "POST",
+      "path": "/v1/operations",
+      "surface": "Owner API",
+      "operationId": "executeOperation",
+      "documented": true,
+      "implemented": true
+    }
+  ],
+  "drift": {
+    "implementationOnlyRoutes": [
+      {
+        "method": "POST",
+        "path": "/internal/fabric/delivery",
+        "surface": "Fabric integration",
+        "operationId": null,
+        "documented": false,
+        "implemented": true
+      }
+    ],
+    "documentedOnlyRoutes": []
+  }
+}\n
