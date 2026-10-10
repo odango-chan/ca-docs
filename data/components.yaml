@@ -25,10 +25,11 @@ components:
 
   - id: ca-provider-common
     repository: odango-chan/ca-provider-common
-    status: planned
+    status: staged
     title:
       zh: Provider 公共能力
       en: Provider common
+    manifest: docs/public-docs.yaml
 
   - id: ca-provider-5gc
     repository: odango-chan/ca-provider-5gc
