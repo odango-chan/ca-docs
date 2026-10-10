@@ -22,10 +22,9 @@ const matrix = [
 <SiteLayout title="ca-5gc-sim" lang="en">
   <section class="hero">
     <span class="eyebrow">Component / ca-5gc-sim</span>
-    <h1>Deterministic 5GC simulator</h1>
+    <h1>ca-5gc-sim</h1>
     <p class="lede">
-      Simulated 5GC domain state and deterministic NF behavior. The site inventory below
-      is built from the current upstream schemas and HTTP route registration.
+      Simulates 5GC state and NF behavior. The Facts, Operations, and routes below are generated from the current schemas and code.
     </p>
     <div class="page-tabs">
       <a href={href('/en/components/ca-5gc-sim/')}>Overview</a>
@@ -46,7 +45,7 @@ const matrix = [
     <div class="source-status snapshot">
       <div>
         <strong>Published snapshot</strong>
-        <span>Pages builds from the latest successfully synchronized sanitized snapshot; the private token is not exposed to the Pages build.</span>
+        <span>The site uses the latest successfully synced ca-5gc-sim data. The source repository is private; the Pages build does not read it directly.</span>
       </div>
       <code>{data.source.repository}@{sourceVersion}</code>
     </div>
@@ -55,12 +54,11 @@ const matrix = [
   <section class="section">
     <div class="section-head">
       <div>
-        <span class="eyebrow">Capability matrix</span>
-        <h2>What the simulator owns today</h2>
+        <span class="eyebrow">Capabilities</span>
+        <h2>What it supports</h2>
       </div>
       <p>
-        Fact reads and mutations share generic HTTP entry points, but the semantic
-        inventory is the useful capability surface.
+        There are only a few HTTP entry points, but each semantic represents a different read or operation.
       </p>
     </div>
     <div style="overflow-x:auto">
@@ -84,31 +82,30 @@ const matrix = [
   <section class="section">
     <div class="section-head">
       <div>
-        <span class="eyebrow">Ownership boundary</span>
-        <h2>What it deliberately does not own</h2>
+        <span class="eyebrow">Handled elsewhere</span>
+        <h2>These belong to other components</h2>
       </div>
     </div>
     <div class="grid">
-      <div class="card"><h3>Network faults</h3><p>Drop, delay, reorder and Network Observation belong to <code>ca-service-fabric</code>.</p></div>
-      <div class="card"><h3>Alias → execution identity</h3><p>User-visible identity resolution belongs to <code>ca-provider-common</code>.</p></div>
-      <div class="card"><h3>Runtime Outcome</h3><p>SUCCEEDED / FAILED / OUTCOME_UNKNOWN and reconcile policy belong to <code>ca-runtime</code>.</p></div>
-      <div class="card"><h3>Agent-facing tools</h3><p>The simulator is not an MCP surface; Agent exposure is admitted through Runtime and <code>ca-mcp</code>.</p></div>
+      <div class="card"><h3>Network faults</h3><p>Drop, delay, reorder, and Network Observation live in <code>ca-service-fabric</code>.</p></div>
+      <div class="card"><h3>Alias → execution identity</h3><p>Alias-to-execution-identity lookup lives in <code>ca-provider-common</code>.</p></div>
+      <div class="card"><h3>Runtime Outcome</h3><p>SUCCEEDED / FAILED / OUTCOME_UNKNOWN and reconcile handling live in <code>ca-runtime</code>.</p></div>
+      <div class="card"><h3>Agent-facing tools</h3><p>The simulator is not exposed directly as an Agent tool. Runtime / <code>ca-mcp</code> provides that interface.</p></div>
     </div>
   </section>
 
   <section class="section">
     <div class="section-head">
       <div>
-        <span class="eyebrow">Contract health</span>
-        <h2>OpenAPI vs implementation</h2>
+        <span class="eyebrow">OpenAPI check</span>
+        <h2>Does OpenAPI match the code?</h2>
       </div>
     </div>
     {driftCount === 0 ? (
-      <div class="notice good">The current OpenAPI route inventory matches the HTTP server implementation.</div>
+      <div class="notice good">OpenAPI and the server routes match.</div>
     ) : (
       <div class="notice">
-        Detected {driftCount} route difference{driftCount === 1 ? '' : 's'} between
-        OpenAPI and <code>internal/httpapi/server.go</code>.
+        There {driftCount === 1 ? 'is' : 'are'} {driftCount} route difference{driftCount === 1 ? '' : 's'} between OpenAPI and <code>internal/httpapi/server.go</code>.
         <a href={href('/en/components/ca-5gc-sim/api/')}> Inspect the route table →</a>
       </div>
     )}

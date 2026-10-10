@@ -20,9 +20,9 @@ const surfaceZh: Record<string, string> = {
 <SiteLayout title="ca-5gc-sim HTTP API" lang="zh">
   <section class="hero">
     <span class="eyebrow">ca-5gc-sim / HTTP API</span>
-    <h1>路由与契约覆盖情况</h1>
+    <h1>HTTP 路由</h1>
     <p class="lede">
-      这里取 OpenAPI 与 Go HTTP 实际注册路由的并集，因此“实现了但还没写进 OpenAPI”的接口也会直接显示出来。
+      这里同时看 OpenAPI 和 Go 代码里实际注册的路由。只写在代码里、还没进 OpenAPI 的接口也会列出来。
     </p>
     <div class="page-tabs">
       <a href={href('/components/ca-5gc-sim/')}>概览</a>
@@ -44,11 +44,10 @@ const surfaceZh: Record<string, string> = {
   <section class="section">
     {driftCount > 0 ? (
       <div class="notice">
-        当前存在 {driftCount} 处契约漂移：OpenAPI 与 Server 路由注册并不完全一致。
-        CA Docs 不会默默把这个差异抹平。
+        目前有 {driftCount} 条路由对不上：OpenAPI 和 Server 注册的结果不完全一致。
       </div>
     ) : (
-      <div class="notice good">当前 OpenAPI 与 Server 路由注册完全一致。</div>
+      <div class="notice good">OpenAPI 和 Server 注册的路由一致。</div>
     )}
 
     <div style="overflow-x:auto; margin-top:1rem">
@@ -71,21 +70,21 @@ const surfaceZh: Record<string, string> = {
 
   <section class="section">
     <div class="notice private-source">
-      <strong>上游源码仓库是 private。</strong>
-      公网访客可以在 CA Docs 查看提取后的能力与路由信息；下面的源码链接仅对拥有
-      <code>{data.source.repository}</code> 权限的用户可用，并固定到当前来源提交
+      <strong>源码仓库是 private。</strong>
+      本页已经列出了公开需要看的路由信息。下面两个源码链接只有有
+      <code>{data.source.repository}</code> 权限的人能打开，链接固定到提交
       <code>{sourceRef.slice(0, 8)}</code>。
     </div>
     <div class="grid" style="margin-top:1rem">
       <div class="card">
-        <h3>机器 API 权威来源</h3>
+        <h3>OpenAPI</h3>
         <p><code>{data.source.openApi}</code></p>
-        <div class="pills"><a class="pill" href={openApiUrl}>打开 private OpenAPI ↗</a></div>
+        <div class="pills"><a class="pill" href={openApiUrl}>打开 OpenAPI ↗</a></div>
       </div>
       <div class="card">
-        <h3>实现路由来源</h3>
+        <h3>HTTP 注册代码</h3>
         <p><code>{data.source.httpServer}</code></p>
-        <div class="pills"><a class="pill" href={serverUrl}>打开 private server.go ↗</a></div>
+        <div class="pills"><a class="pill" href={serverUrl}>打开 server.go ↗</a></div>
       </div>
     </div>
   </section>

@@ -16,22 +16,21 @@ const flow = 'owner repository\n' +
   '         └─ drift detection\n' +
   '         │\n' +
   '         ▼\n' +
-  'human-readable GitHub Pages portal';
+  'GitHub Pages docs';
 ---
 <SiteLayout title="Documentation architecture" lang="en">
   <section class="hero">
     <span class="eyebrow">CA Docs / Architecture</span>
-    <h1>A portal, not a second source of truth</h1>
+    <h1>Data stays in the component repositories</h1>
     <p class="lede">
-      CA Docs provides a cross-repository view while preserving ownership of machine
-      contracts in each <code>ca-*</code> repository.
+      OpenAPI, schemas, and implementation stay in each <code>ca-*</code> repository. CA Docs reads them and builds a common set of pages.
     </p>
   </section>
 
   <section class="section">
     <div class="grid">
       <div class="card wide">
-        <h3>Build flow</h3>
+        <h3>How data gets here</h3>
         <pre><code>{flow}</code></pre>
       </div>
     </div>
@@ -40,20 +39,20 @@ const flow = 'owner repository\n' +
   <section class="section">
     <div class="grid">
       <div class="card">
-        <h3>Machine truth</h3>
-        <p>Owned and versioned by the component repository. CA Docs consumes it.</p>
+        <h3>Original definitions</h3>
+        <p>Kept and versioned with the component that owns it.</p>
       </div>
       <div class="card">
-        <h3>Human explanation</h3>
-        <p>Owned here: navigation, summaries, ownership notes, examples and cross-repo views.</p>
+        <h3>What CA Docs adds</h3>
+        <p>Navigation, notes, examples, and links between repositories.</p>
       </div>
       <div class="card">
-        <h3>Drift is a signal</h3>
-        <p>When implementation and published contract differ, the portal shows the difference rather than hiding it.</p>
+        <h3>When OpenAPI and code differ</h3>
+        <p>The difference is shown directly.</p>
       </div>
       <div class="card">
-        <h3>Incremental adoption</h3>
-        <p>Each component can join independently once its stable machine sources are identified.</p>
+        <h3>Adding another repository</h3>
+        <p>Pick the schema/API/code files to read, then add that repository.</p>
       </div>
     </div>
   </section>

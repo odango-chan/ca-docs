@@ -14,10 +14,9 @@ const serverUrl = `${sourceBase}/${data.source.httpServer}`;
 <SiteLayout title="ca-5gc-sim HTTP API" lang="en">
   <section class="hero">
     <span class="eyebrow">ca-5gc-sim / HTTP API</span>
-    <h1>Routes and contract coverage</h1>
+    <h1>HTTP routes</h1>
     <p class="lede">
-      The route table is the union of the upstream OpenAPI document and actual Go HTTP registration,
-      making implementation-only surfaces visible.
+      This page compares OpenAPI with the routes registered in the Go server. Routes that exist only in code are listed too.
     </p>
     <div class="page-tabs">
       <a href={href('/en/components/ca-5gc-sim/')}>Overview</a>
@@ -39,11 +38,10 @@ const serverUrl = `${sourceBase}/${data.source.httpServer}`;
   <section class="section">
     {driftCount > 0 ? (
       <div class="notice">
-        Contract drift is visible: {driftCount} route difference{driftCount === 1 ? '' : 's'}
-        currently exist between OpenAPI and server registration. CA Docs does not silently normalize the mismatch.
+        There {driftCount === 1 ? 'is' : 'are'} {driftCount} route difference{driftCount === 1 ? '' : 's'} between OpenAPI and the server.
       </div>
     ) : (
-      <div class="notice good">OpenAPI and server route registration currently match.</div>
+      <div class="notice good">OpenAPI and the server routes match.</div>
     )}
     <div style="overflow-x:auto; margin-top:1rem">
       <table>
@@ -65,21 +63,19 @@ const serverUrl = `${sourceBase}/${data.source.httpServer}`;
 
   <section class="section">
     <div class="notice private-source">
-      <strong>The canonical source repository is private.</strong>
-      Public visitors can use the extracted capability and route information in CA Docs.
-      The source links below require access to <code>{data.source.repository}</code> and are pinned
-      to source commit <code>{sourceRef.slice(0, 8)}</code>.
+      <strong>The source repository is private.</strong>
+      The route information needed here is already shown above. The two source links below require access to <code>{data.source.repository}</code> and point to commit <code>{sourceRef.slice(0, 8)}</code>.
     </div>
     <div class="grid" style="margin-top:1rem">
       <div class="card">
-        <h3>Machine API authority</h3>
+        <h3>OpenAPI</h3>
         <p><code>{data.source.openApi}</code></p>
-        <div class="pills"><a class="pill" href={openApiUrl}>Open private OpenAPI ↗</a></div>
+        <div class="pills"><a class="pill" href={openApiUrl}>Open OpenAPI ↗</a></div>
       </div>
       <div class="card">
-        <h3>Implementation route source</h3>
+        <h3>HTTP registration code</h3>
         <p><code>{data.source.httpServer}</code></p>
-        <div class="pills"><a class="pill" href={serverUrl}>Open private server.go ↗</a></div>
+        <div class="pills"><a class="pill" href={serverUrl}>Open server.go ↗</a></div>
       </div>
     </div>
   </section>

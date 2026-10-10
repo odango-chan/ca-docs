@@ -37,8 +37,7 @@ const inspectCommands =
     <span class="eyebrow">ca-5gc-sim / Standalone</span>
     <h1>Run the simulator by itself</h1>
     <p class="lede">
-      <code>serve-standalone</code> uses the same WorldStore, FactReader, OperationService
-      and owner HTTP API without Sandbox, Service Fabric, Lab or Runtime dependencies.
+      <code>serve-standalone</code> runs the simulator by itself, without Sandbox, Service Fabric, Lab, or Runtime. It still uses the same WorldStore, FactReader, OperationService, and HTTP API.
     </p>
     <div class="page-tabs">
       <a href={href('/en/components/ca-5gc-sim/')}>Overview</a>
@@ -48,34 +47,31 @@ const inspectCommands =
 
   <section class="section">
     <div class="section-head">
-      <div><span class="eyebrow">1 / Configuration</span><h2>Minimal standalone world</h2></div>
+      <div><span class="eyebrow">1 / Configuration</span><h2>Minimal config</h2></div>
     </div>
     <pre><code>{sample}</code></pre>
     <p class="source-note">
-      Shape follows the upstream <code>FiveGCSimStandaloneConfig.v1</code> fixture and schema.
+      Config format: <code>FiveGCSimStandaloneConfig.v1</code>.
     </p>
   </section>
 
   <section class="section">
     <div class="section-head">
-      <div><span class="eyebrow">2 / Start</span><h2>Serve the local deterministic profile</h2></div>
+      <div><span class="eyebrow">2 / Start</span><h2>Start it</h2></div>
     </div>
     <pre><code>{startCommand}</code></pre>
     <p>
-      A successful start reaches <code>READY</code> and logs the listen address, world and
-      generation. The configured listen address must be loopback.
+      A successful start prints <code>READY</code>, the listen address, world, and generation. Standalone should listen on loopback only.
     </p>
   </section>
 
   <section class="section">
     <div class="section-head">
-      <div><span class="eyebrow">3 / Inspect</span><h2>Use the same owner API</h2></div>
+      <div><span class="eyebrow">3 / Inspect</span><h2>Check the state</h2></div>
     </div>
     <pre><code>{inspectCommands}</code></pre>
     <div class="notice">
-      Standalone is deterministic local execution. It does not qualify Service Fabric delivery,
-      Network Observation, drop/delay/reorder faults, response-loss behavior or integrated
-      reliability paths.
+      Standalone is for testing the simulator itself. Service Fabric delivery, Network Observation, drop/delay/reorder, response-loss, and other integration cases still need the integrated setup.
     </div>
   </section>
 </SiteLayout>

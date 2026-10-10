@@ -1,9 +1,9 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
-const flow='组件所属仓库\n  ├─ OpenAPI\n  ├─ JSON Schema\n  └─ 实现代码\n         │\n         ▼\nca-docs 同步 / 校验\n         │\n         ├─ semantic 清单\n         ├─ route 清单\n         └─ 漂移检测\n         │\n         ▼\n面向人的 GitHub Pages 文档门户';
+const flow='组件所属仓库\n  ├─ OpenAPI\n  ├─ JSON Schema\n  └─ 实现代码\n         │\n         ▼\nca-docs 同步 / 校验\n         │\n         ├─ semantic 清单\n         ├─ route 清单\n         └─ 漂移检测\n         │\n         ▼\nGitHub Pages 文档';
 ---
 <SiteLayout title="文档架构" lang="zh">
-<section class="hero"><span class="eyebrow">CA Docs / 架构</span><h1>它是门户，不是第二份事实源。</h1><p class="lede">CA Docs 提供跨仓的统一视图，但机器契约的所有权仍然留在各个 <code>ca-*</code> 组件仓库。</p></section>
-<section class="section"><div class="grid"><div class="card wide"><h3>构建链路</h3><pre><code>{flow}</code></pre></div></div></section>
-<section class="section"><div class="grid"><div class="card"><h3>机器事实</h3><p>由组件所属仓库维护和版本化，CA Docs 只消费它们。</p></div><div class="card"><h3>人类解释</h3><p>由本仓负责：导航、摘要、边界说明、示例以及跨仓视图。</p></div><div class="card"><h3>漂移本身就是信号</h3><p>当实现与发布契约不一致时，门户应该展示差异，而不是偷偷把差异抹平。</p></div><div class="card"><h3>逐步接入</h3><p>每个组件在明确自己的稳定机器事实源之后，都可以独立接入门户。</p></div></div></section>
+<section class="hero"><span class="eyebrow">CA Docs / 架构</span><h1>数据从各仓库来，这里只负责整理</h1><p class="lede">OpenAPI、Schema 和实现仍由各个 <code>ca-*</code> 仓库维护。CA Docs 读取这些内容，整理成统一的页面。</p></section>
+<section class="section"><div class="grid"><div class="card wide"><h3>数据怎么过来</h3><pre><code>{flow}</code></pre></div></div></section>
+<section class="section"><div class="grid"><div class="card"><h3>原始定义</h3><p>放在对应组件仓库里，并跟着组件一起版本化。</p></div><div class="card"><h3>这里补什么</h3><p>补导航、说明、示例，以及各仓库之间的关系。</p></div><div class="card"><h3>OpenAPI 和实现不一致</h3><p>直接把差异列出来，不自动忽略。</p></div><div class="card"><h3>怎么扩展</h3><p>每个组件在明确自己的稳定原始定义源之后，都可以独立接入门户。</p></div></div></section>
 </SiteLayout>

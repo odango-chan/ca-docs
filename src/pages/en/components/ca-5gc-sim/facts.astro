@@ -9,10 +9,9 @@ const href = (value: string) => `${base}${value.replace(/^\//, '')}`;
 <SiteLayout title="ca-5gc-sim facts" lang="en">
   <section class="hero">
     <span class="eyebrow">ca-5gc-sim / Facts</span>
-    <h1>{data.counts.facts} readable domain facts</h1>
+    <h1>{data.counts.facts} readable Facts</h1>
     <p class="lede">
-      All fact semantics use <code>POST /v1/facts/read</code>. The semantic and typed
-      <code>subjectRef</code> determine what authoritative 5GC state is read.
+      All reads use <code>POST /v1/facts/read</code>. <code>factSemantic</code> and <code>subjectRef</code> select what to read.
     </p>
     <div class="page-tabs">
       <a href={href('/en/components/ca-5gc-sim/')}>Overview</a>
@@ -44,7 +43,7 @@ const href = (value: string) => `${base}${value.replace(/^\//, '')}`;
       })}
     </div>
     <p class="source-note">
-      Inventory is generated from <code>{data.source.factSchema}</code>.
+      Source: <code>{data.source.factSchema}</code>
     </p>
   </section>
 </SiteLayout>

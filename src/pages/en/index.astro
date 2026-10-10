@@ -8,20 +8,18 @@ const sourceVersion = data.source.commit ? data.source.commit.slice(0, 8) : data
 ---
 <SiteLayout title="ConnectionAgent documentation" lang="en">
   <section class="hero">
-    <span class="eyebrow">ConnectionAgent documentation portal</span>
-    <h1>See what CA can actually do.</h1>
+    <span class="eyebrow">ConnectionAgent docs</span>
+    <h1>ConnectionAgent documentation</h1>
     <p class="lede">
-      Cross-repository capability, API and ownership documentation for the
-      <code>ca-*</code> ecosystem. Machine contracts stay in their owner repositories;
-      this site turns them into a readable system view.
+      Docs for the <code>ca-*</code> repositories: capabilities, APIs, and component boundaries. Schemas and implementation stay in their own repositories; this site puts the useful pieces in one place.
     </p>
   </section>
 
   <section class="section">
     <div class="section-head">
       <div>
-        <span class="eyebrow">Integrated component</span>
-        <h2>Start with the simulator</h2>
+        <span class="eyebrow">Current</span>
+        <h2>Start with ca-5gc-sim</h2>
       </div>
       <p>
         The first live integration reads the current <code>ca-5gc-sim</code> schemas and
@@ -32,7 +30,7 @@ const sourceVersion = data.source.commit ? data.source.commit.slice(0, 8) : data
     <div class="grid">
       <article class="card component-card">
         <span class="eyebrow">ca-5gc-sim</span>
-        <h2>Deterministic 5GC reference simulator</h2>
+        <h2>5GC simulator</h2>
         <p>
           Registration, PDU session, QoS, PFCP, user-plane and transfer-resource
           behavior exposed through one owner API.
@@ -50,7 +48,7 @@ const sourceVersion = data.source.commit ? data.source.commit.slice(0, 8) : data
       </article>
 
       <article class="card">
-        <h3>Why this portal exists</h3>
+        <h3>What is documented here</h3>
         <p>
           A single HTTP endpoint can hide many semantic capabilities. CA Docs expands
           those semantics, shows ownership, and makes contract drift visible.
@@ -62,8 +60,8 @@ const sourceVersion = data.source.commit ? data.source.commit.slice(0, 8) : data
   <section class="section">
     <div class="section-head">
       <div>
-        <span class="eyebrow">Current source-derived inventory</span>
-        <h2>One glance, no code archaeology</h2>
+        <span class="eyebrow">Current data</span>
+        <h2>Counts</h2>
       </div>
     </div>
     <div class="stats">
@@ -77,13 +75,13 @@ const sourceVersion = data.source.commit ? data.source.commit.slice(0, 8) : data
   <section class="section">
     <div class="section-head">
       <div>
-        <span class="eyebrow">Portal principle</span>
-        <h2>Aggregate, don’t fork the truth</h2>
+        <span class="eyebrow">Source</span>
+        <h2>Definitions stay in their repositories</h2>
       </div>
     </div>
     <div class="grid">
       <div class="card">
-        <h3>Owner repositories</h3>
+        <h3>Original definitions</h3>
         <p>
           OpenAPI, JSON Schema and production implementation remain authoritative in
           the component that owns them.
@@ -102,16 +100,16 @@ const sourceVersion = data.source.commit ? data.source.commit.slice(0, 8) : data
   <section class="section">
     <div class="section-head">
       <div>
-        <span class="eyebrow">Next components</span>
-        <h2>Designed to grow across repositories</h2>
+        <span class="eyebrow">Next</span>
+        <h2>More repositories will be added</h2>
       </div>
-      <p>These are portal targets, not duplicated contracts.</p>
+      <p>Only the docs are added here; the contracts stay in their repositories.</p>
     </div>
     <div class="grid">
       <div class="card"><h3>ca-service-fabric</h3><p>Protocol mediation and Network Observation.</p></div>
       <div class="card"><h3>ca-runtime</h3><p>Capability, ProviderBinding, Assurance, Outcome and Reconcile.</p></div>
       <div class="card"><h3>ca-provider-common / ca-provider-5gc</h3><p>Identity and real-5GC provider boundaries.</p></div>
-      <div class="card"><h3>ca-mcp</h3><p>The Agent-facing admitted tool surface.</p></div>
+      <div class="card"><h3>ca-mcp</h3><p>Tools exposed to the Agent.</p></div>
     </div>
   </section>
 </SiteLayout>

@@ -15,11 +15,9 @@ const groups = [...new Set(items.map((item) => item.meta.category))];
 <SiteLayout title="ca-5gc-sim operations" lang="en">
   <section class="hero">
     <span class="eyebrow">ca-5gc-sim / Operations</span>
-    <h1>{data.counts.operations} executable semantics</h1>
+    <h1>{data.counts.operations} Operations</h1>
     <p class="lede">
-      All mutations and owner-local reconciliation actions use
-      <code>POST /v1/operations</code>. The closed schema enum is the generated
-      capability inventory shown here.
+      All operations use <code>POST /v1/operations</code>. The list below comes directly from the Operation schema.
     </p>
     <div class="page-tabs">
       <a href={href('/en/components/ca-5gc-sim/')}>Overview</a>
@@ -31,7 +29,7 @@ const groups = [...new Set(items.map((item) => item.meta.category))];
   {groups.map((group) => (
     <section class="section">
       <div class="section-head">
-        <div><span class="eyebrow">Operation group</span><h2>{group}</h2></div>
+        <div><span class="eyebrow">Group</span><h2>{group}</h2></div>
       </div>
       <div class="cap-list">
         {items.filter((item) => item.meta.category === group).map(({ semantic, meta }) => (
@@ -54,6 +52,6 @@ const groups = [...new Set(items.map((item) => item.meta.category))];
   ))}
 
   <p class="source-note">
-    Inventory is generated from <code>{data.source.operationSchema}</code>.
+    Source: <code>{data.source.operationSchema}</code>
   </p>
 </SiteLayout>
