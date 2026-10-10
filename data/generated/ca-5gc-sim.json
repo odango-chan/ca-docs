@@ -4,12 +4,12 @@
     "repository": "odango-chan/ca-5gc-sim",
     "ref": "main",
     "commit": "3522c9bc3980cdb58c5c1789b38aa72ee40aafc9",
+    "commitDate": "2026-10-09T08:43:43Z",
+    "private": true,
     "openApi": "schemas/v1alpha1/fivegc-sim.openapi.yaml",
     "factSchema": "schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml",
     "operationSchema": "schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml",
-    "httpServer": "internal/httpapi/server.go",
-    "private": true,
-    "commitDate": null
+    "httpServer": "internal/httpapi/server.go"
   },
   "counts": {
     "facts": 8,
