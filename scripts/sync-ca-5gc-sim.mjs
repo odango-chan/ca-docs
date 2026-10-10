@@ -98,84 +98,100 @@ if (!token) {
   process.exit(0);
 }
 
-const [openApiText, factSchemaText, operationSchemaText, serverSource, commit] =
-  await Promise.all([
-    fetchRepoText('schemas/v1alpha1/fivegc-sim.openapi.yaml'),
-    fetchRepoText('schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml'),
-    fetchRepoText('schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml'),
-    fetchRepoText('internal/httpapi/server.go'),
-    sourceCommit(),
-  ]);
-
-const openApi = yaml.load(openApiText);
-const factSchema = yaml.load(factSchemaText);
-const operationSchema = yaml.load(operationSchemaText);
-
-const facts = factSchema?.properties?.spec?.properties?.factSemantic?.enum || [];
-const operations =
-  operationSchema?.properties?.spec?.properties?.operationSemantic?.enum || [];
-
-if (!facts.length || !operations.length) {
-  throw new Error('upstream schema parsed, but semantic inventories are empty');
+async function useSnapshot(reason) {
+  if (!(await snapshotExists())) throw reason;
+  const snapshot = JSON.parse(await fs.readFile(snapshotPath, 'utf8'));
+  console.warn(
+    `ca-5gc-sim: upstream refresh unavailable (${reason.message}); using checked-in snapshot ${snapshot.source?.commit || snapshot.source?.ref || 'unknown'}`,
+  );
 }
 
-const documented = openApiRoutes(openApi);
-const implemented = implementationRoutes(serverSource);
-const documentedByKey = new Map(
-  documented.map((route) => [`${route.method} ${route.path}`, route]),
-);
-const implementedByKey = new Map(
-  implemented.map((route) => [`${route.method} ${route.path}`, route]),
-);
-const keys = [...new Set([...documentedByKey.keys(), ...implementedByKey.keys()])].sort();
+async function refreshFromUpstream() {
+  const [openApiText, factSchemaText, operationSchemaText, serverSource, commit] =
+    await Promise.all([
+      fetchRepoText('schemas/v1alpha1/fivegc-sim.openapi.yaml'),
+      fetchRepoText('schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml'),
+      fetchRepoText('schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml'),
+      fetchRepoText('internal/httpapi/server.go'),
+      sourceCommit(),
+    ]);
 
-const routes = keys.map((key) => {
-  const doc = documentedByKey.get(key);
-  const impl = implementedByKey.get(key);
-  const selected = impl || doc;
-  return {
-    method: selected.method,
-    path: selected.path,
-    surface: classifyRoute(selected.path),
-    operationId: doc?.operationId || null,
-    documented: Boolean(doc),
-    implemented: Boolean(impl),
+  const openApi = yaml.load(openApiText);
+  const factSchema = yaml.load(factSchemaText);
+  const operationSchema = yaml.load(operationSchemaText);
+
+  const facts = factSchema?.properties?.spec?.properties?.factSemantic?.enum || [];
+  const operations =
+    operationSchema?.properties?.spec?.properties?.operationSemantic?.enum || [];
+
+  if (!facts.length || !operations.length) {
+    throw new Error('upstream schema parsed, but semantic inventories are empty');
+  }
+
+  const documented = openApiRoutes(openApi);
+  const implemented = implementationRoutes(serverSource);
+  const documentedByKey = new Map(
+    documented.map((route) => [`${route.method} ${route.path}`, route]),
+  );
+  const implementedByKey = new Map(
+    implemented.map((route) => [`${route.method} ${route.path}`, route]),
+  );
+  const keys = [...new Set([...documentedByKey.keys(), ...implementedByKey.keys()])].sort();
+
+  const routes = keys.map((key) => {
+    const doc = documentedByKey.get(key);
+    const impl = implementedByKey.get(key);
+    const selected = impl || doc;
+    return {
+      method: selected.method,
+      path: selected.path,
+      surface: classifyRoute(selected.path),
+      operationId: doc?.operationId || null,
+      documented: Boolean(doc),
+      implemented: Boolean(impl),
+    };
+  });
+
+  const output = {
+    component: 'ca-5gc-sim',
+    source: {
+      repository: `${owner}/${repo}`,
+      ref,
+      commit,
+      openApi: 'schemas/v1alpha1/fivegc-sim.openapi.yaml',
+      factSchema: 'schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml',
+      operationSchema: 'schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml',
+      httpServer: 'internal/httpapi/server.go',
+    },
+    counts: {
+      facts: facts.length,
+      operations: operations.length,
+      documentedRoutes: documented.length,
+      implementationRoutes: implemented.length,
+    },
+    facts,
+    operations,
+    routes,
+    drift: {
+      implementationOnlyRoutes: routes.filter(
+        (route) => route.implemented && !route.documented,
+      ),
+      documentedOnlyRoutes: routes.filter(
+        (route) => route.documented && !route.implemented,
+      ),
+    },
   };
-});
 
-const output = {
-  component: 'ca-5gc-sim',
-  source: {
-    repository: `${owner}/${repo}`,
-    ref,
-    commit,
-    openApi: 'schemas/v1alpha1/fivegc-sim.openapi.yaml',
-    factSchema: 'schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml',
-    operationSchema: 'schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml',
-    httpServer: 'internal/httpapi/server.go',
-  },
-  counts: {
-    facts: facts.length,
-    operations: operations.length,
-    documentedRoutes: documented.length,
-    implementationRoutes: implemented.length,
-  },
-  facts,
-  operations,
-  routes,
-  drift: {
-    implementationOnlyRoutes: routes.filter(
-      (route) => route.implemented && !route.documented,
-    ),
-    documentedOnlyRoutes: routes.filter(
-      (route) => route.documented && !route.implemented,
-    ),
-  },
-};
+  await fs.mkdir(path.dirname(snapshotPath), { recursive: true });
+  await fs.writeFile(snapshotPath, JSON.stringify(output, null, 2) + '\n');
 
-await fs.mkdir(path.dirname(snapshotPath), { recursive: true });
-await fs.writeFile(snapshotPath, JSON.stringify(output, null, 2) + '\n');
+  console.log(
+    `ca-5gc-sim: refreshed ${facts.length} facts, ${operations.length} operations, ${implemented.length} implementation routes from ${commit}`,
+  );
+}
 
-console.log(
-  `ca-5gc-sim: refreshed ${facts.length} facts, ${operations.length} operations, ${implemented.length} implementation routes from ${commit}`,
-);
+try {
+  await refreshFromUpstream();
+} catch (error) {
+  await useSnapshot(error instanceof Error ? error : new Error(String(error)));
+}
