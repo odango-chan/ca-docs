@@ -4,25 +4,48 @@ import data from '../../../../data/generated/ca-5gc-sim.json';
 
 const base = import.meta.env.BASE_URL;
 const href = (value: string) => `${base}${value.replace(/^\//, '')}`;
-const driftCount =
-  data.drift.implementationOnlyRoutes.length + data.drift.documentedOnlyRoutes.length;
-const sourceRef = data.source.commit || data.source.ref;
-const sourceBase = `https://github.com/${data.source.repository}/blob/${sourceRef}`;
-const openApiUrl = `${sourceBase}/${data.source.openApi}`;
-const serverUrl = `${sourceBase}/${data.source.httpServer}`;
-const surfaceZh: Record<string, string> = {
-  Diagnostics: '诊断',
-  'Owner API': 'Owner API',
-  'Host control': 'Host 控制',
-  'Fabric integration': 'Fabric 内部集成',
+
+const copy: Record<string, { title: string; description: string }> = {
+  'GET /identity': {
+    title: '进程信息',
+    description: '查看当前 ca-5gc-sim 实例、运行 Profile 和 World 信息。',
+  },
+  'GET /healthz': {
+    title: '健康检查',
+    description: '查看进程是否已经 READY。',
+  },
+  'GET /v1/world': {
+    title: '当前 World',
+    description: '查看当前模拟 World。',
+  },
+  'POST /v1/facts/read': {
+    title: '读取状态',
+    description: '读取 UE 注册、PDU Session、用户面、PFCP、传输资源等状态。',
+  },
+  'POST /v1/operations': {
+    title: '执行操作',
+    description: '执行注册、PDU Session、PFCP、虚拟组、QoS 等模拟操作。',
+  },
+  'POST /internal/v1/world/reset': {
+    title: '重置 World',
+    description: 'Host 使用的重置接口，不是 Runtime 业务能力，也不会作为 Agent Tool 暴露。',
+  },
+  'POST /internal/fabric/delivery': {
+    title: 'Fabric 消息回调',
+    description: 'Service Fabric 使用的内部回调。代码里已经注册，目前还没写进 OpenAPI。',
+  },
 };
+
+const documented = data.routes.filter((route) => route.documented);
+const implementationOnly = data.routes.filter((route) => route.implemented && !route.documented);
 ---
 <SiteLayout title="ca-5gc-sim HTTP API" lang="zh">
   <section class="hero">
     <span class="eyebrow">ca-5gc-sim / HTTP API</span>
-    <h1>HTTP 路由</h1>
+    <h1>HTTP API</h1>
     <p class="lede">
-      这里同时看 OpenAPI 和 Go 代码里实际注册的路由。只写在代码里、还没进 OpenAPI 的接口也会列出来。
+      接口直接列在这里，不需要去 private 仓库找 OpenAPI。
+      Facts 和 Operations 的具体 semantic 可以从对应页面继续看。
     </p>
     <div class="page-tabs">
       <a href={href('/components/ca-5gc-sim/')}>概览</a>
@@ -34,58 +57,87 @@ const surfaceZh: Record<string, string> = {
 
   <section class="section">
     <div class="stats">
-      <div class="stat"><strong>{data.counts.documentedRoutes}</strong><span>OpenAPI 路由</span></div>
-      <div class="stat"><strong>{data.counts.implementationRoutes}</strong><span>实现路由</span></div>
-      <div class="stat"><strong>{data.counts.facts}</strong><span>/v1/facts/read 背后的 Facts</span></div>
-      <div class="stat"><strong>{data.counts.operations}</strong><span>/v1/operations 背后的 Operations</span></div>
+      <div class="stat"><strong>{data.counts.documentedRoutes}</strong><span>OpenAPI 接口</span></div>
+      <div class="stat"><strong>{data.counts.implementationRoutes}</strong><span>代码里的路由</span></div>
+      <div class="stat"><strong>{data.counts.facts}</strong><span>Facts</span></div>
+      <div class="stat"><strong>{data.counts.operations}</strong><span>Operations</span></div>
     </div>
   </section>
 
   <section class="section">
-    {driftCount > 0 ? (
-      <div class="notice">
-        目前有 {driftCount} 条路由对不上：OpenAPI 和 Server 注册的结果不完全一致。
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">OpenAPI</span>
+        <h2>当前接口</h2>
       </div>
-    ) : (
-      <div class="notice good">OpenAPI 和 Server 注册的路由一致。</div>
-    )}
+    </div>
 
-    <div style="overflow-x:auto; margin-top:1rem">
-      <table>
-        <thead><tr><th>方法</th><th>路径</th><th>能力面</th><th>OpenAPI</th><th>Server</th></tr></thead>
-        <tbody>
-          {data.routes.map((route) => (
-            <tr>
-              <td><code>{route.method}</code></td>
-              <td><code>{route.path}</code></td>
-              <td>{surfaceZh[route.surface] ?? route.surface}</td>
-              <td>{route.documented ? '✓' : '—'}</td>
-              <td>{route.implemented ? '✓' : '—'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div class="grid">
+      {documented.map((route) => {
+        const key = `${route.method} ${route.path}`;
+        const item = copy[key] ?? { title: route.operationId ?? route.path, description: '' };
+        return (
+          <article class="card">
+            <div class="pills" style="margin-top:0">
+              <span class="pill good">{route.method}</span>
+              <span class="pill">{route.surface}</span>
+            </div>
+            <h3 style="margin-top:1rem">{item.title}</h3>
+            <p><code>{route.path}</code></p>
+            <p style="margin-top:.6rem">{item.description}</p>
+            <p class="source-note">
+              operationId: <code>{route.operationId}</code>
+            </p>
+            {route.path === '/v1/facts/read' && (
+              <a class="component-link" href={href('/components/ca-5gc-sim/facts/')}>
+                查看支持的 factSemantic →
+              </a>
+            )}
+            {route.path === '/v1/operations' && (
+              <a class="component-link" href={href('/components/ca-5gc-sim/operations/')}>
+                查看支持的 operationSemantic →
+              </a>
+            )}
+          </article>
+        );
+      })}
     </div>
   </section>
 
+  {implementationOnly.length > 0 && (
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">实现差异</span>
+          <h2>代码里还有接口没进 OpenAPI</h2>
+        </div>
+      </div>
+      <div class="grid">
+        {implementationOnly.map((route) => {
+          const key = `${route.method} ${route.path}`;
+          const item = copy[key] ?? { title: route.path, description: '' };
+          return (
+            <article class="card">
+              <div class="pills" style="margin-top:0">
+                <span class="pill warn">{route.method}</span>
+                <span class="pill">{route.surface}</span>
+              </div>
+              <h3 style="margin-top:1rem">{item.title}</h3>
+              <p><code>{route.path}</code></p>
+              <p style="margin-top:.6rem">{item.description}</p>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  )}
+
   <section class="section">
-    <div class="notice private-source">
-      <strong>源码仓库是 private。</strong>
-      本页已经列出了公开需要看的路由信息。下面两个源码链接只有有
-      <code>{data.source.repository}</code> 权限的人能打开，链接固定到提交
-      <code>{sourceRef.slice(0, 8)}</code>。
-    </div>
-    <div class="grid" style="margin-top:1rem">
-      <div class="card">
-        <h3>OpenAPI</h3>
-        <p><code>{data.source.openApi}</code></p>
-        <div class="pills"><a class="pill" href={openApiUrl}>打开 OpenAPI ↗</a></div>
-      </div>
-      <div class="card">
-        <h3>HTTP 注册代码</h3>
-        <p><code>{data.source.httpServer}</code></p>
-        <div class="pills"><a class="pill" href={serverUrl}>打开 server.go ↗</a></div>
-      </div>
+    <div class="notice">
+      <strong>下一步：请求/响应字段。</strong>
+      现在这一页已经能直接看所有 HTTP 接口。请求体和响应体的字段级 Schema
+      还没有发布到 public snapshot，后续会单独做成明确允许公开的 API contract，
+      而不是让公网用户去 private 仓找文件。
     </div>
   </section>
 </SiteLayout>
