@@ -3,8 +3,8 @@
   "source": {
     "repository": "odango-chan/ca-5gc-sim",
     "ref": "main",
-    "commit": "3522c9bc3980cdb58c5c1789b38aa72ee40aafc9",
-    "commitDate": "2026-10-09T08:43:43Z",
+    "commit": "46cfdc495373a34043c8ad4fbee0dc8420d8b0db",
+    "commitDate": "2026-10-10T07:49:47Z",
     "private": true,
     "openApi": "schemas/v1alpha1/fivegc-sim.openapi.yaml",
     "factSchema": "schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml",
