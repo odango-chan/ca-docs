@@ -142,6 +142,7 @@
             "oneOfRefs": []
           }
         ],
+        "rules": [],
         "enums": {
           "spec.processProfile": [
             "integrated-reference-simulation",
@@ -295,6 +296,90 @@
             "oneOfRefs": []
           }
         ],
+        "rules": [
+          {
+            "scope": "spec",
+            "when": {
+              "spec.ready": [
+                true
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.phase",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "READY"
+              },
+              {
+                "path": "spec.bindings",
+                "required": false,
+                "type": null,
+                "description": null,
+                "ref": null,
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.bindings.scheduler",
+                "required": false,
+                "type": null,
+                "description": null,
+                "ref": null,
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.bindings.scheduler.status",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "READY"
+              },
+              {
+                "path": "spec.bindings.fabric",
+                "required": false,
+                "type": null,
+                "description": null,
+                "ref": null,
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.bindings.fabric.status",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "READY"
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.phase": [
+                "READY"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.ready",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": true
+              }
+            ]
+          }
+        ],
         "enums": {
           "spec.phase": [
             "BOOTING",
@@ -423,6 +508,7 @@
             ]
           }
         ],
+        "rules": [],
         "enums": {
           "spec.code": [
             "MALFORMED_REQUEST",
@@ -536,6 +622,7 @@
             "oneOfRefs": []
           }
         ],
+        "rules": [],
         "enums": {},
         "examplesAllowed": false
       },
@@ -670,6 +757,131 @@
             "description": null,
             "ref": "fivegc-sim-common.schema.yaml#/$defs/explicitRefs",
             "oneOfRefs": []
+          }
+        ],
+        "rules": [
+          {
+            "scope": "spec",
+            "when": {
+              "spec.factSemantic": [
+                "UE_REGISTRATION",
+                "UE_REGISTRATION_CONTEXT"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/ueSubjectRef",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.factSemantic": [
+                "PDU_SESSION",
+                "USER_PLANE_CONNECTIVITY",
+                "PFCP_RESOURCE"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/pduSessionSubjectRef",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.factSemantic": [
+                "TRANSFER_PARTICIPANTS"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/transferParticipantsSubjectRef",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.factSemantic": [
+                "TRANSFER_QOS"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/transferSubjectRef",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.factSemantic": [
+                "VIRTUAL_GROUP"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "oneOf",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [
+                  "fivegc-sim-common.schema.yaml#/$defs/transferSubjectRef",
+                  "fivegc-sim-common.schema.yaml#/$defs/virtualGroupSubjectRef"
+                ]
+              }
+            ]
+          },
+          {
+            "scope": "spec.readMode",
+            "when": {
+              "spec.readMode.mode": [
+                "AT_REVISION"
+              ]
+            },
+            "required": [
+              "spec.readMode.revision"
+            ],
+            "fields": []
+          },
+          {
+            "scope": "spec.readMode",
+            "when": {
+              "spec.readMode.mode": [
+                "CURRENT"
+              ]
+            },
+            "required": [],
+            "fields": []
           }
         ],
         "enums": {
@@ -842,6 +1054,137 @@
             "oneOfRefs": []
           }
         ],
+        "rules": [
+          {
+            "scope": "spec",
+            "when": {
+              "spec.resolution": [
+                "FOUND",
+                "KNOWN_ABSENT",
+                "KNOWN_NEGATIVE"
+              ]
+            },
+            "required": [
+              "spec.sourceFact"
+            ],
+            "fields": []
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.resolution": [
+                "UNAVAILABLE",
+                "INVALID_QUERY",
+                "INDETERMINATE"
+              ]
+            },
+            "required": [
+              "spec.reasonCode"
+            ],
+            "fields": []
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.factSemantic": [
+                "UE_REGISTRATION",
+                "UE_REGISTRATION_CONTEXT"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/ueSubjectRef",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.factSemantic": [
+                "PDU_SESSION",
+                "USER_PLANE_CONNECTIVITY",
+                "PFCP_RESOURCE"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/pduSessionSubjectRef",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.factSemantic": [
+                "TRANSFER_PARTICIPANTS"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/transferParticipantsSubjectRef",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.factSemantic": [
+                "TRANSFER_QOS"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/transferSubjectRef",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.factSemantic": [
+                "VIRTUAL_GROUP"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "oneOf",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [
+                  "fivegc-sim-common.schema.yaml#/$defs/transferSubjectRef",
+                  "fivegc-sim-common.schema.yaml#/$defs/virtualGroupSubjectRef"
+                ]
+              }
+            ]
+          }
+        ],
         "enums": {
           "spec.factSemantic": [
             "UE_REGISTRATION",
@@ -977,6 +1320,7 @@
             "oneOfRefs": []
           }
         ],
+        "rules": [],
         "enums": {
           "spec.code": [
             "WORLD_NOT_FOUND",
@@ -1132,6 +1476,278 @@
             "description": null,
             "ref": "fivegc-sim-common.schema.yaml#/$defs/explicitRefs",
             "oneOfRefs": []
+          }
+        ],
+        "rules": [
+          {
+            "scope": "spec",
+            "when": {
+              "spec.operationSemantic": [
+                "PDU_SESSION_CREATE"
+              ]
+            },
+            "required": [
+              "spec.params"
+            ],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/pduSessionSubjectRef",
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.params",
+                "required": true,
+                "type": "object",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.params.dnn",
+                "required": true,
+                "type": "string",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.params.sNssai",
+                "required": true,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/snssai",
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.params.fiveQi",
+                "required": false,
+                "type": "integer",
+                "description": "Optional 5QI the created session's QoS policy requires.",
+                "ref": null,
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.operationSemantic": [
+                "PDU_SESSION_RELEASE"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/pduSessionSubjectRef",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.operationSemantic": [
+                "PDU_SESSION_MODIFY_QOS"
+              ]
+            },
+            "required": [
+              "spec.params"
+            ],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/pduSessionSubjectRef",
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.params",
+                "required": true,
+                "type": "object",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.params.fiveQi",
+                "required": true,
+                "type": "integer",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.operationSemantic": [
+                "PFCP_RESOURCE_CLEANUP"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/pfcpResourceSubjectRef",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.operationSemantic": [
+                "EDGE_CACHE_ENSURE",
+                "EDGE_CACHE_RECONCILE",
+                "VIRTUAL_GROUP_RECONCILE_CREATE",
+                "TRANSFER_QOS_BOOST",
+                "TRANSFER_QOS_RECONCILE"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/transferSubjectRef",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.operationSemantic": [
+                "VIRTUAL_GROUP_CREATE"
+              ]
+            },
+            "required": [
+              "spec.params"
+            ],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/transferSubjectRef",
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.params",
+                "required": true,
+                "type": "object",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.params.senderSupi",
+                "required": true,
+                "type": "string",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.params.receiverSupis",
+                "required": true,
+                "type": "array",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.params.durationSeconds",
+                "required": true,
+                "type": "integer",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.params.fiveQi",
+                "required": true,
+                "type": "integer",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.operationSemantic": [
+                "VIRTUAL_GROUP_ASSIGN_MEMBERS",
+                "VIRTUAL_GROUP_RECONCILE_MEMBERS"
+              ]
+            },
+            "required": [
+              "spec.params"
+            ],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/virtualGroupSubjectRef",
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.params",
+                "required": true,
+                "type": "object",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.params.members",
+                "required": true,
+                "type": "array",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.operationSemantic": [
+                "VIRTUAL_GROUP_RELEASE",
+                "VIRTUAL_GROUP_RECONCILE_RELEASE"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/virtualGroupSubjectRef",
+                "oneOfRefs": []
+              }
+            ]
           }
         ],
         "enums": {
@@ -1357,6 +1973,241 @@
             "oneOfRefs": []
           }
         ],
+        "rules": [
+          {
+            "scope": "spec",
+            "when": {
+              "spec.operationSemantic": [
+                "PFCP_RESOURCE_CLEANUP"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/pfcpResourceSubjectRef",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.operationSemantic": [
+                "PDU_SESSION_CREATE",
+                "PDU_SESSION_MODIFY_QOS",
+                "PDU_SESSION_RELEASE"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/pduSessionSubjectRef",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.backendEffectDispatch": [
+                "DISPATCHED"
+              ]
+            },
+            "required": [
+              "spec.protocolTransactionRefs"
+            ],
+            "fields": []
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.backendEffectDispatch": [
+                "NOT_DISPATCHED"
+              ]
+            },
+            "required": [],
+            "fields": []
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.resultCode": [
+                "REJECTED",
+                "WAIT_EXPIRED"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.backendEffectDispatch",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "DISPATCHED"
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.resultCode": [
+                "INVALID_PRESTATE"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.backendEffectDispatch",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "NOT_DISPATCHED"
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.resultCode": [
+                "COMPLETED"
+              ],
+              "spec.backendEffectDispatch": [
+                "NOT_DISPATCHED"
+              ]
+            },
+            "required": [
+              "spec.reasonCode"
+            ],
+            "fields": [
+              {
+                "path": "spec.operationSemantic",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "PFCP_RESOURCE_CLEANUP"
+              },
+              {
+                "path": "spec.reasonCode",
+                "required": true,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "ALREADY_ABSENT"
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.resultCode": [
+                "NOT_COMMITTED"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.backendEffectDispatch",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "NOT_DISPATCHED"
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.operationSemantic": [
+                "UE_REGISTRATION_ENSURE"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/ueSubjectRef",
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.backendEffectDispatch",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "NOT_DISPATCHED"
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {},
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/transferSubjectRef",
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.backendEffectDispatch",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "NOT_DISPATCHED"
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {},
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/virtualGroupSubjectRef",
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.backendEffectDispatch",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "NOT_DISPATCHED"
+              }
+            ]
+          }
+        ],
         "enums": {
           "spec.operationSemantic": [
             "UE_REGISTRATION_ENSURE",
@@ -1511,6 +2362,7 @@
             "oneOfRefs": []
           }
         ],
+        "rules": [],
         "enums": {
           "spec.code": [
             "WORLD_NOT_FOUND",
@@ -1638,6 +2490,7 @@
             "oneOfRefs": []
           }
         ],
+        "rules": [],
         "enums": {},
         "examplesAllowed": true
       },
@@ -1713,6 +2566,7 @@
             "oneOfRefs": []
           }
         ],
+        "rules": [],
         "enums": {},
         "examplesAllowed": false
       },
@@ -1837,6 +2691,7 @@
             "oneOfRefs": []
           }
         ],
+        "rules": [],
         "enums": {},
         "examplesAllowed": true
       },
@@ -1852,6 +2707,7 @@
         "title": "FiveGCSim Common Definitions v1",
         "description": "Shared machine definitions for ca-5gc-sim C2/C6 contracts.",
         "fields": [],
+        "rules": [],
         "enums": {},
         "examplesAllowed": false
       },
@@ -2065,6 +2921,322 @@
             "description": null,
             "ref": null,
             "oneOfRefs": []
+          }
+        ],
+        "rules": [
+          {
+            "scope": "spec",
+            "when": {
+              "spec.recordType": [
+                "RegistrationFact.v1"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.recordFamily",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "5gc.registration"
+              },
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/ueSubjectRef",
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.value",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/registrationFactValue",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.recordType": [
+                "RegistrationContextFact.v1"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.recordFamily",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "5gc.registration_context"
+              },
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/ueSubjectRef",
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.value",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/registrationContextFactValue",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.recordType": [
+                "PduSessionFact.v1"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.recordFamily",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "5gc.pdu_session"
+              },
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/pduSessionSubjectRef",
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.value",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/pduSessionFactValue",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.recordType": [
+                "UserPlaneConnectivityFact.v1"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.recordFamily",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "5gc.user_plane_connectivity"
+              },
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/pduSessionSubjectRef",
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.value",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/userPlaneConnectivityFactValue",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.recordType": [
+                "PfcpResourceFact.v1"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.recordFamily",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "5gc.pfcp_resource"
+              },
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/pduSessionSubjectRef",
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.value",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/pfcpResourceFactValue",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.recordType": [
+                "TransferParticipantsFact.v1"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.recordFamily",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "5gc.transfer_participants"
+              },
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/transferParticipantsSubjectRef",
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.value",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/transferParticipantsFactValue",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.recordType": [
+                "VirtualGroupFact.v1"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.recordFamily",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "5gc.virtual_group"
+              },
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "oneOf",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [
+                  "fivegc-sim-common.schema.yaml#/$defs/transferSubjectRef",
+                  "fivegc-sim-common.schema.yaml#/$defs/virtualGroupSubjectRef"
+                ]
+              },
+              {
+                "path": "spec.value",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/virtualGroupFactValue",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.recordType": [
+                "TransferQoSFact.v1"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.recordFamily",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "5gc.transfer_qos"
+              },
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/transferSubjectRef",
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.value",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/transferQoSFactValue",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.resolution": [
+                "FOUND",
+                "KNOWN_NEGATIVE"
+              ]
+            },
+            "required": [
+              "spec.value"
+            ],
+            "fields": []
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.resolution": [
+                "KNOWN_ABSENT"
+              ]
+            },
+            "required": [],
+            "fields": []
           }
         ],
         "enums": {
