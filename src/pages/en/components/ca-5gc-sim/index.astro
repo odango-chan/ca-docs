@@ -43,10 +43,10 @@ const matrix = [
       <div class="stat"><strong>{data.counts.implementationRoutes}</strong><span>Server routes</span></div>
       <div class="stat"><strong>2</strong><span>Process profiles</span></div>
     </div>
-    <div class:list={['source-status', { live: data.sync?.mode === 'live', snapshot: data.sync?.mode !== 'live' }]}>
+    <div class="source-status snapshot">
       <div>
-        <strong>{data.sync?.mode === 'live' ? 'Live upstream' : 'Fallback snapshot'}</strong>
-        <span>{data.sync?.mode === 'live' ? 'This build refreshed from the private ca-5gc-sim repository.' : 'This build is using the checked-in validated snapshot.'}</span>
+        <strong>Published snapshot</strong>
+        <span>Pages builds from the latest successfully synchronized sanitized snapshot; the private token is not exposed to the Pages build.</span>
       </div>
       <code>{data.source.repository}@{sourceVersion}</code>
     </div>
