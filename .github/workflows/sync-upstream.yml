@@ -1,5 +1,7 @@
 name: Sync Upstream Contracts
 
+# Successful completion is consumed by Deploy CA Docs via workflow_run.
+
 on:
   workflow_dispatch:
   schedule:
