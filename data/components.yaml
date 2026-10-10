@@ -1,0 +1,56 @@
+version: 1
+
+components:
+  - id: ca-5gc-sim
+    repository: odango-chan/ca-5gc-sim
+    status: active
+    title:
+      zh: 5GC 模拟器
+      en: 5GC simulator
+    docs:
+      - kind: openapi
+        source: schemas/v1alpha1/fivegc-sim.openapi.yaml
+      - kind: json-schema
+        source: schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml
+        role: fact-inventory
+      - kind: json-schema
+        source: schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml
+        role: operation-inventory
+      - kind: implementation-check
+        source: internal/httpapi/server.go
+        role: http-route-registration
+
+  - id: ca-runtime
+    repository: odango-chan/ca-runtime
+    status: planned
+    title:
+      zh: Runtime
+      en: Runtime
+
+  - id: ca-service-fabric
+    repository: odango-chan/ca-service-fabric
+    status: planned
+    title:
+      zh: Service Fabric
+      en: Service Fabric
+
+  - id: ca-provider-common
+    repository: odango-chan/ca-provider-common
+    status: planned
+    title:
+      zh: Provider 公共能力
+      en: Provider common
+
+  - id: ca-provider-5gc
+    repository: odango-chan/ca-provider-5gc
+    status: planned
+    title:
+      zh: 5GC Provider
+      en: 5GC provider
+
+  - id: ca-mcp
+    repository: odango-chan/ca-mcp
+    status: planned
+    title:
+      zh: MCP 接口
+      en: MCP interface
