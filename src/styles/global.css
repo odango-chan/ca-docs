@@ -547,3 +547,116 @@ html[lang="zh-CN"] body{letter-spacing:.005em}
 .response-contract table {
   margin-top: 0.6rem;
 }
+
+
+/* Home page: documentation index first, decoration second. */
+.home-hero {
+  padding: 0 0 2rem;
+}
+
+.home-hero h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+}
+
+.home-hero p {
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.home-section {
+  padding: 1.75rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.home-section h2 {
+  margin-bottom: 0.9rem;
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
+
+.doc-index,
+.component-index {
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.doc-row,
+.component-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1rem;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.doc-row:last-child,
+.component-row:last-child {
+  border-bottom: 0;
+}
+
+.doc-row:hover,
+.component-row:hover {
+  background: #f8fafc;
+  text-decoration: none;
+}
+
+.doc-row > div,
+.component-row > div {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.doc-row strong,
+.component-row strong {
+  font-size: 0.98rem;
+}
+
+.doc-row span,
+.component-row span {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.doc-row.primary {
+  border-left: 3px solid var(--accent);
+}
+
+.doc-row.primary strong {
+  color: var(--accent-strong);
+}
+
+.muted-row {
+  background: #fafbfc;
+}
+
+.muted-row:hover {
+  background: #fafbfc;
+}
+
+.home-secondary {
+  font-size: 0.9rem;
+}
+
+.nav-api {
+  font-weight: 800;
+  color: var(--accent-strong);
+}
+
+.page-tabs .primary-tab {
+  border-color: #b9c9ee;
+  background: var(--soft);
+  color: var(--accent-strong);
+}
+
+@media (max-width: 760px) {
+  .doc-row,
+  .component-row {
+    align-items: flex-start;
+  }
+}

@@ -4,112 +4,52 @@ import data from '../../../data/generated/ca-5gc-sim.json';
 
 const base = import.meta.env.BASE_URL;
 const href = (value: string) => `${base}${value.replace(/^\//, '')}`;
-const sourceVersion = data.source.commit ? data.source.commit.slice(0, 8) : data.source.ref;
 ---
-<SiteLayout title="ConnectionAgent documentation" lang="en">
-  <section class="hero">
-    <span class="eyebrow">ConnectionAgent docs</span>
-    <h1>ConnectionAgent documentation</h1>
-    <p class="lede">
-      Docs for the <code>ca-*</code> repositories: capabilities, APIs, and component boundaries. Schemas and implementation stay in their own repositories; this site puts the useful pieces in one place.
-    </p>
+<SiteLayout title="ConnectionAgent docs" lang="en">
+  <section class="home-hero">
+    <h1>CA Docs</h1>
+    <p>APIs, Facts, Operations, and component boundaries.</p>
   </section>
 
-  <section class="section">
-    <div class="section-head">
-      <div>
-        <span class="eyebrow">Current</span>
-        <h2>Start with ca-5gc-sim</h2>
-      </div>
-      <p>
-        The first live integration reads the current <code>ca-5gc-sim</code> schemas and
-        HTTP implementation during every site build.
-      </p>
+  <section class="home-section">
+    <h2>Quick links</h2>
+    <div class="doc-index">
+      <a class="doc-row primary" href={href('/en/components/ca-5gc-sim/api/')}>
+        <div><strong>HTTP API</strong><span>Endpoints, request fields, responses, schemas, and examples</span></div>
+        <span aria-hidden="true">→</span>
+      </a>
+      <a class="doc-row" href={href('/en/components/ca-5gc-sim/facts/')}>
+        <div><strong>Facts</strong><span>{data.counts.facts} readable states</span></div>
+        <span aria-hidden="true">→</span>
+      </a>
+      <a class="doc-row" href={href('/en/components/ca-5gc-sim/operations/')}>
+        <div><strong>Operations</strong><span>{data.counts.operations} executable operations</span></div>
+        <span aria-hidden="true">→</span>
+      </a>
+      <a class="doc-row" href={href('/en/components/ca-5gc-sim/standalone/')}>
+        <div><strong>Standalone</strong><span>Run and call ca-5gc-sim by itself</span></div>
+        <span aria-hidden="true">→</span>
+      </a>
     </div>
+  </section>
 
-    <div class="grid">
-      <article class="card component-card">
-        <span class="eyebrow">ca-5gc-sim</span>
-        <h2>5GC simulator</h2>
-        <p>
-          Registration, PDU session, QoS, PFCP, user-plane and transfer-resource
-          behavior exposed through one owner API.
-        </p>
-        <div class="pills">
-          <span class="pill good">{data.counts.facts} Fact semantics</span>
-          <span class="pill good">{data.counts.operations} Operation semantics</span>
-          <span class="pill">{data.counts.implementationRoutes} implementation routes</span>
-          <span class="pill">standalone + integrated</span>
+  <section class="home-section">
+    <h2>Components</h2>
+    <div class="component-index">
+      <a class="component-row" href={href('/en/components/ca-5gc-sim/')}>
+        <div>
+          <strong>ca-5gc-sim</strong>
+          <span>5GC simulator · {data.counts.documentedRoutes} OpenAPI endpoints · {data.counts.implementationRoutes} server routes</span>
         </div>
-        <a class="component-link" href={href('/en/components/ca-5gc-sim/')}>
-          Explore ca-5gc-sim →
-        </a>
-        <p class="source-note">Upstream snapshot: {sourceVersion}</p>
-      </article>
-
-      <article class="card">
-        <h3>What is documented here</h3>
-        <p>
-          A single HTTP endpoint can hide many semantic capabilities. CA Docs expands
-          those semantics, shows ownership, and makes contract drift visible.
-        </p>
-      </article>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="section-head">
-      <div>
-        <span class="eyebrow">Current data</span>
-        <h2>Counts</h2>
-      </div>
-    </div>
-    <div class="stats">
-      <div class="stat"><strong>{data.counts.facts}</strong><span>Fact semantics</span></div>
-      <div class="stat"><strong>{data.counts.operations}</strong><span>Operation semantics</span></div>
-      <div class="stat"><strong>{data.counts.documentedRoutes}</strong><span>OpenAPI routes</span></div>
-      <div class="stat"><strong>{data.counts.implementationRoutes}</strong><span>Server routes</span></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="section-head">
-      <div>
-        <span class="eyebrow">Source</span>
-        <h2>Definitions stay in their repositories</h2>
-      </div>
-    </div>
-    <div class="grid">
-      <div class="card">
-        <h3>Original definitions</h3>
-        <p>
-          OpenAPI, JSON Schema and production implementation remain authoritative in
-          the component that owns them.
-        </p>
-      </div>
-      <div class="card">
-        <h3>CA Docs</h3>
-        <p>
-          Derives inventories and counts, then adds human-readable descriptions,
-          boundaries, examples and cross-repository navigation.
-        </p>
+        <span aria-hidden="true">→</span>
+      </a>
+      <div class="component-row muted-row">
+        <div><strong>Other ca-* components</strong><span>More components will be added incrementally.</span></div>
       </div>
     </div>
   </section>
 
-  <section class="section">
-    <div class="section-head">
-      <div>
-        <span class="eyebrow">Next</span>
-        <h2>More repositories will be added</h2>
-      </div>
-      <p>Only the docs are added here; the contracts stay in their repositories.</p>
-    </div>
-    <div class="grid">
-      <div class="card"><h3>ca-service-fabric</h3><p>Protocol mediation and Network Observation.</p></div>
-      <div class="card"><h3>ca-runtime</h3><p>Capability, ProviderBinding, Assurance, Outcome and Reconcile.</p></div>
-      <div class="card"><h3>ca-provider-common / ca-provider-5gc</h3><p>Identity and real-5GC provider boundaries.</p></div>
-      <div class="card"><h3>ca-mcp</h3><p>Tools exposed to the Agent.</p></div>
-    </div>
+  <section class="home-section home-secondary">
+    <a href={href('/en/architecture/')}>How docs are synchronized and who owns what →</a>
   </section>
 </SiteLayout>

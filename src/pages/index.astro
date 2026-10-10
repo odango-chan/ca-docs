@@ -1,13 +1,70 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
 import data from '../../data/generated/ca-5gc-sim.json';
-const base=import.meta.env.BASE_URL; const href=(value:string)=>`${base}${value.replace(/^\//,'')}`;
-const sourceVersion=data.source.commit?data.source.commit.slice(0,8):data.source.ref;
+
+const base = import.meta.env.BASE_URL;
+const href = (value: string) => `${base}${value.replace(/^\//, '')}`;
 ---
 <SiteLayout title="ConnectionAgent 文档" lang="zh">
-<section class="hero"><span class="eyebrow">ConnectionAgent 文档</span><h1>ConnectionAgent 文档</h1><p class="lede">这里整理 <code>ca-*</code> 各组件的能力、API 和职责边界。原始 Schema 和实现仍放在各自仓库，这里只把需要查的东西集中起来。</p></section>
-<section class="section"><div class="section-head"><div><span class="eyebrow">目前</span><h2>先看 ca-5gc-sim</h2></div><p>目前先接入 <code>ca-5gc-sim</code>。Facts、Operations 和 HTTP 路由都从它的 Schema 和代码中生成。</p></div><div class="grid"><article class="card component-card"><span class="eyebrow">ca-5gc-sim</span><h2>5GC 模拟器</h2><p>模拟注册、PDU 会话、QoS、PFCP、用户面和传输相关状态，并提供统一的 Owner API。</p><div class="pills"><span class="pill good">{data.counts.facts} 个 Fact semantic</span><span class="pill good">{data.counts.operations} 个 Operation semantic</span><span class="pill">{data.counts.implementationRoutes} 条实现路由</span><span class="pill">Standalone + Integrated</span></div><a class="component-link" href={href('/components/ca-5gc-sim/')}>查看 ca-5gc-sim →</a><p class="source-note">上游快照：{sourceVersion}</p></article><article class="card"><h3>这里会写什么</h3><p>除了 HTTP 路由，还会列出路由背后的 Fact / Operation，并说明这些能力由哪个组件负责。OpenAPI 和实现对不上时也会直接标出来。</p></article></div></section>
-<section class="section"><div class="section-head"><div><span class="eyebrow">当前数据</span><h2>先看数量</h2></div></div><div class="stats"><div class="stat"><strong>{data.counts.facts}</strong><span>Fact semantic</span></div><div class="stat"><strong>{data.counts.operations}</strong><span>Operation semantic</span></div><div class="stat"><strong>{data.counts.documentedRoutes}</strong><span>OpenAPI 路由</span></div><div class="stat"><strong>{data.counts.implementationRoutes}</strong><span>Server 实际路由</span></div></div></section>
-<section class="section"><div class="section-head"><div><span class="eyebrow">来源</span><h2>数据从各仓库来，这里只负责整理</h2></div></div><div class="grid"><div class="card"><h3>原始定义</h3><p>OpenAPI、JSON Schema 和实现代码仍由对应组件仓库维护。</p></div><div class="card"><h3>CA Docs</h3><p>这里生成清单和数量，再补充说明、示例和跨仓链接。</p></div></div></section>
-<section class="section"><div class="section-head"><div><span class="eyebrow">接下来</span><h2>后面会继续接入这些仓库</h2></div><p>接入文档即可，原始契约仍留在各自仓库。</p></div><div class="grid"><div class="card"><h3>ca-service-fabric</h3><p>消息转发、交付和 Network Observation。</p></div><div class="card"><h3>ca-runtime</h3><p>Capability、ProviderBinding、Assurance、Outcome 与 Reconcile。</p></div><div class="card"><h3>ca-provider-common / ca-provider-5gc</h3><p>身份解析，以及真实 5GC 的 Provider。</p></div><div class="card"><h3>ca-mcp</h3><p>给 Agent 使用的 Tool 接口。</p></div></div></section>
+  <section class="home-hero">
+    <h1>CA Docs</h1>
+    <p>查 API、Facts、Operations 和组件边界。</p>
+  </section>
+
+  <section class="home-section">
+    <h2>常用入口</h2>
+    <div class="doc-index">
+      <a class="doc-row primary" href={href('/components/ca-5gc-sim/api/')}>
+        <div>
+          <strong>HTTP API</strong>
+          <span>接口、请求字段、响应、Schema 和示例</span>
+        </div>
+        <span aria-hidden="true">→</span>
+      </a>
+      <a class="doc-row" href={href('/components/ca-5gc-sim/facts/')}>
+        <div>
+          <strong>Facts</strong>
+          <span>{data.counts.facts} 个可读取的状态</span>
+        </div>
+        <span aria-hidden="true">→</span>
+      </a>
+      <a class="doc-row" href={href('/components/ca-5gc-sim/operations/')}>
+        <div>
+          <strong>Operations</strong>
+          <span>{data.counts.operations} 个可执行操作</span>
+        </div>
+        <span aria-hidden="true">→</span>
+      </a>
+      <a class="doc-row" href={href('/components/ca-5gc-sim/standalone/')}>
+        <div>
+          <strong>Standalone</strong>
+          <span>怎么单独启动和调用 ca-5gc-sim</span>
+        </div>
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="home-section">
+    <h2>组件</h2>
+    <div class="component-index">
+      <a class="component-row" href={href('/components/ca-5gc-sim/')}>
+        <div>
+          <strong>ca-5gc-sim</strong>
+          <span>5GC 模拟器 · {data.counts.documentedRoutes} 个 OpenAPI 接口 · {data.counts.implementationRoutes} 条实现路由</span>
+        </div>
+        <span aria-hidden="true">→</span>
+      </a>
+      <div class="component-row muted-row">
+        <div>
+          <strong>其他 ca-* 组件</strong>
+          <span>后续按组件逐步接入。</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-section home-secondary">
+    <a href={href('/architecture/')}>文档怎么同步、各仓库怎么分工 →</a>
+  </section>
 </SiteLayout>
