@@ -5,10 +5,10 @@ const matrix=[['注册','UE_REGISTRATION · UE_REGISTRATION_CONTEXT','UE_REGISTR
 ---
 <SiteLayout title="ca-5gc-sim" lang="zh">
 <section class="hero"><span class="eyebrow">组件 / ca-5gc-sim</span><h1>确定性 5GC 模拟器</h1><p class="lede">模拟 5GC 领域状态与确定性的 NF 行为。下面的能力清单直接来自当前上游 Schema 与 HTTP 路由实现，而不是人工重新抄一份。</p><div class="page-tabs"><a href={href('/components/ca-5gc-sim/')}>概览</a><a href={href('/components/ca-5gc-sim/facts/')}>Facts</a><a href={href('/components/ca-5gc-sim/operations/')}>Operations</a><a href={href('/components/ca-5gc-sim/api/')}>HTTP API</a><a href={href('/components/ca-5gc-sim/standalone/')}>Standalone</a></div></section>
-<section class="section"><div class="stats"><div class="stat"><strong>{data.counts.facts}</strong><span>Fact semantic</span></div><div class="stat"><strong>{data.counts.operations}</strong><span>Operation semantic</span></div><div class="stat"><strong>{data.counts.implementationRoutes}</strong><span>Server 实际路由</span></div><div class="stat"><strong>2</strong><span>进程 Profile</span></div></div><div class:list={['source-status', { live: data.sync?.mode === 'live', snapshot: data.sync?.mode !== 'live' }]}>
+<section class="section"><div class="stats"><div class="stat"><strong>{data.counts.facts}</strong><span>Fact semantic</span></div><div class="stat"><strong>{data.counts.operations}</strong><span>Operation semantic</span></div><div class="stat"><strong>{data.counts.implementationRoutes}</strong><span>Server 实际路由</span></div><div class="stat"><strong>2</strong><span>进程 Profile</span></div></div><div class="source-status snapshot">
       <div>
-        <strong>{data.sync?.mode === 'live' ? '实时上游' : 'Fallback 快照'}</strong>
-        <span>{data.sync?.mode === 'live' ? '本次构建已从 private ca-5gc-sim 刷新。' : '本次构建使用仓库内已验证快照。'}</span>
+        <strong>已发布快照</strong>
+        <span>Pages 使用最近一次成功同步并提交的安全派生快照；private token 不进入 Pages 构建。</span>
       </div>
       <code>{data.source.repository}@{sourceVersion}</code>
     </div></section>
