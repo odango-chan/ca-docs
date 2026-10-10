@@ -85,6 +85,23 @@ function implementationRoutes(serverSource) {
   return routes;
 }
 
+async function writeSyncState(snapshot, mode, detail = null) {
+  const output = {
+    ...snapshot,
+    source: {
+      ...snapshot.source,
+      private: true,
+    },
+    sync: {
+      mode,
+      checkedAt: new Date().toISOString(),
+      detail,
+    },
+  };
+  await fs.writeFile(snapshotPath, JSON.stringify(output, null, 2) + '\n');
+  return output;
+}
+
 if (!token) {
   if (!(await snapshotExists())) {
     throw new Error(
@@ -92,6 +109,7 @@ if (!token) {
     );
   }
   const snapshot = JSON.parse(await fs.readFile(snapshotPath, 'utf8'));
+  await writeSyncState(snapshot, 'snapshot', 'CA_DOCS_SOURCE_TOKEN is not configured');
   console.log(
     `ca-5gc-sim: using checked-in snapshot ${snapshot.source?.commit || snapshot.source?.ref || 'unknown'}`,
   );
@@ -101,6 +119,7 @@ if (!token) {
 async function useSnapshot(reason) {
   if (!(await snapshotExists())) throw reason;
   const snapshot = JSON.parse(await fs.readFile(snapshotPath, 'utf8'));
+  await writeSyncState(snapshot, 'snapshot', reason.message);
   console.warn(
     `ca-5gc-sim: upstream refresh unavailable (${reason.message}); using checked-in snapshot ${snapshot.source?.commit || snapshot.source?.ref || 'unknown'}`,
   );
@@ -158,6 +177,7 @@ async function refreshFromUpstream() {
       repository: `${owner}/${repo}`,
       ref,
       commit,
+      private: true,
       openApi: 'schemas/v1alpha1/fivegc-sim.openapi.yaml',
       factSchema: 'schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml',
       operationSchema: 'schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml',
@@ -179,6 +199,11 @@ async function refreshFromUpstream() {
       documentedOnlyRoutes: routes.filter(
         (route) => route.documented && !route.implemented,
       ),
+    },
+    sync: {
+      mode: 'live',
+      checkedAt: new Date().toISOString(),
+      detail: null,
     },
   };
 

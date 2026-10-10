@@ -388,3 +388,22 @@ td { font-size: 0.9rem; }
 .language-switch a{color:var(--muted)}
 .language-switch a.active{color:var(--ink);font-weight:800}
 html[lang="zh-CN"] body{letter-spacing:.005em}
+
+.source-status{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  margin-top:1rem;
+  padding:.8rem 1rem;
+  border:1px solid var(--line);
+  border-radius:.8rem;
+  background:var(--panel);
+}
+.source-status div{display:grid;gap:.15rem}
+.source-status strong{font-size:.88rem}
+.source-status span{color:var(--muted);font-size:.82rem}
+.source-status.live{border-color:#b7dfd0;background:#effaf5}
+.source-status.snapshot{border-color:#efd7ad;background:#fff9ee}
+.private-source strong{display:block;margin-bottom:.25rem}
+@media (max-width:760px){.source-status{align-items:flex-start;flex-direction:column}}

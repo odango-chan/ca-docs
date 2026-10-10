@@ -7,7 +7,8 @@
     "openApi": "schemas/v1alpha1/fivegc-sim.openapi.yaml",
     "factSchema": "schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml",
     "operationSchema": "schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml",
-    "httpServer": "internal/httpapi/server.go"
+    "httpServer": "internal/httpapi/server.go",
+    "private": true
   },
   "counts": {
     "facts": 8,
@@ -112,5 +113,10 @@
       }
     ],
     "documentedOnlyRoutes": []
+  },
+  "sync": {
+    "mode": "snapshot",
+    "checkedAt": null,
+    "detail": "Checked-in fallback snapshot"
   }
 }

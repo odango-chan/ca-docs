@@ -43,9 +43,13 @@ const matrix = [
       <div class="stat"><strong>{data.counts.implementationRoutes}</strong><span>Server routes</span></div>
       <div class="stat"><strong>2</strong><span>Process profiles</span></div>
     </div>
-    <p class="source-note">
-      Source: <code>{data.source.repository}@{sourceVersion}</code>
-    </p>
+    <div class:list={['source-status', { live: data.sync?.mode === 'live', snapshot: data.sync?.mode !== 'live' }]}>
+      <div>
+        <strong>{data.sync?.mode === 'live' ? 'Live upstream' : 'Fallback snapshot'}</strong>
+        <span>{data.sync?.mode === 'live' ? 'This build refreshed from the private ca-5gc-sim repository.' : 'This build is using the checked-in validated snapshot.'}</span>
+      </div>
+      <code>{data.source.repository}@{sourceVersion}</code>
+    </div>
   </section>
 
   <section class="section">

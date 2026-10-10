@@ -6,18 +6,18 @@ const base = import.meta.env.BASE_URL;
 const href = (value: string) => `${base}${value.replace(/^\//, '')}`;
 const driftCount =
   data.drift.implementationOnlyRoutes.length + data.drift.documentedOnlyRoutes.length;
-const openApiUrl =
-  'https://github.com/odango-chan/ca-5gc-sim/blob/main/schemas/v1alpha1/fivegc-sim.openapi.yaml';
-const serverUrl =
-  'https://github.com/odango-chan/ca-5gc-sim/blob/main/internal/httpapi/server.go';
+const sourceRef = data.source.commit || data.source.ref;
+const sourceBase = `https://github.com/${data.source.repository}/blob/${sourceRef}`;
+const openApiUrl = `${sourceBase}/${data.source.openApi}`;
+const serverUrl = `${sourceBase}/${data.source.httpServer}`;
 ---
 <SiteLayout title="ca-5gc-sim HTTP API" lang="en">
   <section class="hero">
     <span class="eyebrow">ca-5gc-sim / HTTP API</span>
     <h1>Routes and contract coverage</h1>
     <p class="lede">
-      The route table is a union of the upstream OpenAPI document and the actual Go HTTP
-      registration. That makes undocumented implementation surfaces visible.
+      The route table is the union of the upstream OpenAPI document and actual Go HTTP registration,
+      making implementation-only surfaces visible.
     </p>
     <div class="page-tabs">
       <a href={href('/en/components/ca-5gc-sim/')}>Overview</a>
@@ -40,24 +40,14 @@ const serverUrl =
     {driftCount > 0 ? (
       <div class="notice">
         Contract drift is visible: {driftCount} route difference{driftCount === 1 ? '' : 's'}
-        currently exist between OpenAPI and server registration. This site does not silently
-        normalize the mismatch.
+        currently exist between OpenAPI and server registration. CA Docs does not silently normalize the mismatch.
       </div>
     ) : (
       <div class="notice good">OpenAPI and server route registration currently match.</div>
     )}
-
     <div style="overflow-x:auto; margin-top:1rem">
       <table>
-        <thead>
-          <tr>
-            <th>Method</th>
-            <th>Path</th>
-            <th>Surface</th>
-            <th>OpenAPI</th>
-            <th>Server</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Method</th><th>Path</th><th>Surface</th><th>OpenAPI</th><th>Server</th></tr></thead>
         <tbody>
           {data.routes.map((route) => (
             <tr>
@@ -74,16 +64,22 @@ const serverUrl =
   </section>
 
   <section class="section">
-    <div class="grid">
+    <div class="notice private-source">
+      <strong>The canonical source repository is private.</strong>
+      Public visitors can use the extracted capability and route information in CA Docs.
+      The source links below require access to <code>{data.source.repository}</code> and are pinned
+      to source commit <code>{sourceRef.slice(0, 8)}</code>.
+    </div>
+    <div class="grid" style="margin-top:1rem">
       <div class="card">
         <h3>Machine API authority</h3>
-        <p>Request/response wire contracts remain the upstream OpenAPI and JSON Schemas.</p>
-        <div class="pills"><a class="pill" href={openApiUrl}>Open OpenAPI ↗</a></div>
+        <p><code>{data.source.openApi}</code></p>
+        <div class="pills"><a class="pill" href={openApiUrl}>Open private OpenAPI ↗</a></div>
       </div>
       <div class="card">
-        <h3>Implementation route check</h3>
-        <p>Server registration is inspected independently so missing OpenAPI coverage is obvious.</p>
-        <div class="pills"><a class="pill" href={serverUrl}>Open server.go ↗</a></div>
+        <h3>Implementation route source</h3>
+        <p><code>{data.source.httpServer}</code></p>
+        <div class="pills"><a class="pill" href={serverUrl}>Open private server.go ↗</a></div>
       </div>
     </div>
   </section>
