@@ -7,18 +7,7 @@ components:
     title:
       zh: 5GC 模拟器
       en: 5GC simulator
-    docs:
-      - kind: openapi
-        source: schemas/v1alpha1/fivegc-sim.openapi.yaml
-      - kind: json-schema
-        source: schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml
-        role: fact-inventory
-      - kind: json-schema
-        source: schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml
-        role: operation-inventory
-      - kind: implementation-check
-        source: internal/httpapi/server.go
-        role: http-route-registration
+    manifest: docs/public-docs.yaml
 
   - id: ca-runtime
     repository: odango-chan/ca-runtime
