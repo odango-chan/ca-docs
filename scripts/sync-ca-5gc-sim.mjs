@@ -195,6 +195,52 @@ function collectFields(node, prefix, allowEnums, out) {
   }
 }
 
+function collectConditionalRules(node, prefix, allowEnums, out) {
+  if (!node || typeof node !== 'object') return;
+
+  if (Array.isArray(node.allOf)) {
+    for (const branch of node.allOf) {
+      if (!branch?.if || !branch?.then) continue;
+      const when = {};
+      for (const [name, condition] of Object.entries(branch.if.properties || {})) {
+        const fieldPath = prefix ? `${prefix}.${name}` : name;
+        if (Object.prototype.hasOwnProperty.call(condition || {}, 'const')) {
+          when[fieldPath] = [condition.const];
+        } else if (allowEnums && Array.isArray(condition?.enum)) {
+          when[fieldPath] = condition.enum;
+        }
+      }
+
+      const fields = [];
+      collectFields(
+        {
+          properties: branch.then.properties || {},
+          required: branch.then.required || [],
+        },
+        prefix,
+        allowEnums,
+        fields,
+      );
+
+      if (Object.keys(when).length || fields.length || (branch.then.required || []).length) {
+        out.push({
+          scope: prefix || null,
+          when,
+          required: (branch.then.required || []).map((name) =>
+            prefix ? `${prefix}.${name}` : name,
+          ),
+          fields,
+        });
+      }
+    }
+  }
+
+  for (const [name, child] of Object.entries(node.properties || {})) {
+    const childPrefix = prefix ? `${prefix}.${name}` : name;
+    collectConditionalRules(child, childPrefix, allowEnums, out);
+  }
+}
+
 function summarizeSchema(source, document) {
   const publish = new Set(source.publish || []);
   const summary = {
@@ -209,8 +255,11 @@ function summarizeSchema(source, document) {
   }
   if (publish.has('fields')) {
     const fields = [];
+    const rules = [];
     collectFields(document, '', publish.has('enums'), fields);
+    collectConditionalRules(document, '', publish.has('enums'), rules);
     summary.fields = fields;
+    summary.rules = rules;
   }
   if (publish.has('enums')) {
     summary.enums = {};
