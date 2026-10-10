@@ -4,8 +4,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  schedule:
-    - cron: '17 */6 * * *'
 
 permissions:
   contents: read
@@ -31,10 +29,8 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Build site from upstream contracts
+      - name: Build site from published snapshots
         run: npm run build
-        env:
-          CA_DOCS_SOURCE_TOKEN: ${{ secrets.CA_DOCS_SOURCE_TOKEN }}
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
