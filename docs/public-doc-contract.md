@@ -106,18 +106,22 @@ component: ca-service-fabric
 sources:
   - kind: openapi
     path: schemas/v1alpha1/service-fabric.openapi.yaml
+    publish: [metadata, operations, fields, enums, examples]
 
   - kind: json-schema
     path: schemas/v1alpha1/network-observation-query.schema.yaml
     role: network-observation
+    publish: [metadata, fields, enums]
 
   - kind: json-schema
     path: schemas/v1alpha1/boundary-fault-receipt.schema.yaml
     role: boundary-fault
+    publish: [metadata, fields, enums]
 
   - kind: markdown
     path: docs/public/overview.md
     role: overview
+    publish: [metadata, body]
 ```
 
 这样“什么能公开”由源仓库自己决定，CA Docs 只消费 manifest。
@@ -155,3 +159,24 @@ Contents: Read-only
 ```
 
 只需要读取被 manifest 明确声明的文件。
+
+
+## publish 白名单
+
+每个 source 必须显式写 `publish`。CA Docs 只允许把这些派生内容写入 public snapshot：
+
+- `metadata`：标题、版本、来源 commit 等元信息
+- `operations`：API Method / Path / operationId 等接口清单
+- `fields`：请求/响应或 Schema 字段摘要
+- `enums`：枚举值
+- `examples`：明确允许公开的示例
+- `body`：Markdown 正文
+- `implementation-summary`：实现检查的派生结果，例如“代码里存在但 OpenAPI 未声明的路由”
+
+`implementation-check` 不能发布源码正文，只能发布 `metadata` 和 `implementation-summary`。
+
+机器约束定义在：
+
+```
+schemas/v1alpha1/public-docs-manifest.schema.yaml
+```
