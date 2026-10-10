@@ -1,0 +1,16 @@
+{
+  "name": "ca-docs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync": "node scripts/sync-ca-5gc-sim.mjs",
+    "dev": "npm run sync && astro dev",
+    "build": "npm run sync && astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^5.14.0",
+    "js-yaml": "^4.1.0"
+  }
+}
