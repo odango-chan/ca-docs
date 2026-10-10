@@ -1,0 +1,117 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import data from '../../data/generated/ca-5gc-sim.json';
+
+const base = import.meta.env.BASE_URL;
+const href = (value: string) => `${base}${value.replace(/^\//, '')}`;
+const sourceVersion = data.source.commit ? data.source.commit.slice(0, 8) : data.source.ref;
+---
+<SiteLayout title="ConnectionAgent documentation">
+  <section class="hero">
+    <span class="eyebrow">ConnectionAgent documentation portal</span>
+    <h1>See what CA can actually do.</h1>
+    <p class="lede">
+      Cross-repository capability, API and ownership documentation for the
+      <code>ca-*</code> ecosystem. Machine contracts stay in their owner repositories;
+      this site turns them into a readable system view.
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Integrated component</span>
+        <h2>Start with the simulator</h2>
+      </div>
+      <p>
+        The first live integration reads the current <code>ca-5gc-sim</code> schemas and
+        HTTP implementation during every site build.
+      </p>
+    </div>
+
+    <div class="grid">
+      <article class="card component-card">
+        <span class="eyebrow">ca-5gc-sim</span>
+        <h2>Deterministic 5GC reference simulator</h2>
+        <p>
+          Registration, PDU session, QoS, PFCP, user-plane and transfer-resource
+          behavior exposed through one owner API.
+        </p>
+        <div class="pills">
+          <span class="pill good">{data.counts.facts} Fact semantics</span>
+          <span class="pill good">{data.counts.operations} Operation semantics</span>
+          <span class="pill">{data.counts.implementationRoutes} implementation routes</span>
+          <span class="pill">standalone + integrated</span>
+        </div>
+        <a class="component-link" href={href('/components/ca-5gc-sim/')}>
+          Explore ca-5gc-sim →
+        </a>
+        <p class="source-note">Upstream snapshot: {sourceVersion}</p>
+      </article>
+
+      <article class="card">
+        <h3>Why this portal exists</h3>
+        <p>
+          A single HTTP endpoint can hide many semantic capabilities. CA Docs expands
+          those semantics, shows ownership, and makes contract drift visible.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Current source-derived inventory</span>
+        <h2>One glance, no code archaeology</h2>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><strong>{data.counts.facts}</strong><span>Fact semantics</span></div>
+      <div class="stat"><strong>{data.counts.operations}</strong><span>Operation semantics</span></div>
+      <div class="stat"><strong>{data.counts.documentedRoutes}</strong><span>OpenAPI routes</span></div>
+      <div class="stat"><strong>{data.counts.implementationRoutes}</strong><span>Server routes</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Portal principle</span>
+        <h2>Aggregate, don’t fork the truth</h2>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3>Owner repositories</h3>
+        <p>
+          OpenAPI, JSON Schema and production implementation remain authoritative in
+          the component that owns them.
+        </p>
+      </div>
+      <div class="card">
+        <h3>CA Docs</h3>
+        <p>
+          Derives inventories and counts, then adds human-readable descriptions,
+          boundaries, examples and cross-repository navigation.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Next components</span>
+        <h2>Designed to grow across repositories</h2>
+      </div>
+      <p>These are portal targets, not duplicated contracts.</p>
+    </div>
+    <div class="grid">
+      <div class="card"><h3>ca-service-fabric</h3><p>Protocol mediation and Network Observation.</p></div>
+      <div class="card"><h3>ca-runtime</h3><p>Capability, ProviderBinding, Assurance, Outcome and Reconcile.</p></div>
+      <div class="card"><h3>ca-provider-common / ca-provider-5gc</h3><p>Identity and real-5GC provider boundaries.</p></div>
+      <div class="card"><h3>ca-mcp</h3><p>The Agent-facing admitted tool surface.</p></div>
+    </div>
+  </section>
+</SiteLayout>

@@ -1,0 +1,50 @@
+---
+import SiteLayout from '../../../layouts/SiteLayout.astro';
+import data from '../../../../data/generated/ca-5gc-sim.json';
+import { factMeta, fallbackMeta } from '../../../lib/ca5gc';
+
+const base = import.meta.env.BASE_URL;
+const href = (value: string) => `${base}${value.replace(/^\//, '')}`;
+---
+<SiteLayout title="ca-5gc-sim facts">
+  <section class="hero">
+    <span class="eyebrow">ca-5gc-sim / Facts</span>
+    <h1>{data.counts.facts} readable domain facts</h1>
+    <p class="lede">
+      All fact semantics use <code>POST /v1/facts/read</code>. The semantic and typed
+      <code>subjectRef</code> determine what authoritative 5GC state is read.
+    </p>
+    <div class="page-tabs">
+      <a href={href('/components/ca-5gc-sim/')}>Overview</a>
+      <a href={href('/components/ca-5gc-sim/operations/')}>Operations</a>
+      <a href={href('/components/ca-5gc-sim/api/')}>HTTP API</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="cap-list">
+      {data.facts.map((semantic) => {
+        const meta = factMeta[semantic] ?? fallbackMeta(semantic, 'fact');
+        return (
+          <article class="cap-item">
+            <div>
+              <div class="semantic">{semantic}</div>
+              <div class="meta">{meta.category}</div>
+            </div>
+            <div>
+              <h3>{meta.title}</h3>
+              <p class="meta">{meta.description}</p>
+            </div>
+            <div>
+              <div class="meta">Subject</div>
+              <code>{meta.subject}</code>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+    <p class="source-note">
+      Inventory is generated from <code>{data.source.factSchema}</code>.
+    </p>
+  </section>
+</SiteLayout>

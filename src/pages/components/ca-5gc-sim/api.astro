@@ -1,0 +1,90 @@
+---
+import SiteLayout from '../../../layouts/SiteLayout.astro';
+import data from '../../../../data/generated/ca-5gc-sim.json';
+
+const base = import.meta.env.BASE_URL;
+const href = (value: string) => `${base}${value.replace(/^\//, '')}`;
+const driftCount =
+  data.drift.implementationOnlyRoutes.length + data.drift.documentedOnlyRoutes.length;
+const openApiUrl =
+  'https://github.com/odango-chan/ca-5gc-sim/blob/main/schemas/v1alpha1/fivegc-sim.openapi.yaml';
+const serverUrl =
+  'https://github.com/odango-chan/ca-5gc-sim/blob/main/internal/httpapi/server.go';
+---
+<SiteLayout title="ca-5gc-sim HTTP API">
+  <section class="hero">
+    <span class="eyebrow">ca-5gc-sim / HTTP API</span>
+    <h1>Routes and contract coverage</h1>
+    <p class="lede">
+      The route table is a union of the upstream OpenAPI document and the actual Go HTTP
+      registration. That makes undocumented implementation surfaces visible.
+    </p>
+    <div class="page-tabs">
+      <a href={href('/components/ca-5gc-sim/')}>Overview</a>
+      <a href={href('/components/ca-5gc-sim/facts/')}>Facts</a>
+      <a href={href('/components/ca-5gc-sim/operations/')}>Operations</a>
+      <a href={href('/components/ca-5gc-sim/standalone/')}>Standalone</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="stats">
+      <div class="stat"><strong>{data.counts.documentedRoutes}</strong><span>OpenAPI routes</span></div>
+      <div class="stat"><strong>{data.counts.implementationRoutes}</strong><span>Implementation routes</span></div>
+      <div class="stat"><strong>{data.counts.facts}</strong><span>Facts behind /v1/facts/read</span></div>
+      <div class="stat"><strong>{data.counts.operations}</strong><span>Operations behind /v1/operations</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    {driftCount > 0 ? (
+      <div class="notice">
+        Contract drift is visible: {driftCount} route difference{driftCount === 1 ? '' : 's'}
+        currently exist between OpenAPI and server registration. This site does not silently
+        normalize the mismatch.
+      </div>
+    ) : (
+      <div class="notice good">OpenAPI and server route registration currently match.</div>
+    )}
+
+    <div style="overflow-x:auto; margin-top:1rem">
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Path</th>
+            <th>Surface</th>
+            <th>OpenAPI</th>
+            <th>Server</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.routes.map((route) => (
+            <tr>
+              <td><code>{route.method}</code></td>
+              <td><code>{route.path}</code></td>
+              <td>{route.surface}</td>
+              <td>{route.documented ? '✓' : '—'}</td>
+              <td>{route.implemented ? '✓' : '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="grid">
+      <div class="card">
+        <h3>Machine API authority</h3>
+        <p>Request/response wire contracts remain the upstream OpenAPI and JSON Schemas.</p>
+        <div class="pills"><a class="pill" href={openApiUrl}>Open OpenAPI ↗</a></div>
+      </div>
+      <div class="card">
+        <h3>Implementation route check</h3>
+        <p>Server registration is inspected independently so missing OpenAPI coverage is obvious.</p>
+        <div class="pills"><a class="pill" href={serverUrl}>Open server.go ↗</a></div>
+      </div>
+    </div>
+  </section>
+</SiteLayout>
