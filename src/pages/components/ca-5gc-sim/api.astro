@@ -6,34 +6,94 @@ const base = import.meta.env.BASE_URL;
 const href = (value: string) => `${base}${value.replace(/^\//, '')}`;
 
 const copy: Record<string, { title: string; description: string }> = {
-  'GET /identity': {
-    title: '进程信息',
-    description: '查看当前 ca-5gc-sim 实例、运行 Profile 和 World 信息。',
+  'GET /identity': { title: '进程信息', description: '查看当前 ca-5gc-sim 实例、运行 Profile 和 World 信息。' },
+  'GET /healthz': { title: '健康检查', description: '查看进程是否已经 READY。' },
+  'GET /v1/world': { title: '当前 World', description: '查看当前模拟 World。' },
+  'POST /v1/facts/read': { title: '读取状态', description: '读取 UE 注册、PDU Session、用户面、PFCP、传输资源等状态。' },
+  'POST /v1/operations': { title: '执行操作', description: '执行注册、PDU Session、PFCP、虚拟组、QoS 等模拟操作。' },
+  'POST /internal/v1/world/reset': { title: '重置 World', description: 'Host 使用的重置接口，不是 Runtime 业务能力，也不会作为 Agent Tool 暴露。' },
+  'POST /internal/fabric/delivery': { title: 'Fabric 消息回调', description: 'Service Fabric 使用的内部回调。代码里已经注册，目前还没写进 OpenAPI。' },
+};
+
+const requestDocs: Record<string, { fields: Array<[string,string,string]>, example: string }> = {
+  '/v1/facts/read': {
+    fields: [
+      ['worldRef', '必填', '要读取的 World'],
+      ['worldGeneration', '必填', '当前 generation'],
+      ['factSemantic', '必填', '要读取哪类状态'],
+      ['subjectRef', '必填', '读取对象，例如 UE 或 PDU Session'],
+      ['readMode', '必填', 'CURRENT 或 AT_REVISION'],
+      ['correlationRefs', '可选', '调用链关联信息'],
+    ],
+    example: JSON.stringify({
+      apiVersion: 'connectionagent.io/v1alpha1',
+      kind: 'FiveGCSimFactReadRequest',
+      contractVersion: 'v1',
+      spec: {
+        worldRef: 'world-standalone',
+        worldGeneration: 'g1',
+        factSemantic: 'PDU_SESSION',
+        subjectRef: { kind: 'PDU_SESSION', supi: '001010000000002', pduSessionId: 10 },
+        readMode: { mode: 'CURRENT' },
+      },
+    }, null, 2),
   },
-  'GET /healthz': {
-    title: '健康检查',
-    description: '查看进程是否已经 READY。',
+  '/v1/operations': {
+    fields: [
+      ['worldRef', '必填', '目标 World'],
+      ['worldGeneration', '必填', '当前 generation'],
+      ['expectedWorldRevision', '可选', '需要做并发保护时填写'],
+      ['operationSemantic', '必填', '要执行的动作'],
+      ['subjectRef', '必填', '操作对象'],
+      ['params', '按操作决定', '例如 DNN、S-NSSAI、5QI、成员列表'],
+      ['responseWaitBudget', '必填', '确定性调度等待预算'],
+      ['callerCorrelationRefs', '可选', '调用链关联信息'],
+    ],
+    example: JSON.stringify({
+      apiVersion: 'connectionagent.io/v1alpha1',
+      kind: 'FiveGCSimOperationRequest',
+      contractVersion: 'v1',
+      spec: {
+        worldRef: 'world-standalone',
+        worldGeneration: 'g1',
+        operationSemantic: 'PDU_SESSION_MODIFY_QOS',
+        subjectRef: { kind: 'PDU_SESSION', supi: '001010000000002', pduSessionId: 10 },
+        params: { fiveQi: 7 },
+        responseWaitBudget: { schedulerBindingRef: 'local-scheduler', logicalDuration: '5s' },
+      },
+    }, null, 2),
   },
-  'GET /v1/world': {
-    title: '当前 World',
-    description: '查看当前模拟 World。',
+  '/internal/v1/world/reset': {
+    fields: [
+      ['expectedWorldRef', '必填', '当前 World'],
+      ['expectedWorldGeneration', '必填', '当前 generation'],
+      ['newWorldGeneration', '必填', '重置后的 generation'],
+      ['newSchedulerBindingRef', '必填', '新的 Scheduler binding'],
+      ['seedProfile', '必填', '重置后使用的 seed profile'],
+      ['seedParameters', '可选', 'seed profile 参数'],
+    ],
+    example: JSON.stringify({
+      apiVersion: 'connectionagent.io/v1alpha1',
+      kind: 'FiveGCSimWorldResetRequest',
+      contractVersion: 'v1',
+      spec: {
+        expectedWorldRef: 'world-standalone',
+        expectedWorldGeneration: 'g1',
+        newWorldGeneration: 'g2',
+        newSchedulerBindingRef: 'local-scheduler',
+        seedProfile: 'registered-active-pdu-sessions-v1',
+      },
+    }, null, 2),
   },
-  'POST /v1/facts/read': {
-    title: '读取状态',
-    description: '读取 UE 注册、PDU Session、用户面、PFCP、传输资源等状态。',
-  },
-  'POST /v1/operations': {
-    title: '执行操作',
-    description: '执行注册、PDU Session、PFCP、虚拟组、QoS 等模拟操作。',
-  },
-  'POST /internal/v1/world/reset': {
-    title: '重置 World',
-    description: 'Host 使用的重置接口，不是 Runtime 业务能力，也不会作为 Agent Tool 暴露。',
-  },
-  'POST /internal/fabric/delivery': {
-    title: 'Fabric 消息回调',
-    description: 'Service Fabric 使用的内部回调。代码里已经注册，目前还没写进 OpenAPI。',
-  },
+};
+
+const responseDocs: Record<string, Array<[string,string]>> = {
+  '/identity': [['200', '返回进程信息和支持的契约'], ['503', '服务当前不可用']],
+  '/healthz': [['200', 'READY'], ['503', '进程还活着，但当前不是 READY']],
+  '/v1/world': [['200', '返回当前 World'], ['503', '服务当前不可用']],
+  '/v1/facts/read': [['200', '请求被接受，结果可能是 FOUND / KNOWN_ABSENT / UNAVAILABLE 等'], ['400 / 404 / 409', '请求本身无法接受'], ['503', '服务当前不可用']],
+  '/v1/operations': [['200', '请求被接受，结果可能是 COMPLETED / REJECTED / WAIT_EXPIRED / INVALID_PRESTATE / NOT_COMMITTED'], ['400 / 404 / 409', '请求本身无法接受'], ['503', '服务当前不可用']],
+  '/internal/v1/world/reset': [['200', '新 generation 已 READY'], ['400 / 409 / 503', '重置失败']],
 };
 
 const documented = data.routes.filter((route) => route.documented);
@@ -44,8 +104,7 @@ const implementationOnly = data.routes.filter((route) => route.implemented && !r
     <span class="eyebrow">ca-5gc-sim / HTTP API</span>
     <h1>HTTP API</h1>
     <p class="lede">
-      接口直接列在这里，不需要去 private 仓库找 OpenAPI。
-      Facts 和 Operations 的具体 semantic 可以从对应页面继续看。
+      接口、请求字段和示例都直接放在这里，不需要去 private 仓库找 OpenAPI。
     </p>
     <div class="page-tabs">
       <a href={href('/components/ca-5gc-sim/')}>概览</a>
@@ -65,39 +124,62 @@ const implementationOnly = data.routes.filter((route) => route.implemented && !r
   </section>
 
   <section class="section">
-    <div class="section-head">
-      <div>
-        <span class="eyebrow">OpenAPI</span>
-        <h2>当前接口</h2>
-      </div>
-    </div>
-
-    <div class="grid">
+    <div class="api-list">
       {documented.map((route) => {
         const key = `${route.method} ${route.path}`;
         const item = copy[key] ?? { title: route.operationId ?? route.path, description: '' };
+        const request = requestDocs[route.path];
+        const responses = responseDocs[route.path] ?? [];
+
         return (
-          <article class="card">
-            <div class="pills" style="margin-top:0">
-              <span class="pill good">{route.method}</span>
+          <article class="api-card">
+            <div class="api-heading">
+              <span class:list={['method-badge', route.method.toLowerCase()]}>{route.method}</span>
+              <code class="api-path">{route.path}</code>
               <span class="pill">{route.surface}</span>
             </div>
-            <h3 style="margin-top:1rem">{item.title}</h3>
-            <p><code>{route.path}</code></p>
-            <p style="margin-top:.6rem">{item.description}</p>
-            <p class="source-note">
-              operationId: <code>{route.operationId}</code>
-            </p>
-            {route.path === '/v1/facts/read' && (
-              <a class="component-link" href={href('/components/ca-5gc-sim/facts/')}>
-                查看支持的 factSemantic →
-              </a>
+
+            <h3>{item.title}</h3>
+            <p>{item.description}</p>
+            <div class="api-meta"><span>operationId</span><code>{route.operationId}</code></div>
+
+            {request && (
+              <div class="api-block">
+                <strong>请求字段</strong>
+                <div style="overflow-x:auto">
+                  <table>
+                    <thead><tr><th>字段</th><th>要求</th><th>说明</th></tr></thead>
+                    <tbody>
+                      {request.fields.map(([name, required, description]) => (
+                        <tr><td><code>{name}</code></td><td>{required}</td><td>{description}</td></tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <details class="api-example">
+                  <summary>请求示例</summary>
+                  <pre><code>{request.example}</code></pre>
+                </details>
+                {route.path === '/v1/facts/read' && (
+                  <a href={href('/components/ca-5gc-sim/facts/')}>查看 factSemantic →</a>
+                )}
+                {route.path === '/v1/operations' && (
+                  <a href={href('/components/ca-5gc-sim/operations/')}>查看 operationSemantic →</a>
+                )}
+              </div>
             )}
-            {route.path === '/v1/operations' && (
-              <a class="component-link" href={href('/components/ca-5gc-sim/operations/')}>
-                查看支持的 operationSemantic →
-              </a>
-            )}
+
+            <div class="api-block">
+              <strong>响应</strong>
+              <div class="response-list">
+                {responses.map(([status, description]) => (
+                  <div class="response-row">
+                    <code class="status-code">{status}</code>
+                    <div>{description}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </article>
         );
       })}
@@ -107,37 +189,18 @@ const implementationOnly = data.routes.filter((route) => route.implemented && !r
   {implementationOnly.length > 0 && (
     <section class="section">
       <div class="section-head">
-        <div>
-          <span class="eyebrow">实现差异</span>
-          <h2>代码里还有接口没进 OpenAPI</h2>
-        </div>
+        <div><span class="eyebrow">实现差异</span><h2>代码里还有接口没进 OpenAPI</h2></div>
       </div>
-      <div class="grid">
-        {implementationOnly.map((route) => {
-          const key = `${route.method} ${route.path}`;
-          const item = copy[key] ?? { title: route.path, description: '' };
-          return (
-            <article class="card">
-              <div class="pills" style="margin-top:0">
-                <span class="pill warn">{route.method}</span>
-                <span class="pill">{route.surface}</span>
-              </div>
-              <h3 style="margin-top:1rem">{item.title}</h3>
-              <p><code>{route.path}</code></p>
-              <p style="margin-top:.6rem">{item.description}</p>
-            </article>
-          );
-        })}
-      </div>
+      {implementationOnly.map((route) => {
+        const key = `${route.method} ${route.path}`;
+        const item = copy[key] ?? { title: route.path, description: '' };
+        return (
+          <div class="notice">
+            <strong><code>{route.method} {route.path}</code> · {item.title}</strong>
+            <div>{item.description}</div>
+          </div>
+        );
+      })}
     </section>
   )}
-
-  <section class="section">
-    <div class="notice">
-      <strong>下一步：请求/响应字段。</strong>
-      现在这一页已经能直接看所有 HTTP 接口。请求体和响应体的字段级 Schema
-      还没有发布到 public snapshot，后续会单独做成明确允许公开的 API contract，
-      而不是让公网用户去 private 仓找文件。
-    </div>
-  </section>
 </SiteLayout>
