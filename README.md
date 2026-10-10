@@ -11,7 +11,7 @@ CA Docs 是一个**跨仓视图**，不是第二份机器契约事实源。OpenA
 
 ### ca-5gc-sim
 
-确定性 5GC 参考模拟器。目前从 private `odango-chan/ca-5gc-sim` 提取：
+当前第一个 active 组件。现在从 private `odango-chan/ca-5gc-sim` 提取：
 
 - Fact semantic 清单
 - Operation semantic 清单
@@ -22,19 +22,32 @@ CA Docs 是一个**跨仓视图**，不是第二份机器契约事实源。OpenA
 
 公开仓不会复制 private 源码正文。
 
+## 组件接入
+
+`data/components.yaml` 是当前组件注册表。新的 `ca-*` 仓库不需要照抄 ca-5gc-sim 的页面或同步脚本。
+
+统一目标是让每个源仓提供：
+
+```
+docs/public-docs.yaml
+```
+
+由源仓自己声明哪些 OpenAPI、JSON Schema、公开 Markdown 或实现检查允许进入公共文档。规范见 `docs/public-doc-contract.md`。
+
 ## 同步与发布模型
 
-private token 只用于独立的 **Sync Upstream Contracts** workflow，不再交给 GitHub Pages 构建任务。
+private token 只用于独立的 **Sync Upstream Contracts** workflow，不交给 GitHub Pages 构建任务。
 
 ```text
-private ca-5gc-sim
+private ca-* repositories
         │  CA_DOCS_SOURCE_TOKEN (Contents: Read-only)
         ▼
 Sync Upstream Contracts
         │
+        ├─ 读取组件 public-docs manifest
         ├─ 提取 / 校验安全派生数据
         ▼
-data/generated/ca-5gc-sim.json
+data/generated/*
         │  提交到 public ca-docs
         ▼
 Deploy CA Docs
@@ -58,7 +71,7 @@ GitHub Pages
 
 推荐 Fine-grained personal access token：
 
-- Repository access：仅 `odango-chan/ca-5gc-sim`
+- Repository access：只选择已经接入 CA Docs 的 private `ca-*` 仓库
 - Repository permissions：`Contents: Read-only`
 
 ## 本地开发
