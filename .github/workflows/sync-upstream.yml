@@ -41,13 +41,30 @@ jobs:
       - name: Commit sanitized snapshot when changed
         shell: bash
         run: |
-          if git diff --quiet -- data/generated/ca-5gc-sim.json; then
-            echo "No published snapshot changes."
-            exit 0
-          fi
+          cp data/generated/ca-5gc-sim.json /tmp/ca-5gc-sim.json
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/generated/ca-5gc-sim.json
-          git commit -m "chore: refresh ca-5gc-sim snapshot"
-          git push
+
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/ca-5gc-sim.json data/generated/ca-5gc-sim.json
+
+            if git diff --quiet -- data/generated/ca-5gc-sim.json; then
+              echo "No published snapshot changes."
+              exit 0
+            fi
+
+            git add data/generated/ca-5gc-sim.json
+            git commit -m "chore: refresh ca-5gc-sim snapshot"
+
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "Push raced with another main update; retrying ($attempt/3)."
+          done
+
+          echo "Unable to publish snapshot after 3 attempts."
+          exit 1
