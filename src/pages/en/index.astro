@@ -14,8 +14,8 @@ const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\
   <section class="home-section">
     <h2>Quick links</h2>
     <div class="doc-index">
-      <a class="doc-row primary" href={href('/en/components/ca-5gc-sim/api/')}>
-        <div><strong>HTTP API</strong><span>Endpoints, request fields, responses, schemas, and examples</span></div>
+      <a class="doc-row primary" href={href('/en/api/')}>
+        <div><strong>API</strong><span>Browse APIs for all integrated components</span></div>
         <span aria-hidden="true">→</span>
       </a>
       <a class="doc-row" href={href('/en/components/ca-5gc-sim/facts/')}>
@@ -41,6 +41,10 @@ const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\
           <strong>ca-5gc-sim</strong>
           <span>5GC simulator · {data.counts.documentedRoutes} OpenAPI endpoints · {data.counts.implementationRoutes} server routes</span>
         </div>
+        <span aria-hidden="true">→</span>
+      </a>
+      <a class="component-row" href={href('/en/components/ca-provider-common/')}>
+        <div><strong>ca-provider-common</strong><span>Subject Identity · Provider API + Trusted Control API</span></div>
         <span aria-hidden="true">→</span>
       </a>
       <div class="component-row muted-row">

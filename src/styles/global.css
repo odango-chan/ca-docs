@@ -660,3 +660,35 @@ html[lang="zh-CN"] body{letter-spacing:.005em}
     align-items: flex-start;
   }
 }
+
+.prose {
+  max-width: 860px;
+}
+
+.prose h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.prose h2 {
+  margin-top: 2rem;
+  font-size: 1.25rem;
+}
+
+.prose p,
+.prose li {
+  color: var(--ink);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.4rem;
+}
+
+.prose table {
+  margin-top: 1rem;
+}
+
+.prose pre {
+  margin: 1rem 0;
+}

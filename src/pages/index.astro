@@ -14,10 +14,10 @@ const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\
   <section class="home-section">
     <h2>常用入口</h2>
     <div class="doc-index">
-      <a class="doc-row primary" href={href('/components/ca-5gc-sim/api/')}>
+      <a class="doc-row primary" href={href('/api/')}>
         <div>
-          <strong>HTTP API</strong>
-          <span>接口、请求字段、响应、Schema 和示例</span>
+          <strong>API</strong>
+          <span>查看所有已接入组件的接口</span>
         </div>
         <span aria-hidden="true">→</span>
       </a>
@@ -55,11 +55,15 @@ const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\
         </div>
         <span aria-hidden="true">→</span>
       </a>
-      <div class="component-row muted-row">
+      <a class="component-row" href={href('/components/ca-provider-common/')}>
         <div>
-          <strong>其他 ca-* 组件</strong>
-          <span>后续按组件逐步接入。</span>
+          <strong>ca-provider-common</strong>
+          <span>Subject Identity · Provider API + Trusted Control API</span>
         </div>
+        <span aria-hidden="true">→</span>
+      </a>
+      <div class="component-row muted-row">
+        <div><strong>其他 ca-* 组件</strong><span>后续按组件逐步接入。</span></div>
       </div>
     </div>
   </section>

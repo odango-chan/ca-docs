@@ -33,8 +33,9 @@ const labels = lang === 'zh'
       <div class="shell nav-row">
         <a class="brand" href={lang === 'zh' ? href('/') : href('/en/')}><span class="brand-mark">CA</span><span>Docs</span></a>
         <nav aria-label={labels.nav}>
-          <a class="nav-api" href={lang === 'zh' ? href('/components/ca-5gc-sim/api/') : href('/en/components/ca-5gc-sim/api/')}>API</a>
+          <a class="nav-api" href={lang === 'zh' ? href('/api/') : href('/en/api/')}>API</a>
           <a href={lang === 'zh' ? href('/components/ca-5gc-sim/') : href('/en/components/ca-5gc-sim/')}>ca-5gc-sim</a>
+          <a href={lang === 'zh' ? href('/components/ca-provider-common/') : href('/en/components/ca-provider-common/')}>provider-common</a>
           <a href={lang === 'zh' ? href('/architecture/') : href('/en/architecture/')}>{labels.architecture}</a>
           <span class="language-switch" aria-label={labels.language}>
             <a class:list={[{ active: lang === 'zh' }]} href={href(zhPath)}>中文</a><span>/</span><a class:list={[{ active: lang === 'en' }]} href={href(enPath)}>English</a>
