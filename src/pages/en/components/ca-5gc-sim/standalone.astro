@@ -1,0 +1,81 @@
+---
+import SiteLayout from '../../../../layouts/SiteLayout.astro';
+
+const base = import.meta.env.BASE_URL;
+const href = (value: string) => `${base}${value.replace(/^\//, '')}`;
+const sample = '{\n' +
+  '  "apiVersion": "connectionagent.io/v1alpha1",\n' +
+  '  "kind": "FiveGCSimStandaloneConfig",\n' +
+  '  "contractVersion": "v1",\n' +
+  '  "spec": {\n' +
+  '    "process": {"listen": "127.0.0.1:8787"},\n' +
+  '    "world": {\n' +
+  '      "worldRef": "world-standalone",\n' +
+  '      "worldGeneration": "g1",\n' +
+  '      "seedProfile": "registered-active-pdu-sessions-v1",\n' +
+  '      "seedParameters": {\n' +
+  '        "supis": ["001010000000001", "001010000000002"],\n' +
+  '        "networkPolicy": {\n' +
+  '          "dnn": "internet",\n' +
+  '          "sst": 1,\n' +
+  '          "sd": "000000",\n' +
+  '          "pduSessionId": 10,\n' +
+  '          "fiveQi": 9\n' +
+  '        }\n' +
+  '      }\n' +
+  '    }\n' +
+  '  }\n' +
+  '}';
+const startCommand = 'go run ./cmd/ca-5gc-sim serve-standalone --config ./standalone.json --log-level info';
+const inspectCommands =
+  'curl http://127.0.0.1:8787/identity\n' +
+  'curl http://127.0.0.1:8787/healthz\n' +
+  'curl http://127.0.0.1:8787/v1/world';
+---
+<SiteLayout title="ca-5gc-sim standalone" lang="en">
+  <section class="hero">
+    <span class="eyebrow">ca-5gc-sim / Standalone</span>
+    <h1>Run the simulator by itself</h1>
+    <p class="lede">
+      <code>serve-standalone</code> uses the same WorldStore, FactReader, OperationService
+      and owner HTTP API without Sandbox, Service Fabric, Lab or Runtime dependencies.
+    </p>
+    <div class="page-tabs">
+      <a href={href('/en/components/ca-5gc-sim/')}>Overview</a>
+      <a href={href('/en/components/ca-5gc-sim/api/')}>HTTP API</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div><span class="eyebrow">1 / Configuration</span><h2>Minimal standalone world</h2></div>
+    </div>
+    <pre><code>{sample}</code></pre>
+    <p class="source-note">
+      Shape follows the upstream <code>FiveGCSimStandaloneConfig.v1</code> fixture and schema.
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div><span class="eyebrow">2 / Start</span><h2>Serve the local deterministic profile</h2></div>
+    </div>
+    <pre><code>{startCommand}</code></pre>
+    <p>
+      A successful start reaches <code>READY</code> and logs the listen address, world and
+      generation. The configured listen address must be loopback.
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div><span class="eyebrow">3 / Inspect</span><h2>Use the same owner API</h2></div>
+    </div>
+    <pre><code>{inspectCommands}</code></pre>
+    <div class="notice">
+      Standalone is deterministic local execution. It does not qualify Service Fabric delivery,
+      Network Observation, drop/delay/reorder faults, response-loss behavior or integrated
+      reliability paths.
+    </div>
+  </section>
+</SiteLayout>

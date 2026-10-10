@@ -383,3 +383,8 @@ td { font-size: 0.9rem; }
   .nav-row { flex-direction: column; }
   nav { justify-content: flex-start; }
 }
+
+.language-switch{display:inline-flex;align-items:center;gap:.35rem;padding:.18rem .5rem;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--muted);font-size:.82rem}
+.language-switch a{color:var(--muted)}
+.language-switch a.active{color:var(--ink);font-weight:800}
+html[lang="zh-CN"] body{letter-spacing:.005em}

@@ -1,0 +1,64 @@
+---
+import SiteLayout from '../../../layouts/SiteLayout.astro';
+
+const base = import.meta.env.BASE_URL;
+const href = (value: string) => `${base}${value.replace(/^\//, '')}`;
+const flow = 'owner repository\n' +
+  '  ├─ OpenAPI\n' +
+  '  ├─ JSON Schema\n' +
+  '  └─ implementation\n' +
+  '         │\n' +
+  '         ▼\n' +
+  'ca-docs sync / validation\n' +
+  '         │\n' +
+  '         ├─ semantic inventory\n' +
+  '         ├─ route inventory\n' +
+  '         └─ drift detection\n' +
+  '         │\n' +
+  '         ▼\n' +
+  'human-readable GitHub Pages portal';
+---
+<SiteLayout title="Documentation architecture" lang="en">
+  <section class="hero">
+    <span class="eyebrow">CA Docs / Architecture</span>
+    <h1>A portal, not a second source of truth</h1>
+    <p class="lede">
+      CA Docs provides a cross-repository view while preserving ownership of machine
+      contracts in each <code>ca-*</code> repository.
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="grid">
+      <div class="card wide">
+        <h3>Build flow</h3>
+        <pre><code>{flow}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="grid">
+      <div class="card">
+        <h3>Machine truth</h3>
+        <p>Owned and versioned by the component repository. CA Docs consumes it.</p>
+      </div>
+      <div class="card">
+        <h3>Human explanation</h3>
+        <p>Owned here: navigation, summaries, ownership notes, examples and cross-repo views.</p>
+      </div>
+      <div class="card">
+        <h3>Drift is a signal</h3>
+        <p>When implementation and published contract differ, the portal shows the difference rather than hiding it.</p>
+      </div>
+      <div class="card">
+        <h3>Incremental adoption</h3>
+        <p>Each component can join independently once its stable machine sources are identified.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <a href={href('/en/components/ca-5gc-sim/')}>View the first integrated component →</a>
+  </section>
+</SiteLayout>

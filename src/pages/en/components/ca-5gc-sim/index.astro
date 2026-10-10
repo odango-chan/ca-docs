@@ -1,0 +1,112 @@
+---
+import SiteLayout from '../../../../layouts/SiteLayout.astro';
+import data from '../../../../../data/generated/ca-5gc-sim.json';
+
+const base = import.meta.env.BASE_URL;
+const href = (value: string) => `${base}${value.replace(/^\//, '')}`;
+const driftCount =
+  data.drift.implementationOnlyRoutes.length + data.drift.documentedOnlyRoutes.length;
+const sourceVersion = data.source.commit ? data.source.commit.slice(0, 8) : data.source.ref;
+
+const matrix = [
+  ['Registration', 'UE_REGISTRATION · UE_REGISTRATION_CONTEXT', 'UE_REGISTRATION_ENSURE'],
+  ['PDU session', 'PDU_SESSION', 'CREATE · MODIFY_QOS · RELEASE'],
+  ['User plane', 'USER_PLANE_CONNECTIVITY', '—'],
+  ['PFCP', 'PFCP_RESOURCE', 'PFCP_RESOURCE_CLEANUP'],
+  ['Transfer participants', 'TRANSFER_PARTICIPANTS', '—'],
+  ['Edge cache', '—', 'ENSURE · RECONCILE'],
+  ['Virtual group', 'VIRTUAL_GROUP', 'CREATE · ASSIGN · RELEASE · RECONCILE'],
+  ['Transfer QoS', 'TRANSFER_QOS', 'BOOST · RECONCILE'],
+];
+---
+<SiteLayout title="ca-5gc-sim" lang="en">
+  <section class="hero">
+    <span class="eyebrow">Component / ca-5gc-sim</span>
+    <h1>Deterministic 5GC simulator</h1>
+    <p class="lede">
+      Simulated 5GC domain state and deterministic NF behavior. The site inventory below
+      is built from the current upstream schemas and HTTP route registration.
+    </p>
+    <div class="page-tabs">
+      <a href={href('/en/components/ca-5gc-sim/')}>Overview</a>
+      <a href={href('/en/components/ca-5gc-sim/facts/')}>Facts</a>
+      <a href={href('/en/components/ca-5gc-sim/operations/')}>Operations</a>
+      <a href={href('/en/components/ca-5gc-sim/api/')}>HTTP API</a>
+      <a href={href('/en/components/ca-5gc-sim/standalone/')}>Standalone</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="stats">
+      <div class="stat"><strong>{data.counts.facts}</strong><span>Fact semantics</span></div>
+      <div class="stat"><strong>{data.counts.operations}</strong><span>Operation semantics</span></div>
+      <div class="stat"><strong>{data.counts.implementationRoutes}</strong><span>Server routes</span></div>
+      <div class="stat"><strong>2</strong><span>Process profiles</span></div>
+    </div>
+    <p class="source-note">
+      Source: <code>{data.source.repository}@{sourceVersion}</code>
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Capability matrix</span>
+        <h2>What the simulator owns today</h2>
+      </div>
+      <p>
+        Fact reads and mutations share generic HTTP entry points, but the semantic
+        inventory is the useful capability surface.
+      </p>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr><th>Area</th><th>Readable fact</th><th>Mutation / reconcile</th></tr>
+        </thead>
+        <tbody>
+          {matrix.map(([area, read, mutate]) => (
+            <tr>
+              <td><strong>{area}</strong></td>
+              <td><code>{read}</code></td>
+              <td><code>{mutate}</code></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Ownership boundary</span>
+        <h2>What it deliberately does not own</h2>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="card"><h3>Network faults</h3><p>Drop, delay, reorder and Network Observation belong to <code>ca-service-fabric</code>.</p></div>
+      <div class="card"><h3>Alias → execution identity</h3><p>User-visible identity resolution belongs to <code>ca-provider-common</code>.</p></div>
+      <div class="card"><h3>Runtime Outcome</h3><p>SUCCEEDED / FAILED / OUTCOME_UNKNOWN and reconcile policy belong to <code>ca-runtime</code>.</p></div>
+      <div class="card"><h3>Agent-facing tools</h3><p>The simulator is not an MCP surface; Agent exposure is admitted through Runtime and <code>ca-mcp</code>.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Contract health</span>
+        <h2>OpenAPI vs implementation</h2>
+      </div>
+    </div>
+    {driftCount === 0 ? (
+      <div class="notice good">The current OpenAPI route inventory matches the HTTP server implementation.</div>
+    ) : (
+      <div class="notice">
+        Detected {driftCount} route difference{driftCount === 1 ? '' : 's'} between
+        OpenAPI and <code>internal/httpapi/server.go</code>.
+        <a href={href('/en/components/ca-5gc-sim/api/')}> Inspect the route table →</a>
+      </div>
+    )}
+  </section>
+</SiteLayout>
