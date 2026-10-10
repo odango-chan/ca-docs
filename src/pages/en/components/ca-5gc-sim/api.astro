@@ -4,19 +4,26 @@ import data from '../../../../../data/generated/ca-5gc-sim.json';
 
 const base = import.meta.env.BASE_URL;
 const href = (value: string) => `${base}${value.replace(/^\//, '')}`;
-const driftCount =
-  data.drift.implementationOnlyRoutes.length + data.drift.documentedOnlyRoutes.length;
-const sourceRef = data.source.commit || data.source.ref;
-const sourceBase = `https://github.com/${data.source.repository}/blob/${sourceRef}`;
-const openApiUrl = `${sourceBase}/${data.source.openApi}`;
-const serverUrl = `${sourceBase}/${data.source.httpServer}`;
+
+const copy: Record<string, { title: string; description: string }> = {
+  'GET /identity': { title: 'Process identity', description: 'Shows the current ca-5gc-sim process, profile, and world.' },
+  'GET /healthz': { title: 'Health check', description: 'Shows whether the process is READY.' },
+  'GET /v1/world': { title: 'Current world', description: 'Shows the current simulated world.' },
+  'POST /v1/facts/read': { title: 'Read state', description: 'Reads registration, PDU session, user-plane, PFCP, and transfer-resource state.' },
+  'POST /v1/operations': { title: 'Execute operation', description: 'Runs registration, PDU session, PFCP, virtual-group, and QoS operations.' },
+  'POST /internal/v1/world/reset': { title: 'Reset world', description: 'Host-only reset endpoint. It is not a Runtime business capability or Agent tool.' },
+  'POST /internal/fabric/delivery': { title: 'Fabric delivery callback', description: 'Internal callback used by Service Fabric. It is registered in code but is not in OpenAPI yet.' },
+};
+
+const documented = data.routes.filter((route) => route.documented);
+const implementationOnly = data.routes.filter((route) => route.implemented && !route.documented);
 ---
 <SiteLayout title="ca-5gc-sim HTTP API" lang="en">
   <section class="hero">
     <span class="eyebrow">ca-5gc-sim / HTTP API</span>
-    <h1>HTTP routes</h1>
+    <h1>HTTP API</h1>
     <p class="lede">
-      This page compares OpenAPI with the routes registered in the Go server. Routes that exist only in code are listed too.
+      Endpoints are documented here directly. Source access is not required to browse the public API surface.
     </p>
     <div class="page-tabs">
       <a href={href('/en/components/ca-5gc-sim/')}>Overview</a>
@@ -27,56 +34,64 @@ const serverUrl = `${sourceBase}/${data.source.httpServer}`;
   </section>
 
   <section class="section">
-    <div class="stats">
-      <div class="stat"><strong>{data.counts.documentedRoutes}</strong><span>OpenAPI routes</span></div>
-      <div class="stat"><strong>{data.counts.implementationRoutes}</strong><span>Implementation routes</span></div>
-      <div class="stat"><strong>{data.counts.facts}</strong><span>Facts behind /v1/facts/read</span></div>
-      <div class="stat"><strong>{data.counts.operations}</strong><span>Operations behind /v1/operations</span></div>
+    <div class="api-list">
+      {documented.map((route) => {
+        const key = `${route.method} ${route.path}`;
+        const item = copy[key] ?? { title: route.operationId ?? route.path, description: '' };
+        return (
+          <article class="api-card">
+            <div class="api-heading">
+              <span class:list={['method-badge', route.method.toLowerCase()]}>{route.method}</span>
+              <code class="api-path">{route.path}</code>
+              <span class="pill">{route.surface}</span>
+            </div>
+            <h3>{item.title}</h3>
+            <p>{item.description}</p>
+            <div class="api-meta"><span>operationId</span><code>{route.operationId}</code></div>
+
+            {route.path === '/v1/facts/read' && (
+              <div class="api-block">
+                <strong>Request</strong>
+                <p><code>worldRef</code>, <code>worldGeneration</code>, <code>factSemantic</code>, <code>subjectRef</code>, and <code>readMode</code> are required.</p>
+                <a href={href('/en/components/ca-5gc-sim/facts/')}>Supported factSemantic values →</a>
+              </div>
+            )}
+
+            {route.path === '/v1/operations' && (
+              <div class="api-block">
+                <strong>Request</strong>
+                <p><code>worldRef</code>, <code>worldGeneration</code>, <code>operationSemantic</code>, <code>subjectRef</code>, and <code>responseWaitBudget</code> are required. <code>params</code> depends on the operation.</p>
+                <a href={href('/en/components/ca-5gc-sim/operations/')}>Supported operationSemantic values →</a>
+              </div>
+            )}
+
+            {route.path === '/internal/v1/world/reset' && (
+              <div class="api-block">
+                <strong>Request</strong>
+                <p>Includes the current world/generation, the new generation, scheduler binding, and seed profile.</p>
+              </div>
+            )}
+          </article>
+        );
+      })}
     </div>
   </section>
 
-  <section class="section">
-    {driftCount > 0 ? (
-      <div class="notice">
-        There {driftCount === 1 ? 'is' : 'are'} {driftCount} route difference{driftCount === 1 ? '' : 's'} between OpenAPI and the server.
+  {implementationOnly.length > 0 && (
+    <section class="section">
+      <div class="section-head">
+        <div><span class="eyebrow">Implementation gap</span><h2>Routes in code but not OpenAPI</h2></div>
       </div>
-    ) : (
-      <div class="notice good">OpenAPI and the server routes match.</div>
-    )}
-    <div style="overflow-x:auto; margin-top:1rem">
-      <table>
-        <thead><tr><th>Method</th><th>Path</th><th>Surface</th><th>OpenAPI</th><th>Server</th></tr></thead>
-        <tbody>
-          {data.routes.map((route) => (
-            <tr>
-              <td><code>{route.method}</code></td>
-              <td><code>{route.path}</code></td>
-              <td>{route.surface}</td>
-              <td>{route.documented ? '✓' : '—'}</td>
-              <td>{route.implemented ? '✓' : '—'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="notice private-source">
-      <strong>The source repository is private.</strong>
-      The route information needed here is already shown above. The two source links below require access to <code>{data.source.repository}</code> and point to commit <code>{sourceRef.slice(0, 8)}</code>.
-    </div>
-    <div class="grid" style="margin-top:1rem">
-      <div class="card">
-        <h3>OpenAPI</h3>
-        <p><code>{data.source.openApi}</code></p>
-        <div class="pills"><a class="pill" href={openApiUrl}>Open OpenAPI ↗</a></div>
-      </div>
-      <div class="card">
-        <h3>HTTP registration code</h3>
-        <p><code>{data.source.httpServer}</code></p>
-        <div class="pills"><a class="pill" href={serverUrl}>Open server.go ↗</a></div>
-      </div>
-    </div>
-  </section>
+      {implementationOnly.map((route) => {
+        const key = `${route.method} ${route.path}`;
+        const item = copy[key] ?? { title: route.path, description: '' };
+        return (
+          <div class="notice">
+            <strong><code>{route.method} {route.path}</code> · {item.title}</strong>
+            <div>{item.description}</div>
+          </div>
+        );
+      })}
+    </section>
+  )}
 </SiteLayout>
