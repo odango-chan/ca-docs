@@ -6,6 +6,7 @@ const owner = 'odango-chan';
 const repo = 'ca-5gc-sim';
 const ref = process.env.CA_5GC_SIM_REF || 'main';
 const token = process.env.CA_DOCS_SOURCE_TOKEN || '';
+const strict = process.env.CA_DOCS_SYNC_STRICT === '1';
 const snapshotPath = path.resolve('data/generated/ca-5gc-sim.json');
 
 async function snapshotExists() {
@@ -41,7 +42,7 @@ async function fetchRepoText(relativePath) {
   return Buffer.from(payload.content.replace(/\n/g, ''), 'base64').toString('utf8');
 }
 
-async function sourceCommit() {
+async function sourceRevision() {
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/branches/${encodeURIComponent(ref)}`,
     { headers: githubHeaders() },
@@ -50,7 +51,13 @@ async function sourceCommit() {
     throw new Error(`failed to resolve source ref: HTTP ${response.status}`);
   }
   const payload = await response.json();
-  return payload?.commit?.sha || null;
+  return {
+    commit: payload?.commit?.sha || null,
+    commitDate:
+      payload?.commit?.commit?.committer?.date ||
+      payload?.commit?.commit?.author?.date ||
+      null,
+  };
 }
 
 function classifyRoute(routePath) {
@@ -85,54 +92,39 @@ function implementationRoutes(serverSource) {
   return routes;
 }
 
-async function writeSyncState(snapshot, mode, detail = null) {
-  const output = {
-    ...snapshot,
-    source: {
-      ...snapshot.source,
-      private: true,
-    },
-    sync: {
-      mode,
-      checkedAt: new Date().toISOString(),
-      detail,
-    },
-  };
-  await fs.writeFile(snapshotPath, JSON.stringify(output, null, 2) + '\n');
-  return output;
-}
-
 if (!token) {
+  if (strict) {
+    throw new Error('CA_DOCS_SOURCE_TOKEN is required in strict sync mode');
+  }
   if (!(await snapshotExists())) {
     throw new Error(
       'CA_DOCS_SOURCE_TOKEN is not configured and no checked-in ca-5gc-sim snapshot exists',
     );
   }
   const snapshot = JSON.parse(await fs.readFile(snapshotPath, 'utf8'));
-  await writeSyncState(snapshot, 'snapshot', 'CA_DOCS_SOURCE_TOKEN is not configured');
   console.log(
-    `ca-5gc-sim: using checked-in snapshot ${snapshot.source?.commit || snapshot.source?.ref || 'unknown'}`,
+    `ca-5gc-sim: using published snapshot ${snapshot.source?.commit || snapshot.source?.ref || 'unknown'}`,
   );
   process.exit(0);
 }
 
 async function useSnapshot(reason) {
+  if (strict) throw reason;
   if (!(await snapshotExists())) throw reason;
   const snapshot = JSON.parse(await fs.readFile(snapshotPath, 'utf8'));
-  await writeSyncState(snapshot, 'snapshot', reason.message);
   console.warn(
-    `ca-5gc-sim: upstream refresh unavailable (${reason.message}); using checked-in snapshot ${snapshot.source?.commit || snapshot.source?.ref || 'unknown'}`,
+    `ca-5gc-sim: upstream refresh unavailable (${reason.message}); using published snapshot ${snapshot.source?.commit || snapshot.source?.ref || 'unknown'}`,
   );
 }
 
 async function refreshFromUpstream() {
-  const [openApiText, factSchemaText, operationSchemaText, serverSource, commit] =
+  const [openApiText, factSchemaText, operationSchemaText, serverSource, revision] =
     await Promise.all([
       fetchRepoText('schemas/v1alpha1/fivegc-sim.openapi.yaml'),
       fetchRepoText('schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml'),
       fetchRepoText('schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml'),
       fetchRepoText('internal/httpapi/server.go'),
-      sourceCommit(),
+      sourceRevision(),
     ]);
 
   const openApi = yaml.load(openApiText);
@@ -176,7 +168,8 @@ async function refreshFromUpstream() {
     source: {
       repository: `${owner}/${repo}`,
       ref,
-      commit,
+      commit: revision.commit,
+      commitDate: revision.commitDate,
       private: true,
       openApi: 'schemas/v1alpha1/fivegc-sim.openapi.yaml',
       factSchema: 'schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml',
@@ -201,9 +194,7 @@ async function refreshFromUpstream() {
       ),
     },
     sync: {
-      mode: 'live',
-      checkedAt: new Date().toISOString(),
-      detail: null,
+      mode: 'published',
     },
   };
 
@@ -211,7 +202,7 @@ async function refreshFromUpstream() {
   await fs.writeFile(snapshotPath, JSON.stringify(output, null, 2) + '\n');
 
   console.log(
-    `ca-5gc-sim: refreshed ${facts.length} facts, ${operations.length} operations, ${implemented.length} implementation routes from ${commit}`,
+    `ca-5gc-sim: refreshed ${facts.length} facts, ${operations.length} operations, ${implemented.length} implementation routes from ${revision.commit}`,
   );
 }
 
