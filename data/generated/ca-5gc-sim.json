@@ -6,10 +6,2101 @@
     "commit": "46cfdc495373a34043c8ad4fbee0dc8420d8b0db",
     "commitDate": "2026-10-10T07:49:47Z",
     "private": true,
+    "publicDocsManifest": "docs/public-docs.yaml",
     "openApi": "schemas/v1alpha1/fivegc-sim.openapi.yaml",
     "factSchema": "schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml",
     "operationSchema": "schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml",
     "httpServer": "internal/httpapi/server.go"
+  },
+  "publicDocs": {
+    "apiVersion": "connectionagent.io/v1alpha1",
+    "kind": "PublicDocsManifest",
+    "manifest": "docs/public-docs.yaml",
+    "contracts": [
+      {
+        "kind": "json-schema",
+        "path": "schemas/v1alpha1/fivegc-sim-process-identity.schema.yaml",
+        "role": "api-response-process-identity",
+        "publish": [
+          "metadata",
+          "fields",
+          "enums"
+        ],
+        "title": "FiveGCSimProcessIdentity.v1",
+        "description": "Safe process identity and exact supported-contract advertisement.",
+        "fields": [
+          {
+            "path": "apiVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "connectionagent.io/v1alpha1"
+          },
+          {
+            "path": "kind",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "FiveGCSimProcessIdentity"
+          },
+          {
+            "path": "contractVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "v1"
+          },
+          {
+            "path": "spec",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.service",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "ca-5gc-sim"
+          },
+          {
+            "path": "spec.processInstanceRef",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.pid",
+            "required": false,
+            "type": "integer",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.processStartedAt",
+            "required": false,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.processProfile",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "integrated-reference-simulation",
+              "standalone-deterministic-simulator"
+            ]
+          },
+          {
+            "path": "spec.configDigest",
+            "required": true,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldRef",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldGeneration",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.supportedContracts",
+            "required": true,
+            "type": "array",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          }
+        ],
+        "enums": {
+          "spec.processProfile": [
+            "integrated-reference-simulation",
+            "standalone-deterministic-simulator"
+          ]
+        },
+        "examplesAllowed": false
+      },
+      {
+        "kind": "json-schema",
+        "path": "schemas/v1alpha1/fivegc-sim-process-health.schema.yaml",
+        "role": "api-response-process-health",
+        "publish": [
+          "metadata",
+          "fields",
+          "enums"
+        ],
+        "title": "FiveGCSimProcessHealth.v1",
+        "description": "Process readiness projection. It is not a 5GC domain fact.",
+        "fields": [
+          {
+            "path": "apiVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "connectionagent.io/v1alpha1"
+          },
+          {
+            "path": "kind",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "FiveGCSimProcessHealth"
+          },
+          {
+            "path": "contractVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "v1"
+          },
+          {
+            "path": "spec",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.service",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "ca-5gc-sim"
+          },
+          {
+            "path": "spec.processInstanceRef",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.phase",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "BOOTING",
+              "BINDING",
+              "READY",
+              "DRAINING",
+              "STOPPED",
+              "FAILED"
+            ]
+          },
+          {
+            "path": "spec.ready",
+            "required": true,
+            "type": "boolean",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.reasonCode",
+            "required": false,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.configDigest",
+            "required": true,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldRef",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldGeneration",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.bindings",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.bindings.scheduler",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "#/$defs/bindingStatus",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.bindings.fabric",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "#/$defs/bindingStatus",
+            "oneOfRefs": []
+          }
+        ],
+        "enums": {
+          "spec.phase": [
+            "BOOTING",
+            "BINDING",
+            "READY",
+            "DRAINING",
+            "STOPPED",
+            "FAILED"
+          ]
+        },
+        "examplesAllowed": false
+      },
+      {
+        "kind": "json-schema",
+        "path": "schemas/v1alpha1/fivegc-sim-process-error.schema.yaml",
+        "role": "api-response-process-error",
+        "publish": [
+          "metadata",
+          "fields",
+          "enums"
+        ],
+        "title": "FiveGCSimProcessError.v1",
+        "description": "Process/control error distinct from C2/C6 accepted semantic results.",
+        "fields": [
+          {
+            "path": "apiVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "connectionagent.io/v1alpha1"
+          },
+          {
+            "path": "kind",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "FiveGCSimProcessError"
+          },
+          {
+            "path": "contractVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "v1"
+          },
+          {
+            "path": "spec",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.code",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "MALFORMED_REQUEST",
+              "CONFIGURATION_INVALID",
+              "LISTEN_IN_USE",
+              "SERVICE_NOT_READY",
+              "SERVICE_DRAINING",
+              "BINDING_UNAVAILABLE",
+              "RESET_BUSY",
+              "WORLD_REF_MISMATCH",
+              "WORLD_GENERATION_MISMATCH",
+              "INTERNAL_ERROR"
+            ]
+          },
+          {
+            "path": "spec.summary",
+            "required": false,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.processInstanceRef",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldRef",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldGeneration",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.phase",
+            "required": false,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "BOOTING",
+              "BINDING",
+              "READY",
+              "DRAINING",
+              "STOPPED",
+              "FAILED"
+            ]
+          }
+        ],
+        "enums": {
+          "spec.code": [
+            "MALFORMED_REQUEST",
+            "CONFIGURATION_INVALID",
+            "LISTEN_IN_USE",
+            "SERVICE_NOT_READY",
+            "SERVICE_DRAINING",
+            "BINDING_UNAVAILABLE",
+            "RESET_BUSY",
+            "WORLD_REF_MISMATCH",
+            "WORLD_GENERATION_MISMATCH",
+            "INTERNAL_ERROR"
+          ],
+          "spec.phase": [
+            "BOOTING",
+            "BINDING",
+            "READY",
+            "DRAINING",
+            "STOPPED",
+            "FAILED"
+          ]
+        },
+        "examplesAllowed": false
+      },
+      {
+        "kind": "json-schema",
+        "path": "schemas/v1alpha1/fivegc-sim-world.schema.yaml",
+        "role": "api-response-world",
+        "publish": [
+          "metadata",
+          "fields",
+          "enums"
+        ],
+        "title": "FiveGCSimWorld.v1",
+        "description": null,
+        "fields": [
+          {
+            "path": "apiVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "connectionagent.io/v1alpha1"
+          },
+          {
+            "path": "kind",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "FiveGCSimWorld"
+          },
+          {
+            "path": "contractVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "v1"
+          },
+          {
+            "path": "spec",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.sourceAuthority",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "ca-5gc-sim"
+          },
+          {
+            "path": "spec.worldRef",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldGeneration",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldRevision",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/worldRevision",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.schedulerBindingRef",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          }
+        ],
+        "enums": {},
+        "examplesAllowed": false
+      },
+      {
+        "kind": "json-schema",
+        "path": "schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml",
+        "role": "fact-inventory",
+        "publish": [
+          "metadata",
+          "fields",
+          "enums",
+          "examples"
+        ],
+        "title": "FiveGCSimFactReadRequest.v1",
+        "description": null,
+        "fields": [
+          {
+            "path": "apiVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "connectionagent.io/v1alpha1"
+          },
+          {
+            "path": "kind",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "FiveGCSimFactReadRequest"
+          },
+          {
+            "path": "contractVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "v1"
+          },
+          {
+            "path": "spec",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldRef",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldGeneration",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.factSemantic",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "UE_REGISTRATION",
+              "UE_REGISTRATION_CONTEXT",
+              "PDU_SESSION",
+              "USER_PLANE_CONNECTIVITY",
+              "PFCP_RESOURCE",
+              "TRANSFER_PARTICIPANTS",
+              "VIRTUAL_GROUP",
+              "TRANSFER_QOS"
+            ]
+          },
+          {
+            "path": "spec.subjectRef",
+            "required": true,
+            "type": "oneOf",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [
+              "fivegc-sim-common.schema.yaml#/$defs/ueSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/pduSessionSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/transferParticipantsSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/transferSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/virtualGroupSubjectRef"
+            ]
+          },
+          {
+            "path": "spec.readMode",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.readMode.mode",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "CURRENT",
+              "AT_REVISION"
+            ]
+          },
+          {
+            "path": "spec.readMode.revision",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/worldRevision",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.correlationRefs",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/explicitRefs",
+            "oneOfRefs": []
+          }
+        ],
+        "enums": {
+          "spec.factSemantic": [
+            "UE_REGISTRATION",
+            "UE_REGISTRATION_CONTEXT",
+            "PDU_SESSION",
+            "USER_PLANE_CONNECTIVITY",
+            "PFCP_RESOURCE",
+            "TRANSFER_PARTICIPANTS",
+            "VIRTUAL_GROUP",
+            "TRANSFER_QOS"
+          ],
+          "spec.readMode.mode": [
+            "CURRENT",
+            "AT_REVISION"
+          ]
+        },
+        "examplesAllowed": true
+      },
+      {
+        "kind": "json-schema",
+        "path": "schemas/v1alpha1/fivegc-sim-fact-read-result.schema.yaml",
+        "role": "api-response-fact-read",
+        "publish": [
+          "metadata",
+          "fields",
+          "enums"
+        ],
+        "title": "FiveGCSimFactReadResult.v1",
+        "description": null,
+        "fields": [
+          {
+            "path": "apiVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "connectionagent.io/v1alpha1"
+          },
+          {
+            "path": "kind",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "FiveGCSimFactReadResult"
+          },
+          {
+            "path": "contractVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "v1"
+          },
+          {
+            "path": "spec",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldRef",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldGeneration",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.factSemantic",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "UE_REGISTRATION",
+              "UE_REGISTRATION_CONTEXT",
+              "PDU_SESSION",
+              "USER_PLANE_CONNECTIVITY",
+              "PFCP_RESOURCE",
+              "TRANSFER_PARTICIPANTS",
+              "VIRTUAL_GROUP",
+              "TRANSFER_QOS"
+            ]
+          },
+          {
+            "path": "spec.subjectRef",
+            "required": true,
+            "type": "oneOf",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [
+              "fivegc-sim-common.schema.yaml#/$defs/ueSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/pduSessionSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/transferParticipantsSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/transferSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/virtualGroupSubjectRef"
+            ]
+          },
+          {
+            "path": "spec.resolution",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "FOUND",
+              "KNOWN_ABSENT",
+              "KNOWN_NEGATIVE",
+              "UNAVAILABLE",
+              "INVALID_QUERY",
+              "INDETERMINATE"
+            ]
+          },
+          {
+            "path": "spec.evaluatedWorldRevision",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/worldRevision",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.reasonCode",
+            "required": false,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.summary",
+            "required": false,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.sourceFact",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-source-fact.schema.yaml",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.correlationRefs",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/explicitRefs",
+            "oneOfRefs": []
+          }
+        ],
+        "enums": {
+          "spec.factSemantic": [
+            "UE_REGISTRATION",
+            "UE_REGISTRATION_CONTEXT",
+            "PDU_SESSION",
+            "USER_PLANE_CONNECTIVITY",
+            "PFCP_RESOURCE",
+            "TRANSFER_PARTICIPANTS",
+            "VIRTUAL_GROUP",
+            "TRANSFER_QOS"
+          ],
+          "spec.resolution": [
+            "FOUND",
+            "KNOWN_ABSENT",
+            "KNOWN_NEGATIVE",
+            "UNAVAILABLE",
+            "INVALID_QUERY",
+            "INDETERMINATE"
+          ]
+        },
+        "examplesAllowed": false
+      },
+      {
+        "kind": "json-schema",
+        "path": "schemas/v1alpha1/fivegc-sim-fact-read-error.schema.yaml",
+        "role": "api-response-fact-read-error",
+        "publish": [
+          "metadata",
+          "fields",
+          "enums"
+        ],
+        "title": "FiveGCSimFactReadAcceptanceError.v1",
+        "description": null,
+        "fields": [
+          {
+            "path": "apiVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "connectionagent.io/v1alpha1"
+          },
+          {
+            "path": "kind",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "FiveGCSimFactReadAcceptanceError"
+          },
+          {
+            "path": "contractVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "v1"
+          },
+          {
+            "path": "spec",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.code",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "WORLD_NOT_FOUND",
+              "WORLD_GENERATION_MISMATCH",
+              "MALFORMED_REQUEST",
+              "UNSUPPORTED_CONTRACT_VERSION",
+              "UNSUPPORTED_FACT_SEMANTIC"
+            ]
+          },
+          {
+            "path": "spec.worldRef",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldGeneration",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.factSemantic",
+            "required": false,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "UE_REGISTRATION",
+              "UE_REGISTRATION_CONTEXT",
+              "PDU_SESSION",
+              "USER_PLANE_CONNECTIVITY",
+              "PFCP_RESOURCE",
+              "TRANSFER_PARTICIPANTS",
+              "VIRTUAL_GROUP",
+              "TRANSFER_QOS"
+            ]
+          },
+          {
+            "path": "spec.summary",
+            "required": false,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.correlationRefs",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/explicitRefs",
+            "oneOfRefs": []
+          }
+        ],
+        "enums": {
+          "spec.code": [
+            "WORLD_NOT_FOUND",
+            "WORLD_GENERATION_MISMATCH",
+            "MALFORMED_REQUEST",
+            "UNSUPPORTED_CONTRACT_VERSION",
+            "UNSUPPORTED_FACT_SEMANTIC"
+          ],
+          "spec.factSemantic": [
+            "UE_REGISTRATION",
+            "UE_REGISTRATION_CONTEXT",
+            "PDU_SESSION",
+            "USER_PLANE_CONNECTIVITY",
+            "PFCP_RESOURCE",
+            "TRANSFER_PARTICIPANTS",
+            "VIRTUAL_GROUP",
+            "TRANSFER_QOS"
+          ]
+        },
+        "examplesAllowed": false
+      },
+      {
+        "kind": "json-schema",
+        "path": "schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml",
+        "role": "operation-inventory",
+        "publish": [
+          "metadata",
+          "fields",
+          "enums",
+          "examples"
+        ],
+        "title": "FiveGCSimOperationRequest.v1",
+        "description": null,
+        "fields": [
+          {
+            "path": "apiVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "connectionagent.io/v1alpha1"
+          },
+          {
+            "path": "kind",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "FiveGCSimOperationRequest"
+          },
+          {
+            "path": "contractVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "v1"
+          },
+          {
+            "path": "spec",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldRef",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldGeneration",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.expectedWorldRevision",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/worldRevision",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.operationSemantic",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "UE_REGISTRATION_ENSURE",
+              "PDU_SESSION_CREATE",
+              "PDU_SESSION_MODIFY_QOS",
+              "PDU_SESSION_RELEASE",
+              "PFCP_RESOURCE_CLEANUP",
+              "EDGE_CACHE_ENSURE",
+              "EDGE_CACHE_RECONCILE",
+              "VIRTUAL_GROUP_CREATE",
+              "VIRTUAL_GROUP_RECONCILE_CREATE",
+              "VIRTUAL_GROUP_ASSIGN_MEMBERS",
+              "VIRTUAL_GROUP_RECONCILE_MEMBERS",
+              "VIRTUAL_GROUP_RELEASE",
+              "VIRTUAL_GROUP_RECONCILE_RELEASE",
+              "TRANSFER_QOS_BOOST",
+              "TRANSFER_QOS_RECONCILE"
+            ]
+          },
+          {
+            "path": "spec.subjectRef",
+            "required": true,
+            "type": "oneOf",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [
+              "fivegc-sim-common.schema.yaml#/$defs/ueSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/pduSessionSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/pfcpResourceSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/transferSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/virtualGroupSubjectRef"
+            ]
+          },
+          {
+            "path": "spec.params",
+            "required": false,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.responseWaitBudget",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/schedulerWaitBudget",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.callerCorrelationRefs",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/explicitRefs",
+            "oneOfRefs": []
+          }
+        ],
+        "enums": {
+          "spec.operationSemantic": [
+            "UE_REGISTRATION_ENSURE",
+            "PDU_SESSION_CREATE",
+            "PDU_SESSION_MODIFY_QOS",
+            "PDU_SESSION_RELEASE",
+            "PFCP_RESOURCE_CLEANUP",
+            "EDGE_CACHE_ENSURE",
+            "EDGE_CACHE_RECONCILE",
+            "VIRTUAL_GROUP_CREATE",
+            "VIRTUAL_GROUP_RECONCILE_CREATE",
+            "VIRTUAL_GROUP_ASSIGN_MEMBERS",
+            "VIRTUAL_GROUP_RECONCILE_MEMBERS",
+            "VIRTUAL_GROUP_RELEASE",
+            "VIRTUAL_GROUP_RECONCILE_RELEASE",
+            "TRANSFER_QOS_BOOST",
+            "TRANSFER_QOS_RECONCILE"
+          ]
+        },
+        "examplesAllowed": true
+      },
+      {
+        "kind": "json-schema",
+        "path": "schemas/v1alpha1/fivegc-sim-operation-result.schema.yaml",
+        "role": "api-response-operation",
+        "publish": [
+          "metadata",
+          "fields",
+          "enums"
+        ],
+        "title": "FiveGCSimOperationResult.v1",
+        "description": null,
+        "fields": [
+          {
+            "path": "apiVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "connectionagent.io/v1alpha1"
+          },
+          {
+            "path": "kind",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "FiveGCSimOperationResult"
+          },
+          {
+            "path": "contractVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "v1"
+          },
+          {
+            "path": "spec",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.backendOperationRef",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.operationSemantic",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "UE_REGISTRATION_ENSURE",
+              "PDU_SESSION_CREATE",
+              "PDU_SESSION_MODIFY_QOS",
+              "PDU_SESSION_RELEASE",
+              "PFCP_RESOURCE_CLEANUP",
+              "EDGE_CACHE_ENSURE",
+              "EDGE_CACHE_RECONCILE",
+              "VIRTUAL_GROUP_CREATE",
+              "VIRTUAL_GROUP_RECONCILE_CREATE",
+              "VIRTUAL_GROUP_ASSIGN_MEMBERS",
+              "VIRTUAL_GROUP_RECONCILE_MEMBERS",
+              "VIRTUAL_GROUP_RELEASE",
+              "VIRTUAL_GROUP_RECONCILE_RELEASE",
+              "TRANSFER_QOS_BOOST",
+              "TRANSFER_QOS_RECONCILE"
+            ]
+          },
+          {
+            "path": "spec.subjectRef",
+            "required": true,
+            "type": "oneOf",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [
+              "fivegc-sim-common.schema.yaml#/$defs/ueSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/pduSessionSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/pfcpResourceSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/transferSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/virtualGroupSubjectRef"
+            ]
+          },
+          {
+            "path": "spec.worldRef",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldGeneration",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.startWorldRevision",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/worldRevision",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.endWorldRevision",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/worldRevision",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.resultCode",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "COMPLETED",
+              "REJECTED",
+              "WAIT_EXPIRED",
+              "INVALID_PRESTATE",
+              "NOT_COMMITTED"
+            ]
+          },
+          {
+            "path": "spec.backendEffectDispatch",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "NOT_DISPATCHED",
+              "DISPATCHED"
+            ]
+          },
+          {
+            "path": "spec.reasonCode",
+            "required": false,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.summary",
+            "required": false,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.callerCorrelationRefs",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/explicitRefs",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.protocolTransactionRefs",
+            "required": false,
+            "type": "array",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.sourceFactRefs",
+            "required": false,
+            "type": "array",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.output",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/operationOutput",
+            "oneOfRefs": []
+          }
+        ],
+        "enums": {
+          "spec.operationSemantic": [
+            "UE_REGISTRATION_ENSURE",
+            "PDU_SESSION_CREATE",
+            "PDU_SESSION_MODIFY_QOS",
+            "PDU_SESSION_RELEASE",
+            "PFCP_RESOURCE_CLEANUP",
+            "EDGE_CACHE_ENSURE",
+            "EDGE_CACHE_RECONCILE",
+            "VIRTUAL_GROUP_CREATE",
+            "VIRTUAL_GROUP_RECONCILE_CREATE",
+            "VIRTUAL_GROUP_ASSIGN_MEMBERS",
+            "VIRTUAL_GROUP_RECONCILE_MEMBERS",
+            "VIRTUAL_GROUP_RELEASE",
+            "VIRTUAL_GROUP_RECONCILE_RELEASE",
+            "TRANSFER_QOS_BOOST",
+            "TRANSFER_QOS_RECONCILE"
+          ],
+          "spec.resultCode": [
+            "COMPLETED",
+            "REJECTED",
+            "WAIT_EXPIRED",
+            "INVALID_PRESTATE",
+            "NOT_COMMITTED"
+          ],
+          "spec.backendEffectDispatch": [
+            "NOT_DISPATCHED",
+            "DISPATCHED"
+          ]
+        },
+        "examplesAllowed": false
+      },
+      {
+        "kind": "json-schema",
+        "path": "schemas/v1alpha1/fivegc-sim-operation-error.schema.yaml",
+        "role": "api-response-operation-error",
+        "publish": [
+          "metadata",
+          "fields",
+          "enums"
+        ],
+        "title": "FiveGCSimOperationAcceptanceError.v1",
+        "description": null,
+        "fields": [
+          {
+            "path": "apiVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "connectionagent.io/v1alpha1"
+          },
+          {
+            "path": "kind",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "FiveGCSimOperationAcceptanceError"
+          },
+          {
+            "path": "contractVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "v1"
+          },
+          {
+            "path": "spec",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.code",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "WORLD_NOT_FOUND",
+              "WORLD_GENERATION_MISMATCH",
+              "EXPECTED_REVISION_MISMATCH",
+              "MALFORMED_REQUEST",
+              "UNSUPPORTED_CONTRACT_VERSION",
+              "UNSUPPORTED_OPERATION",
+              "INVALID_PARAMETER"
+            ]
+          },
+          {
+            "path": "spec.worldRef",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldGeneration",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.operationSemantic",
+            "required": false,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "UE_REGISTRATION_ENSURE",
+              "PDU_SESSION_CREATE",
+              "PDU_SESSION_MODIFY_QOS",
+              "PDU_SESSION_RELEASE",
+              "PFCP_RESOURCE_CLEANUP",
+              "EDGE_CACHE_ENSURE",
+              "EDGE_CACHE_RECONCILE",
+              "VIRTUAL_GROUP_CREATE",
+              "VIRTUAL_GROUP_RECONCILE_CREATE",
+              "VIRTUAL_GROUP_ASSIGN_MEMBERS",
+              "VIRTUAL_GROUP_RECONCILE_MEMBERS",
+              "VIRTUAL_GROUP_RELEASE",
+              "VIRTUAL_GROUP_RECONCILE_RELEASE",
+              "TRANSFER_QOS_BOOST",
+              "TRANSFER_QOS_RECONCILE"
+            ]
+          },
+          {
+            "path": "spec.summary",
+            "required": false,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.callerCorrelationRefs",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/explicitRefs",
+            "oneOfRefs": []
+          }
+        ],
+        "enums": {
+          "spec.code": [
+            "WORLD_NOT_FOUND",
+            "WORLD_GENERATION_MISMATCH",
+            "EXPECTED_REVISION_MISMATCH",
+            "MALFORMED_REQUEST",
+            "UNSUPPORTED_CONTRACT_VERSION",
+            "UNSUPPORTED_OPERATION",
+            "INVALID_PARAMETER"
+          ],
+          "spec.operationSemantic": [
+            "UE_REGISTRATION_ENSURE",
+            "PDU_SESSION_CREATE",
+            "PDU_SESSION_MODIFY_QOS",
+            "PDU_SESSION_RELEASE",
+            "PFCP_RESOURCE_CLEANUP",
+            "EDGE_CACHE_ENSURE",
+            "EDGE_CACHE_RECONCILE",
+            "VIRTUAL_GROUP_CREATE",
+            "VIRTUAL_GROUP_RECONCILE_CREATE",
+            "VIRTUAL_GROUP_ASSIGN_MEMBERS",
+            "VIRTUAL_GROUP_RECONCILE_MEMBERS",
+            "VIRTUAL_GROUP_RELEASE",
+            "VIRTUAL_GROUP_RECONCILE_RELEASE",
+            "TRANSFER_QOS_BOOST",
+            "TRANSFER_QOS_RECONCILE"
+          ]
+        },
+        "examplesAllowed": false
+      },
+      {
+        "kind": "json-schema",
+        "path": "schemas/v1alpha1/fivegc-sim-world-reset-request.schema.yaml",
+        "role": "api-request-world-reset",
+        "publish": [
+          "metadata",
+          "fields",
+          "enums",
+          "examples"
+        ],
+        "title": "FiveGCSimWorldResetRequest.v1",
+        "description": "Host-only owner-local reset request. It is not a Runtime business capability.",
+        "fields": [
+          {
+            "path": "apiVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "connectionagent.io/v1alpha1"
+          },
+          {
+            "path": "kind",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "FiveGCSimWorldResetRequest"
+          },
+          {
+            "path": "contractVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "v1"
+          },
+          {
+            "path": "spec",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.expectedWorldRef",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.expectedWorldGeneration",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.newWorldGeneration",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.newSchedulerBindingRef",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.seedProfile",
+            "required": true,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.seedParameters",
+            "required": false,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          }
+        ],
+        "enums": {},
+        "examplesAllowed": true
+      },
+      {
+        "kind": "json-schema",
+        "path": "schemas/v1alpha1/fivegc-sim-world-reset-result.schema.yaml",
+        "role": "api-response-world-reset",
+        "publish": [
+          "metadata",
+          "fields",
+          "enums"
+        ],
+        "title": "FiveGCSimWorldResetResult.v1",
+        "description": "Successful host-only reset result after the new world generation and required bindings are ready.",
+        "fields": [
+          {
+            "path": "apiVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "connectionagent.io/v1alpha1"
+          },
+          {
+            "path": "kind",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "FiveGCSimWorldResetResult"
+          },
+          {
+            "path": "contractVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "v1"
+          },
+          {
+            "path": "spec",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.previousWorldGeneration",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.world",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-world.schema.yaml",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.health",
+            "required": true,
+            "type": "allOf",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          }
+        ],
+        "enums": {},
+        "examplesAllowed": false
+      },
+      {
+        "kind": "json-schema",
+        "path": "schemas/v1alpha1/fivegc-sim-standalone-config.schema.yaml",
+        "role": "standalone-config",
+        "publish": [
+          "metadata",
+          "fields",
+          "enums",
+          "examples"
+        ],
+        "title": "FiveGCSimStandaloneConfig.v1",
+        "description": "Minimal caller-owned configuration for the independent deterministic simulator process profile.",
+        "fields": [
+          {
+            "path": "apiVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "connectionagent.io/v1alpha1"
+          },
+          {
+            "path": "kind",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "FiveGCSimStandaloneConfig"
+          },
+          {
+            "path": "contractVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "v1"
+          },
+          {
+            "path": "spec",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.process",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.process.listen",
+            "required": true,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.world",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.world.worldRef",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.world.worldGeneration",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.world.seedProfile",
+            "required": true,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.world.seedParameters",
+            "required": false,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.world.behavior",
+            "required": false,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.world.behavior.indeterminateFacts",
+            "required": false,
+            "type": "array",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          }
+        ],
+        "enums": {},
+        "examplesAllowed": true
+      },
+      {
+        "kind": "json-schema",
+        "path": "schemas/v1alpha1/fivegc-sim-common.schema.yaml",
+        "role": "shared-api-types",
+        "publish": [
+          "metadata",
+          "fields",
+          "enums"
+        ],
+        "title": "FiveGCSim Common Definitions v1",
+        "description": "Shared machine definitions for ca-5gc-sim C2/C6 contracts.",
+        "fields": [],
+        "enums": {},
+        "examplesAllowed": false
+      },
+      {
+        "kind": "json-schema",
+        "path": "schemas/v1alpha1/fivegc-sim-source-fact.schema.yaml",
+        "role": "source-fact",
+        "publish": [
+          "metadata",
+          "fields",
+          "enums"
+        ],
+        "title": "FiveGCSimSourceFact.v1",
+        "description": null,
+        "fields": [
+          {
+            "path": "apiVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "connectionagent.io/v1alpha1"
+          },
+          {
+            "path": "kind",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "FiveGCSimSourceFact"
+          },
+          {
+            "path": "contractVersion",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "v1"
+          },
+          {
+            "path": "spec",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.sourceAuthority",
+            "required": true,
+            "type": "const",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "const": "ca-5gc-sim"
+          },
+          {
+            "path": "spec.factRef",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.materialRef",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.schemaRef",
+            "required": true,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.schemaDigest",
+            "required": true,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.recordFamily",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "5gc.registration",
+              "5gc.registration_context",
+              "5gc.pdu_session",
+              "5gc.user_plane_connectivity",
+              "5gc.pfcp_resource",
+              "5gc.transfer_participants",
+              "5gc.virtual_group",
+              "5gc.transfer_qos"
+            ]
+          },
+          {
+            "path": "spec.recordType",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "RegistrationFact.v1",
+              "RegistrationContextFact.v1",
+              "PduSessionFact.v1",
+              "UserPlaneConnectivityFact.v1",
+              "PfcpResourceFact.v1",
+              "TransferParticipantsFact.v1",
+              "VirtualGroupFact.v1",
+              "TransferQoSFact.v1"
+            ]
+          },
+          {
+            "path": "spec.worldRef",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldGeneration",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.worldRevision",
+            "required": true,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/worldRevision",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.subjectRef",
+            "required": true,
+            "type": "oneOf",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [
+              "fivegc-sim-common.schema.yaml#/$defs/ueSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/pduSessionSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/transferParticipantsSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/transferSubjectRef",
+              "fivegc-sim-common.schema.yaml#/$defs/virtualGroupSubjectRef"
+            ]
+          },
+          {
+            "path": "spec.resolution",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "FOUND",
+              "KNOWN_ABSENT",
+              "KNOWN_NEGATIVE"
+            ]
+          },
+          {
+            "path": "spec.accessClass",
+            "required": true,
+            "type": "enum",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": [],
+            "enum": [
+              "ORDINARY",
+              "EVALUATOR_ONLY"
+            ]
+          },
+          {
+            "path": "spec.value",
+            "required": false,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.correlationRefs",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/explicitRefs",
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.contentDigest",
+            "required": false,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          }
+        ],
+        "enums": {
+          "spec.recordFamily": [
+            "5gc.registration",
+            "5gc.registration_context",
+            "5gc.pdu_session",
+            "5gc.user_plane_connectivity",
+            "5gc.pfcp_resource",
+            "5gc.transfer_participants",
+            "5gc.virtual_group",
+            "5gc.transfer_qos"
+          ],
+          "spec.recordType": [
+            "RegistrationFact.v1",
+            "RegistrationContextFact.v1",
+            "PduSessionFact.v1",
+            "UserPlaneConnectivityFact.v1",
+            "PfcpResourceFact.v1",
+            "TransferParticipantsFact.v1",
+            "VirtualGroupFact.v1",
+            "TransferQoSFact.v1"
+          ],
+          "spec.resolution": [
+            "FOUND",
+            "KNOWN_ABSENT",
+            "KNOWN_NEGATIVE"
+          ],
+          "spec.accessClass": [
+            "ORDINARY",
+            "EVALUATOR_ONLY"
+          ]
+        },
+        "examplesAllowed": false
+      }
+    ]
   },
   "counts": {
     "facts": 8,
@@ -50,6 +2141,20 @@
       "path": "/healthz",
       "surface": "Diagnostics",
       "operationId": "getProcessHealth",
+      "description": "",
+      "request": null,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Process is READY.",
+          "schema": "schemas/v1alpha1/fivegc-sim-process-health.schema.yaml"
+        },
+        {
+          "status": "503",
+          "description": "Process is alive but not READY, or is draining/blocked.",
+          "schema": "schemas/v1alpha1/fivegc-sim-process-health.schema.yaml"
+        }
+      ],
       "documented": true,
       "implemented": true
     },
@@ -58,6 +2163,20 @@
       "path": "/identity",
       "surface": "Diagnostics",
       "operationId": "getProcessIdentity",
+      "description": "",
+      "request": null,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Process identity and exact supported-contract advertisement.",
+          "schema": "schemas/v1alpha1/fivegc-sim-process-identity.schema.yaml"
+        },
+        {
+          "status": "503",
+          "description": "Process/control error because the owner service is not available for this request.",
+          "schema": "schemas/v1alpha1/fivegc-sim-process-error.schema.yaml"
+        }
+      ],
       "documented": true,
       "implemented": true
     },
@@ -66,6 +2185,20 @@
       "path": "/v1/world",
       "surface": "Owner API",
       "operationId": "getWorld",
+      "description": "",
+      "request": null,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Current C2 world handle.",
+          "schema": "schemas/v1alpha1/fivegc-sim-world.schema.yaml"
+        },
+        {
+          "status": "503",
+          "description": "Process/control error because the owner service is not available for this request.",
+          "schema": "schemas/v1alpha1/fivegc-sim-process-error.schema.yaml"
+        }
+      ],
       "documented": true,
       "implemented": true
     },
@@ -74,6 +2207,9 @@
       "path": "/internal/fabric/delivery",
       "surface": "Fabric integration",
       "operationId": null,
+      "description": "",
+      "request": null,
+      "responses": [],
       "documented": false,
       "implemented": true
     },
@@ -82,6 +2218,34 @@
       "path": "/internal/v1/world/reset",
       "surface": "Host control",
       "operationId": "resetWorld",
+      "description": "Host-only control surface. Not a Runtime business capability and never an Agent Tool.",
+      "request": {
+        "required": true,
+        "contentType": "application/json",
+        "schema": "schemas/v1alpha1/fivegc-sim-world-reset-request.schema.yaml"
+      },
+      "responses": [
+        {
+          "status": "200",
+          "description": "New generation and required bindings are READY.",
+          "schema": "schemas/v1alpha1/fivegc-sim-world-reset-result.schema.yaml"
+        },
+        {
+          "status": "400",
+          "description": "Process/control error outside accepted C2/C6 semantic results.",
+          "schema": "schemas/v1alpha1/fivegc-sim-process-error.schema.yaml"
+        },
+        {
+          "status": "409",
+          "description": "Process/control error outside accepted C2/C6 semantic results.",
+          "schema": "schemas/v1alpha1/fivegc-sim-process-error.schema.yaml"
+        },
+        {
+          "status": "503",
+          "description": "Process/control error outside accepted C2/C6 semantic results.",
+          "schema": "schemas/v1alpha1/fivegc-sim-process-error.schema.yaml"
+        }
+      ],
       "documented": true,
       "implemented": true
     },
@@ -90,6 +2254,39 @@
       "path": "/v1/facts/read",
       "surface": "Owner API",
       "operationId": "readFact",
+      "description": "",
+      "request": {
+        "required": true,
+        "contentType": "application/json",
+        "schema": "schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml"
+      },
+      "responses": [
+        {
+          "status": "200",
+          "description": "Accepted C2 semantic result, including UNAVAILABLE or INVALID_QUERY.",
+          "schema": "schemas/v1alpha1/fivegc-sim-fact-read-result.schema.yaml"
+        },
+        {
+          "status": "400",
+          "description": "C2 request acceptance failure.",
+          "schema": "schemas/v1alpha1/fivegc-sim-fact-read-error.schema.yaml"
+        },
+        {
+          "status": "404",
+          "description": "C2 request acceptance failure.",
+          "schema": "schemas/v1alpha1/fivegc-sim-fact-read-error.schema.yaml"
+        },
+        {
+          "status": "409",
+          "description": "C2 request acceptance failure.",
+          "schema": "schemas/v1alpha1/fivegc-sim-fact-read-error.schema.yaml"
+        },
+        {
+          "status": "503",
+          "description": "Process/control error because the owner service is not available for this request.",
+          "schema": "schemas/v1alpha1/fivegc-sim-process-error.schema.yaml"
+        }
+      ],
       "documented": true,
       "implemented": true
     },
@@ -98,6 +2295,39 @@
       "path": "/v1/operations",
       "surface": "Owner API",
       "operationId": "executeOperation",
+      "description": "",
+      "request": {
+        "required": true,
+        "contentType": "application/json",
+        "schema": "schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml"
+      },
+      "responses": [
+        {
+          "status": "200",
+          "description": "Accepted C6 semantic result, including REJECTED, WAIT_EXPIRED, or INVALID_PRESTATE.",
+          "schema": "schemas/v1alpha1/fivegc-sim-operation-result.schema.yaml"
+        },
+        {
+          "status": "400",
+          "description": "C6 request acceptance failure.",
+          "schema": "schemas/v1alpha1/fivegc-sim-operation-error.schema.yaml"
+        },
+        {
+          "status": "404",
+          "description": "C6 request acceptance failure.",
+          "schema": "schemas/v1alpha1/fivegc-sim-operation-error.schema.yaml"
+        },
+        {
+          "status": "409",
+          "description": "C6 request acceptance failure.",
+          "schema": "schemas/v1alpha1/fivegc-sim-operation-error.schema.yaml"
+        },
+        {
+          "status": "503",
+          "description": "Process/control error because the owner service is not available for this request.",
+          "schema": "schemas/v1alpha1/fivegc-sim-process-error.schema.yaml"
+        }
+      ],
       "documented": true,
       "implemented": true
     }
@@ -109,6 +2339,9 @@
         "path": "/internal/fabric/delivery",
         "surface": "Fabric integration",
         "operationId": null,
+        "description": "",
+        "request": null,
+        "responses": [],
         "documented": false,
         "implemented": true
       }
