@@ -3,8 +3,8 @@
   "source": {
     "repository": "odango-chan/ca-5gc-sim",
     "ref": "main",
-    "commit": "6d74335fe6bb5cf5f7995eef4c928f1a4f59a0da",
-    "commitDate": "2026-10-10T08:04:11Z",
+    "commit": "491b8173154a2956407541ae219b5f2134297896",
+    "commitDate": "2026-10-12T07:32:40Z",
     "private": true,
     "publicDocsManifest": "docs/public-docs.yaml",
     "openApi": "schemas/v1alpha1/fivegc-sim.openapi.yaml",
@@ -701,6 +701,7 @@
               "UE_REGISTRATION",
               "UE_REGISTRATION_CONTEXT",
               "PDU_SESSION",
+              "PDU_SESSION_ACTIVITY",
               "USER_PLANE_CONNECTIVITY",
               "PFCP_RESOURCE",
               "TRANSFER_PARTICIPANTS",
@@ -785,6 +786,7 @@
             "when": {
               "spec.factSemantic": [
                 "PDU_SESSION",
+                "PDU_SESSION_ACTIVITY",
                 "USER_PLANE_CONNECTIVITY",
                 "PFCP_RESOURCE"
               ]
@@ -889,6 +891,7 @@
             "UE_REGISTRATION",
             "UE_REGISTRATION_CONTEXT",
             "PDU_SESSION",
+            "PDU_SESSION_ACTIVITY",
             "USER_PLANE_CONNECTIVITY",
             "PFCP_RESOURCE",
             "TRANSFER_PARTICIPANTS",
@@ -976,6 +979,7 @@
               "UE_REGISTRATION",
               "UE_REGISTRATION_CONTEXT",
               "PDU_SESSION",
+              "PDU_SESSION_ACTIVITY",
               "USER_PLANE_CONNECTIVITY",
               "PFCP_RESOURCE",
               "TRANSFER_PARTICIPANTS",
@@ -1108,6 +1112,7 @@
             "when": {
               "spec.factSemantic": [
                 "PDU_SESSION",
+                "PDU_SESSION_ACTIVITY",
                 "USER_PLANE_CONNECTIVITY",
                 "PFCP_RESOURCE"
               ]
@@ -1190,6 +1195,7 @@
             "UE_REGISTRATION",
             "UE_REGISTRATION_CONTEXT",
             "PDU_SESSION",
+            "PDU_SESSION_ACTIVITY",
             "USER_PLANE_CONNECTIVITY",
             "PFCP_RESOURCE",
             "TRANSFER_PARTICIPANTS",
@@ -1296,6 +1302,7 @@
               "UE_REGISTRATION",
               "UE_REGISTRATION_CONTEXT",
               "PDU_SESSION",
+              "PDU_SESSION_ACTIVITY",
               "USER_PLANE_CONNECTIVITY",
               "PFCP_RESOURCE",
               "TRANSFER_PARTICIPANTS",
@@ -1333,6 +1340,7 @@
             "UE_REGISTRATION",
             "UE_REGISTRATION_CONTEXT",
             "PDU_SESSION",
+            "PDU_SESSION_ACTIVITY",
             "USER_PLANE_CONNECTIVITY",
             "PFCP_RESOURCE",
             "TRANSFER_PARTICIPANTS",
@@ -2810,6 +2818,7 @@
               "5gc.registration",
               "5gc.registration_context",
               "5gc.pdu_session",
+              "5gc.pdu_session_activity",
               "5gc.user_plane_connectivity",
               "5gc.pfcp_resource",
               "5gc.transfer_participants",
@@ -2828,6 +2837,7 @@
               "RegistrationFact.v1",
               "RegistrationContextFact.v1",
               "PduSessionFact.v1",
+              "PduSessionActivityFact.v1",
               "UserPlaneConnectivityFact.v1",
               "PfcpResourceFact.v1",
               "TransferParticipantsFact.v1",
@@ -3072,6 +3082,42 @@
             "scope": "spec",
             "when": {
               "spec.recordType": [
+                "PduSessionActivityFact.v1"
+              ]
+            },
+            "required": [],
+            "fields": [
+              {
+                "path": "spec.recordFamily",
+                "required": false,
+                "type": "const",
+                "description": null,
+                "ref": null,
+                "oneOfRefs": [],
+                "const": "5gc.pdu_session_activity"
+              },
+              {
+                "path": "spec.subjectRef",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/pduSessionSubjectRef",
+                "oneOfRefs": []
+              },
+              {
+                "path": "spec.value",
+                "required": false,
+                "type": "ref",
+                "description": null,
+                "ref": "fivegc-sim-common.schema.yaml#/$defs/pduSessionActivityFactValue",
+                "oneOfRefs": []
+              }
+            ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.recordType": [
                 "PfcpResourceFact.v1"
               ]
             },
@@ -3244,6 +3290,7 @@
             "5gc.registration",
             "5gc.registration_context",
             "5gc.pdu_session",
+            "5gc.pdu_session_activity",
             "5gc.user_plane_connectivity",
             "5gc.pfcp_resource",
             "5gc.transfer_participants",
@@ -3254,6 +3301,7 @@
             "RegistrationFact.v1",
             "RegistrationContextFact.v1",
             "PduSessionFact.v1",
+            "PduSessionActivityFact.v1",
             "UserPlaneConnectivityFact.v1",
             "PfcpResourceFact.v1",
             "TransferParticipantsFact.v1",
@@ -3275,7 +3323,7 @@
     ]
   },
   "counts": {
-    "facts": 8,
+    "facts": 9,
     "operations": 15,
     "documentedRoutes": 6,
     "implementationRoutes": 7
@@ -3284,6 +3332,7 @@
     "UE_REGISTRATION",
     "UE_REGISTRATION_CONTEXT",
     "PDU_SESSION",
+    "PDU_SESSION_ACTIVITY",
     "USER_PLANE_CONNECTIVITY",
     "PFCP_RESOURCE",
     "TRANSFER_PARTICIPANTS",
