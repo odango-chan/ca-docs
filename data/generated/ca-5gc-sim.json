@@ -3,8 +3,8 @@
   "source": {
     "repository": "odango-chan/ca-5gc-sim",
     "ref": "main",
-    "commit": "491b8173154a2956407541ae219b5f2134297896",
-    "commitDate": "2026-10-12T07:32:40Z",
+    "commit": "c94121b90274c6aa5a20be2fb8220958bb7e4f25",
+    "commitDate": "2026-10-13T07:49:39Z",
     "private": true,
     "publicDocsManifest": "docs/public-docs.yaml",
     "openApi": "schemas/v1alpha1/fivegc-sim.openapi.yaml",
@@ -3326,7 +3326,7 @@
     "facts": 9,
     "operations": 15,
     "documentedRoutes": 6,
-    "implementationRoutes": 7
+    "implementationRoutes": 10
   },
   "facts": [
     "UE_REGISTRATION",
@@ -3384,7 +3384,7 @@
       "path": "/identity",
       "surface": "Diagnostics",
       "operationId": "getProcessIdentity",
-      "description": "Returns metadata about this ca-5gc-sim process and the owner contracts\nit supports. Think of this endpoint as \"who is this simulator process\nand what does it serve?\", not \"who is UE-B?\".\n\nThis endpoint never performs user-visible name/alias -> SUPI/IMSI\nresolution. That cross-domain identity mapping belongs to\ntool-common and is exposed there as\nPOST /v1/subject-identities/lookup.\n",
+      "description": "Returns metadata about this ca-5gc-sim process and the owner contracts\nit supports. Think of this endpoint as \"who is this simulator process\nand what does it serve?\", not \"who is UE-B?\".\n\nThis endpoint never performs user-visible name/alias -> SUPI/IMSI\nresolution. That cross-domain identity mapping belongs to\nca-provider-common and is exposed there as\nPOST /v1/subject-identities/lookup.\n",
       "request": null,
       "responses": [
         {
@@ -3399,6 +3399,39 @@
         }
       ],
       "documented": true,
+      "implemented": true
+    },
+    {
+      "method": "GET",
+      "path": "/management/v1/healthz",
+      "surface": "Owner API",
+      "operationId": null,
+      "description": "",
+      "request": null,
+      "responses": [],
+      "documented": false,
+      "implemented": true
+    },
+    {
+      "method": "GET",
+      "path": "/management/v1/identity",
+      "surface": "Owner API",
+      "operationId": null,
+      "description": "",
+      "request": null,
+      "responses": [],
+      "documented": false,
+      "implemented": true
+    },
+    {
+      "method": "GET",
+      "path": "/management/v1/readyz",
+      "surface": "Owner API",
+      "operationId": null,
+      "description": "",
+      "request": null,
+      "responses": [],
+      "documented": false,
       "implemented": true
     },
     {
@@ -3555,6 +3588,39 @@
   ],
   "drift": {
     "implementationOnlyRoutes": [
+      {
+        "method": "GET",
+        "path": "/management/v1/healthz",
+        "surface": "Owner API",
+        "operationId": null,
+        "description": "",
+        "request": null,
+        "responses": [],
+        "documented": false,
+        "implemented": true
+      },
+      {
+        "method": "GET",
+        "path": "/management/v1/identity",
+        "surface": "Owner API",
+        "operationId": null,
+        "description": "",
+        "request": null,
+        "responses": [],
+        "documented": false,
+        "implemented": true
+      },
+      {
+        "method": "GET",
+        "path": "/management/v1/readyz",
+        "surface": "Owner API",
+        "operationId": null,
+        "description": "",
+        "request": null,
+        "responses": [],
+        "documented": false,
+        "implemented": true
+      },
       {
         "method": "POST",
         "path": "/internal/fabric/delivery",
