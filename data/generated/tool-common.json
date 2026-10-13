@@ -3,8 +3,8 @@
   "source": {
     "repository": "odango-chan/tool-common",
     "ref": "main",
-    "commit": "5157b9329da8fc1d3462164400aa52ae84f9ce37",
-    "commitDate": "2026-10-13T08:46:46Z",
+    "commit": "b43e7241f188f9ce83cb6ba53df7a94c83d869ff",
+    "commitDate": "2026-10-13T08:47:44Z",
     "private": true,
     "publicDocsManifest": "docs/public-docs.yaml"
   },
