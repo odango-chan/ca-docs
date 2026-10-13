@@ -23,12 +23,12 @@ components:
       zh: Service Fabric
       en: Service Fabric
 
-  - id: ca-provider-common
-    repository: odango-chan/ca-provider-common
-    status: staged
+  - id: tool-common
+    repository: odango-chan/tool-common
+    status: active
     title:
-      zh: Provider 公共能力
-      en: Provider common
+      zh: tool-common
+      en: tool-common
     manifest: docs/public-docs.yaml
 
   - id: ca-provider-5gc

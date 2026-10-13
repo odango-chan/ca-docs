@@ -4,7 +4,7 @@ import yaml from 'js-yaml';
 
 const token = process.env.CA_DOCS_SOURCE_TOKEN || '';
 const strict = process.env.CA_DOCS_SYNC_STRICT === '1';
-const snapshotPath = path.resolve('data/generated/ca-provider-common.json');
+const snapshotPath = path.resolve('data/generated/tool-common.json');
 
 function headers() {
   const out = { Accept: 'application/vnd.github+json', 'User-Agent': 'ca-docs-sync' };
@@ -134,13 +134,13 @@ async function fallback(reason) {
   if (strict) throw reason;
   try {
     const current = JSON.parse(await fs.readFile(snapshotPath, 'utf8'));
-    console.warn(`ca-provider-common: ${reason.message}; using published snapshot ${current.source?.commit || 'unknown'}`);
+    console.warn(`tool-common: ${reason.message}; using published snapshot ${current.source?.commit || 'unknown'}`);
   } catch {
     throw reason;
   }
 }
 
-export async function syncProviderCommon(component) {
+export async function syncToolCommon(component) {
   const { owner, repo } = splitRepo(component.repository);
   const ctx = { owner, repo, ref: component.ref || 'main' };
   const manifestPath = component.manifest || 'docs/public-docs.yaml';
@@ -223,7 +223,7 @@ export async function syncProviderCommon(component) {
 
     await fs.mkdir(path.dirname(snapshotPath), { recursive: true });
     await fs.writeFile(snapshotPath, JSON.stringify(output, null, 2) + '\n');
-    console.log(`ca-provider-common: refreshed via ${manifestPath}: ${output.counts.providerRoutes} provider routes, ${output.counts.controlRoutes} control routes from ${rev.commit}`);
+    console.log(`tool-common: refreshed via ${manifestPath}: ${output.counts.providerRoutes} provider routes, ${output.counts.controlRoutes} control routes from ${rev.commit}`);
   } catch (error) {
     await fallback(error instanceof Error ? error : new Error(String(error)));
   }

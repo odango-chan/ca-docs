@@ -11,7 +11,7 @@ CA Docs 是一个**跨仓视图**，不是第二份机器契约事实源。OpenA
 
 ### ca-5gc-sim
 
-当前第一个 active 组件。现在从 private `odango-chan/ca-5gc-sim` 提取：
+当前 active 组件之一。现在从 private `odango-chan/ca-5gc-sim` 提取：
 
 - Fact semantic 清单
 - Operation semantic 清单
@@ -21,6 +21,10 @@ CA Docs 是一个**跨仓视图**，不是第二份机器契约事实源。OpenA
 - 对应上游 commit
 
 公开仓不会复制 private 源码正文。
+
+### tool-common
+
+从 private `odango-chan/tool-common` 提取 Provider/Control OpenAPI、明确允许公开的中英文说明及实现路由摘要。它拥有跨领域、环境无关的 Tool Plane capability；当前 capability 为 `subject.identity.lookup@v1`。
 
 ## 组件接入
 

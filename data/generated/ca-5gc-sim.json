@@ -3384,7 +3384,7 @@
       "path": "/identity",
       "surface": "Diagnostics",
       "operationId": "getProcessIdentity",
-      "description": "Returns metadata about this ca-5gc-sim process and the owner contracts\nit supports. Think of this endpoint as \"who is this simulator process\nand what does it serve?\", not \"who is UE-B?\".\n\nThis endpoint never performs user-visible name/alias -> SUPI/IMSI\nresolution. That cross-domain identity mapping belongs to\nca-provider-common and is exposed there as\nPOST /v1/subject-identities/lookup.\n",
+      "description": "Returns metadata about this ca-5gc-sim process and the owner contracts\nit supports. Think of this endpoint as \"who is this simulator process\nand what does it serve?\", not \"who is UE-B?\".\n\nThis endpoint never performs user-visible name/alias -> SUPI/IMSI\nresolution. That cross-domain identity mapping belongs to\ntool-common and is exposed there as\nPOST /v1/subject-identities/lookup.\n",
       "request": null,
       "responses": [
         {
