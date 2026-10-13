@@ -24,7 +24,7 @@ CA Docs 是一个**跨仓视图**，不是第二份机器契约事实源。OpenA
 
 ### tool-common
 
-源注册表和页面 slug 已更新到 private `odango-chan/tool-common`，公开站继续使用 checked-in snapshot。该来源暂保持 `staged`：严格同步已确认仓库 secret 对新 owner manifest 返回 HTTP 404；授予 `CA_DOCS_SOURCE_TOKEN` `Contents: Read-only` 后即可启用自动刷新。它拥有跨领域、环境无关的 Tool Plane capability；当前 capability 为 `subject.identity.lookup@v1`。
+源注册表、页面 slug 和公开 snapshot 使用 private `odango-chan/tool-common`。该来源已启用严格同步；workflow 使用 `CA_DOCS_SOURCE_TOKEN` 读取 owner manifest、OpenAPI 和公开文档，并在 snapshot 更新时提交派生数据。它拥有跨领域、环境无关的 Tool Plane capability；当前 capability 为 `subject.identity.lookup@v1`。
 
 ## 组件接入
 
@@ -43,7 +43,7 @@ docs/public-docs.yaml
 private token 只用于独立的 **Sync Upstream Contracts** workflow，不交给 GitHub Pages 构建任务。
 
 ```text
-private ca-* repositories
+private component repositories
         │  CA_DOCS_SOURCE_TOKEN (Contents: Read-only)
         ▼
 Sync Upstream Contracts
@@ -75,7 +75,7 @@ GitHub Pages
 
 推荐 Fine-grained personal access token：
 
-- Repository access：只选择已经接入 CA Docs 的 private `ca-*` 仓库
+- Repository access：只选择已经接入 CA Docs 的 private 仓库，包括 `tool-common`
 - Repository permissions：`Contents: Read-only`
 
 ## 本地开发

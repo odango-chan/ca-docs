@@ -25,7 +25,7 @@ components:
 
   - id: tool-common
     repository: odango-chan/tool-common
-    status: staged
+    status: active
     title:
       zh: tool-common
       en: tool-common
