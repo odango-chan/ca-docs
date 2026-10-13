@@ -24,7 +24,7 @@ CA Docs 是一个**跨仓视图**，不是第二份机器契约事实源。OpenA
 
 ### tool-common
 
-从 private `odango-chan/tool-common` 提取 Provider/Control OpenAPI、明确允许公开的中英文说明及实现路由摘要。它拥有跨领域、环境无关的 Tool Plane capability；当前 capability 为 `subject.identity.lookup@v1`。
+源注册表和页面 slug 已更新到 private `odango-chan/tool-common`，公开站继续使用 checked-in snapshot。该来源暂保持 `staged`：严格同步已确认仓库 secret 对新 owner manifest 返回 HTTP 404；授予 `CA_DOCS_SOURCE_TOKEN` `Contents: Read-only` 后即可启用自动刷新。它拥有跨领域、环境无关的 Tool Plane capability；当前 capability 为 `subject.identity.lookup@v1`。
 
 ## 组件接入
 
