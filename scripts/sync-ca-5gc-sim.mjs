@@ -15,6 +15,10 @@ async function snapshotExists() {
   }
 }
 
+export function sourceIdentityMatches(manifest, component) {
+  return manifest?.component === (component.sourceIdentity || component.id);
+}
+
 function githubHeaders() {
   const headers = {
     Accept: 'application/vnd.github+json',
@@ -313,12 +317,12 @@ export async function syncCa5gcSim(component) {
       !manifest ||
       manifest.apiVersion !== 'connectionagent.io/v1alpha1' ||
       manifest.kind !== 'PublicDocsManifest' ||
-      manifest.component !== component.id
+      !sourceIdentityMatches(manifest, component)
     ) {
       throw new Error(`invalid PublicDocsManifest at ${manifestPath}`);
     }
 
-    const openApiSource = requireSource(manifest, 'owner-http-api', 'openapi', ['operations']);
+    const openApiSource = requireSource(manifest, 'owner-provider-http-api', 'openapi', ['operations']);
     const factSource = requireSource(manifest, 'fact-inventory', 'json-schema', ['enums']);
     const operationSource = requireSource(manifest, 'operation-inventory', 'json-schema', ['enums']);
     const implementationSource = requireSource(
