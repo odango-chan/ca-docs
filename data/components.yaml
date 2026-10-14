@@ -16,12 +16,12 @@ components:
       zh: Runtime
       en: Runtime
 
-  - id: ca-service-fabric
-    repository: odango-chan/ca-service-fabric
+  - id: env-fabric
+    repository: odango-chan/env-fabric
     status: planned
     title:
-      zh: Service Fabric
-      en: Service Fabric
+      zh: env-fabric 网络边界中介
+      en: env-fabric network boundary mediation
 
   - id: tool-common
     repository: odango-chan/tool-common

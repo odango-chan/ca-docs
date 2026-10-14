@@ -1,0 +1,66 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import yaml from 'js-yaml';
+import SiteLayout from '../../../../layouts/SiteLayout.astro';
+
+export function getStaticPaths() {
+  const registry = yaml.load(fs.readFileSync(path.resolve('data/components.yaml'), 'utf8'));
+  return (registry.components || [])
+    .filter((component) => component.status === 'active' && component.sync === 'manifest')
+    .map((component) => {
+      const snapshotPath = path.resolve('data/generated', `${component.id}.json`);
+      const data = JSON.parse(fs.readFileSync(snapshotPath, 'utf8'));
+      return { params: { component: component.id }, props: { data } };
+    });
+}
+
+const { data } = Astro.props;
+const title = data.title?.en || data.component;
+const apiSources = data.sources.filter((source) => source.kind === 'openapi');
+const contractSources = data.sources.filter((source) => source.kind === 'json-schema');
+const fieldDescription = (field) => {
+  if (Object.hasOwn(field, 'const')) return `Fixed value: ${field.const}`;
+  if (Array.isArray(field.enum)) return `Allowed: ${field.enum.join(' / ')}`;
+  return field.description || `Type: ${field.type || 'object'}`;
+};
+const base = import.meta.env.BASE_URL;
+const href = (value) => `${base.replace(/\/?$/, '/')}${value.replace(/^\/+/, '')}`;
+---
+
+<SiteLayout title={`${title} API / Contracts`} lang="en">
+  <section class="hero">
+    <span class="eyebrow">Component / {data.component}</span>
+    <h1>{title}</h1>
+    <div class="page-tabs"><a class="primary-tab" href={href(`/en/components/${data.component}/`)}>APIs &amp; contracts</a></div>
+  </section>
+
+  {apiSources.length > 0 && <section class="section">
+    <div class="section-head"><div><span class="eyebrow">OpenAPI</span><h2>HTTP APIs</h2></div></div>
+    {apiSources.map((api) => <div class="section" id={api.role}>
+      <h3>{api.metadata?.title || api.role}</h3>
+      {api.metadata?.description && <p>{api.metadata.description}</p>}
+      <div class="api-list">{api.operations.map((operation) => <article class="api-card">
+        <div class="api-heading"><span class:list={['method-badge', operation.method.toLowerCase()]}>{operation.method}</span><code class="api-path">{operation.path}</code></div>
+        <h3>{operation.summary || operation.operationId}</h3>
+        {operation.operationId && <div class="api-meta"><span>operationId</span><code>{operation.operationId}</code></div>}
+        {operation.request && <p>Request contract: <code>{operation.request.schema}</code></p>}
+        <div class="response-list">{operation.responses.map((response) => <div class="response-row"><code class="status-code">{response.status}</code><div>{response.description}</div></div>)}</div>
+      </article>)}</div>
+    </div>)}
+  </section>}
+
+  {contractSources.length > 0 && <section class="section">
+    <div class="section-head"><div><span class="eyebrow">JSON Schema</span><h2>Data contracts</h2></div></div>
+    {contractSources.map((contract) => <article class="api-card">
+      <h3>{contract.metadata?.title || contract.role}</h3>
+      {contract.metadata?.description && <p>{contract.metadata.description}</p>}
+      <code class="source-note">{contract.metadata?.id}</code>
+      {contract.fields.length > 0 && <table><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody>
+        {contract.fields.map((field) => <tr><td><code>{field.path}</code></td><td>{fieldDescription(field)}</td></tr>)}
+      </tbody></table>}
+    </article>)}
+  </section>}
+
+  <section class="section"><p class="source-note">Source: <code>{data.source.repository}@{data.source.commit?.slice(0, 8) || data.source.ref}</code> · <code>{data.source.publicDocsManifest}</code></p></section>
+</SiteLayout>

@@ -15,7 +15,7 @@ properties:
     const: PublicDocsManifest
   component:
     type: string
-    pattern: '^ca-[a-z0-9-]+$'
+    pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
   title:
     type: object
     additionalProperties: false
