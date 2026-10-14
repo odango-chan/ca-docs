@@ -4,6 +4,7 @@ components:
   - id: ca-5gc-sim
     repository: odango-chan/ca-5gc-sim
     status: active
+    sourceIdentity: env-5gc-sim
     title:
       zh: 5GC 模拟器
       en: 5GC simulator
@@ -18,10 +19,12 @@ components:
 
   - id: env-fabric
     repository: odango-chan/env-fabric
-    status: planned
+    status: active
+    sync: manifest
     title:
       zh: env-fabric 网络边界中介
       en: env-fabric network boundary mediation
+    manifest: docs/public-docs.yaml
 
   - id: tool-common
     repository: odango-chan/tool-common
