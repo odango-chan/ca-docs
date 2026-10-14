@@ -1,0 +1,3 @@
+strict mode: missing type "array" for keyword "items" at "https://connectionagent.io/schemas/v1alpha1/public-docs-manifest.schema.yaml#/$defs/source/allOf/0/then/properties/publish" (strictTypes)
+strict mode: missing type "array" for keyword "items" at "https://connectionagent.io/schemas/v1alpha1/public-docs-manifest.schema.yaml#/$defs/source/allOf/1/then/properties/publish" (strictTypes)
+env-fabric: refreshed 13 declared public sources from d4696c2bbcba3a0c78371102bc934dc051036b5c

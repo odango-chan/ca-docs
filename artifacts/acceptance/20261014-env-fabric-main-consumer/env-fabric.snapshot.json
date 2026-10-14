@@ -1,0 +1,1866 @@
+{
+  "component": "env-fabric",
+  "title": {
+    "zh": "env-fabric 网络边界中介",
+    "en": "env-fabric network boundary mediation"
+  },
+  "source": {
+    "repository": "odango-chan/env-fabric",
+    "ref": "main",
+    "commit": "d4696c2bbcba3a0c78371102bc934dc051036b5c",
+    "commitDate": "2026-10-14T06:46:55Z",
+    "private": true,
+    "publicDocsManifest": "docs/public-docs.yaml"
+  },
+  "sources": [
+    {
+      "kind": "openapi",
+      "role": "business-api",
+      "path": "schemas/v1alpha1/service-fabric.openapi.yaml",
+      "metadata": {
+        "title": "env-fabric Business API",
+        "description": "Owner business routes for Fabric Network Observation and boundary intervention.",
+        "version": "v1alpha1"
+      },
+      "schemas": {},
+      "operations": [
+        {
+          "method": "POST",
+          "path": "/v1/observations/query",
+          "operationId": "queryNetworkObservations",
+          "summary": "",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "Retained Network Observation records.",
+              "schema": null
+            },
+            {
+              "status": "400",
+              "description": "",
+              "schema": null
+            },
+            {
+              "status": "503",
+              "description": "",
+              "schema": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/events/{fabricEventRef}",
+          "operationId": "getFabricEvent",
+          "summary": "",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "One owner-native FabricEvent.",
+              "schema": null
+            },
+            {
+              "status": "404",
+              "description": "",
+              "schema": null
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/v1/interventions/leases",
+          "operationId": "installExecutableBoundaryLease",
+          "summary": "",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "Fabric-owned executable boundary lease state.",
+              "schema": null
+            },
+            {
+              "status": "400",
+              "description": "",
+              "schema": null
+            },
+            {
+              "status": "409",
+              "description": "",
+              "schema": null
+            },
+            {
+              "status": "503",
+              "description": "",
+              "schema": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/interventions/leases/{leaseRef}",
+          "operationId": "getExecutableBoundaryLease",
+          "summary": "",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "Current executable lease state.",
+              "schema": null
+            },
+            {
+              "status": "404",
+              "description": "",
+              "schema": null
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/v1/interventions/leases/{leaseRef}/cancel",
+          "operationId": "cancelExecutableBoundaryLease",
+          "summary": "",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "Lease state after cancellation.",
+              "schema": null
+            },
+            {
+              "status": "404",
+              "description": "",
+              "schema": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/fault-receipts/{receiptRef}",
+          "operationId": "getBoundaryFaultReceipt",
+          "summary": "",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "Owner-native committed boundary effect evidence.",
+              "schema": null
+            },
+            {
+              "status": "404",
+              "description": "",
+              "schema": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "openapi",
+      "role": "management-api",
+      "path": "schemas/v1alpha1/service-fabric-management.openapi.yaml",
+      "metadata": {
+        "title": "env-fabric Managed Node API",
+        "description": "Managed Node lifecycle surface available only on the management listener.",
+        "version": "v1alpha1"
+      },
+      "schemas": {},
+      "operations": [
+        {
+          "method": "GET",
+          "path": "/management/v1/identity",
+          "operationId": "getManagedNodeIdentity",
+          "summary": "",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "Stable component identity and process incarnation reference.",
+              "schema": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/management/v1/healthz",
+          "operationId": "getManagedNodeHealth",
+          "summary": "",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "Liveness independent of business readiness.",
+              "schema": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/management/v1/readyz",
+          "operationId": "getManagedNodeReadiness",
+          "summary": "",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "The process can admit normal work.",
+              "schema": null
+            },
+            {
+              "status": "503",
+              "description": "The process is alive but cannot admit normal work.",
+              "schema": null
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/management/v1/drain",
+          "operationId": "drainManagedNode",
+          "summary": "Close admission and drain retained in-flight work",
+          "description": "",
+          "responses": [
+            {
+              "status": "202",
+              "description": "Drain operation accepted or already completed.",
+              "schema": "ManagedNodeOperation"
+            },
+            {
+              "status": "400",
+              "description": "Invalid Drain request.",
+              "schema": "ManagedNodeError"
+            },
+            {
+              "status": "409",
+              "description": "Operation or process-instance fence conflict.",
+              "schema": "ManagedNodeError"
+            },
+            {
+              "status": "413",
+              "description": "Request body exceeds 1 MiB.",
+              "schema": "ManagedNodeError"
+            },
+            {
+              "status": "500",
+              "description": "",
+              "schema": null
+            }
+          ],
+          "request": {
+            "schema": "ManagedNodeDrainRequest"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/management/v1/operations/{operationId}",
+          "operationId": "getManagedNodeOperation",
+          "summary": "Read a Drain operation safe-point status",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "Drain operation state.",
+              "schema": "ManagedNodeOperation"
+            },
+            {
+              "status": "404",
+              "description": "Drain operation not found.",
+              "schema": "ManagedNodeError"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "openapi",
+      "role": "provider-mcp-api",
+      "path": "schemas/v1alpha1/service-fabric-provider-mcp.openapi.yaml",
+      "metadata": {
+        "title": "env-fabric Provider-MCP HTTP API",
+        "description": "REST management and evidence routes for the dedicated Provider-MCP listener.\nMCP protocol mounts at /mcp and /mcp/provider are protocol-native and are\nspecified by the MCP transport contract rather than represented as REST.\n",
+        "version": "v1alpha1"
+      },
+      "schemas": {},
+      "operations": [
+        {
+          "method": "GET",
+          "path": "/v1/provider-mcp/identity",
+          "operationId": "getProviderMcpLaneIdentity",
+          "summary": "",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "Identity and admitted effects of the Provider-MCP lane.",
+              "schema": null
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/v1/external-interactions/query",
+          "operationId": "queryExternalInteractions",
+          "summary": "",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "Retained Provider-MCP interaction events.",
+              "schema": null
+            },
+            {
+              "status": "400",
+              "description": "",
+              "schema": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/external-interactions/events/{ref}",
+          "operationId": "getExternalInteractionEvent",
+          "summary": "",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "One owner-native external interaction event.",
+              "schema": null
+            },
+            {
+              "status": "404",
+              "description": "",
+              "schema": null
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/v1/provider-mcp/interventions/leases",
+          "operationId": "installProviderMcpLease",
+          "summary": "",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "Provider-MCP intervention lease.",
+              "schema": null
+            },
+            {
+              "status": "400",
+              "description": "",
+              "schema": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/provider-mcp/interventions/leases/{ref}",
+          "operationId": "getProviderMcpLease",
+          "summary": "",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "Current Provider-MCP intervention lease.",
+              "schema": null
+            },
+            {
+              "status": "404",
+              "description": "",
+              "schema": null
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/v1/provider-mcp/interventions/leases/{ref}/cancel",
+          "operationId": "cancelProviderMcpLease",
+          "summary": "",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "Lease state after cancellation.",
+              "schema": null
+            },
+            {
+              "status": "404",
+              "description": "",
+              "schema": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/provider-mcp/fault-receipts/{ref}",
+          "operationId": "getProviderMcpFaultReceipt",
+          "summary": "",
+          "description": "",
+          "responses": [
+            {
+              "status": "200",
+              "description": "Committed Provider-MCP effect receipt.",
+              "schema": null
+            },
+            {
+              "status": "404",
+              "description": "",
+              "schema": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "json-schema",
+      "role": "network-observation-query",
+      "path": "schemas/v1alpha1/network-observation-query.schema.yaml",
+      "metadata": {
+        "id": "https://connectionagent.io/schemas/v1alpha1/network-observation-query.schema.yaml",
+        "title": "network-observation-query",
+        "description": ""
+      },
+      "fields": [
+        {
+          "path": "apiVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "kind",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "contractVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec",
+          "required": true,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter",
+          "required": true,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.environmentRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.environmentGeneration",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.acquisitionMode",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.interface",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.protocol",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.messageKind",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.direction",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.transactionRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.subjectRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.messageRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.deliveryAttemptRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.disposition",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.leaseRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.faultReceiptRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.ownerSequenceFrom",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.ownerSequenceTo",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.cursor",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.pageSize",
+          "required": true,
+          "type": "integer",
+          "description": null,
+          "ref": null
+        }
+      ],
+      "enum": null
+    },
+    {
+      "kind": "json-schema",
+      "role": "network-observation-result",
+      "path": "schemas/v1alpha1/network-observation-result.schema.yaml",
+      "metadata": {
+        "id": "https://connectionagent.io/schemas/v1alpha1/network-observation-result.schema.yaml",
+        "title": "network-observation-result",
+        "description": ""
+      },
+      "fields": [
+        {
+          "path": "apiVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "kind",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "contractVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec",
+          "required": true,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.queryRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.availability",
+          "required": true,
+          "type": "enum",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.records",
+          "required": true,
+          "type": "array",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.nextCursor",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.gapReasonCode",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.sourceAuthority",
+          "required": false,
+          "type": "const",
+          "description": null,
+          "ref": null
+        }
+      ],
+      "enum": null
+    },
+    {
+      "kind": "json-schema",
+      "role": "boundary-fault-receipt",
+      "path": "schemas/v1alpha1/boundary-fault-receipt.schema.yaml",
+      "metadata": {
+        "id": "https://connectionagent.io/schemas/v1alpha1/boundary-fault-receipt.schema.yaml",
+        "title": "boundary-fault-receipt",
+        "description": "Service Fabric owner-native proof that a boundary effect crossed its commit point."
+      },
+      "fields": [
+        {
+          "path": "apiVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "kind",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "contractVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec",
+          "required": true,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.boundaryFaultReceiptRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.schemaRef",
+          "required": true,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.schemaDigest",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.recordDigest",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.leaseRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.interventionRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.environmentRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.environmentGeneration",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.schedulerBindingRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.matchedMessageRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.matchedFabricEventRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.effect",
+          "required": true,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.effect.kind",
+          "required": true,
+          "type": "enum",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.effect.logicalDuration",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.hitOrdinal",
+          "required": true,
+          "type": "integer",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.enforcementCommitRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.profileDigest",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.ownerSequence",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.recoveredFromCommitRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        }
+      ],
+      "enum": null
+    },
+    {
+      "kind": "json-schema",
+      "role": "external-interaction-event",
+      "path": "schemas/v1alpha1/external-interaction-event.schema.yaml",
+      "metadata": {
+        "id": "https://connectionagent.io/schemas/v1alpha1/external-interaction-event.schema.yaml",
+        "title": "external-interaction-event",
+        "description": "Owner-native Service Fabric observation record for the transparent Provider-side MCP lane. This record family is EXTERNAL_INTERACTION_OBSERVATION and is independent from the C4 FabricEvent / NETWORK_OBSERVATION family: Provider MCP traffic must never be encoded as a protocol/network message (no interface=N11, no protocol=MCP inside FabricEvent, no REAL_INLINE acquisitionMode for MCP)."
+      },
+      "fields": [
+        {
+          "path": "apiVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "kind",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "contractVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec",
+          "required": true,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.externalInteractionEventRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.interactionRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.attemptRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.recordFamily",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.recordType",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.schemaRef",
+          "required": true,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.schemaDigest",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.recordDigest",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.boundaryKind",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.transport",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.phase",
+          "required": true,
+          "type": "enum",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.providerEndpointRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.toolName",
+          "required": true,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.mcpRequestId",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.transportCorrelationRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.environmentRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.runRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.invocationRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.subjectRefs",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.resourceRefs",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.correlationRefs",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.scopeRefs",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.ownerSequence",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.payloadAvailability",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.requestDigest",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.resultDigest",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.faultReceiptRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.reasonCode",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        }
+      ],
+      "enum": null
+    },
+    {
+      "kind": "json-schema",
+      "role": "external-interaction-query",
+      "path": "schemas/v1alpha1/external-interaction-query.schema.yaml",
+      "metadata": {
+        "id": "https://connectionagent.io/schemas/v1alpha1/external-interaction-query.schema.yaml",
+        "title": "external-interaction-query",
+        "description": "Filtered read over owner-native ExternalInteractionEvent records."
+      },
+      "fields": [
+        {
+          "path": "apiVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "kind",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "contractVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec",
+          "required": true,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter",
+          "required": true,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.boundaryKind",
+          "required": false,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.transport",
+          "required": false,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.phase",
+          "required": false,
+          "type": "enum",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.toolName",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.interactionRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.attemptRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.mcpRequestId",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.transportCorrelationRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.environmentRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.runRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.invocationRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.subjectRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.resourceRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.faultReceiptRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.ownerSequenceFrom",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.filter.ownerSequenceTo",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.cursor",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.pageSize",
+          "required": true,
+          "type": "integer",
+          "description": null,
+          "ref": null
+        }
+      ],
+      "enum": null
+    },
+    {
+      "kind": "json-schema",
+      "role": "external-interaction-result",
+      "path": "schemas/v1alpha1/external-interaction-result.schema.yaml",
+      "metadata": {
+        "id": "https://connectionagent.io/schemas/v1alpha1/external-interaction-result.schema.yaml",
+        "title": "external-interaction-result",
+        "description": "Owner-native ExternalInteractionEvent query result."
+      },
+      "fields": [
+        {
+          "path": "apiVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "kind",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "contractVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec",
+          "required": true,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.queryRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.availability",
+          "required": true,
+          "type": "enum",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.records",
+          "required": true,
+          "type": "array",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.nextCursor",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.gapReasonCode",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.sourceAuthority",
+          "required": false,
+          "type": "const",
+          "description": null,
+          "ref": null
+        }
+      ],
+      "enum": null
+    },
+    {
+      "kind": "json-schema",
+      "role": "process-config",
+      "path": "schemas/v1alpha1/env-fabric-process-config.schema.yaml",
+      "metadata": {
+        "id": "https://connectionagent.io/schemas/v1alpha1/env-fabric-process-config.schema.yaml",
+        "title": "process-config",
+        "description": "Strict YAML operator configuration for one env-fabric process."
+      },
+      "fields": [
+        {
+          "path": "apiVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "kind",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "contractVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec",
+          "required": true,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.mode",
+          "required": true,
+          "type": "enum",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.business",
+          "required": false,
+          "type": "ref",
+          "description": "Business, Network Observation, and boundary intervention listener.",
+          "ref": null
+        },
+        {
+          "path": "spec.control",
+          "required": false,
+          "type": "ref",
+          "description": "Trusted Managed Node listener; must bind loopback or a private IP.",
+          "ref": null
+        },
+        {
+          "path": "spec.environmentRef",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.environmentGeneration",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.storage",
+          "required": false,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.storage.mode",
+          "required": true,
+          "type": "enum",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.storage.path",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.storage.durabilityProfile",
+          "required": true,
+          "type": "enum",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.retention",
+          "required": false,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.retention.profile",
+          "required": true,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.realInline",
+          "required": false,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.realInline.n4",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.ownerHTTP",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.providerMCP",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.limits",
+          "required": false,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.limits.maxActiveLeases",
+          "required": true,
+          "type": "integer",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.limits.maxQueryPageSize",
+          "required": true,
+          "type": "integer",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.readiness",
+          "required": false,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.readiness.policy",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        }
+      ],
+      "enum": null
+    },
+    {
+      "kind": "json-schema",
+      "role": "process-identity",
+      "path": "schemas/v1alpha1/service-fabric-process-identity.schema.yaml",
+      "metadata": {
+        "id": "https://connectionagent.io/schemas/v1alpha1/service-fabric-process-identity.schema.yaml",
+        "title": "process-identity",
+        "description": ""
+      },
+      "fields": [
+        {
+          "path": "apiVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "kind",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "contractVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec",
+          "required": true,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.service",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.processInstanceRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.serviceVersion",
+          "required": true,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.buildCommit",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.startedAt",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.schemaProfileDigest",
+          "required": false,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.supportedContractVersions",
+          "required": true,
+          "type": "array",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.supportedAcquisitionModes",
+          "required": true,
+          "type": "array",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.supportedProtocolProfiles",
+          "required": true,
+          "type": "array",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.supportedEffects",
+          "required": true,
+          "type": "array",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.supportedExternalInteractionContracts",
+          "required": false,
+          "type": "array",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.supportedProviderMCPEffects",
+          "required": false,
+          "type": "array",
+          "description": null,
+          "ref": null
+        }
+      ],
+      "enum": null
+    },
+    {
+      "kind": "json-schema",
+      "role": "process-health",
+      "path": "schemas/v1alpha1/service-fabric-process-health.schema.yaml",
+      "metadata": {
+        "id": "https://connectionagent.io/schemas/v1alpha1/service-fabric-process-health.schema.yaml",
+        "title": "process-health",
+        "description": "Liveness-only process projection; it is not readiness."
+      },
+      "fields": [
+        {
+          "path": "apiVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "kind",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "contractVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec",
+          "required": true,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.service",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.processInstanceRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.phase",
+          "required": true,
+          "type": "enum",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.reasonCode",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        }
+      ],
+      "enum": null
+    },
+    {
+      "kind": "json-schema",
+      "role": "process-readiness",
+      "path": "schemas/v1alpha1/service-fabric-readiness.schema.yaml",
+      "metadata": {
+        "id": "https://connectionagent.io/schemas/v1alpha1/service-fabric-readiness.schema.yaml",
+        "title": "process-readiness",
+        "description": ""
+      },
+      "fields": [
+        {
+          "path": "apiVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "kind",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "contractVersion",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec",
+          "required": true,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.service",
+          "required": true,
+          "type": "const",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.processInstanceRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.phase",
+          "required": true,
+          "type": "enum",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.ready",
+          "required": true,
+          "type": "boolean",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.reasonCode",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.environmentRef",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.environmentGeneration",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.recordStore",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.query",
+          "required": true,
+          "type": "ref",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.durability",
+          "required": false,
+          "type": "object",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.durability.profile",
+          "required": true,
+          "type": "enum",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.durability.recoveryStatus",
+          "required": true,
+          "type": "enum",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.durability.recoveryNote",
+          "required": false,
+          "type": "string",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.durability.scope",
+          "required": true,
+          "type": "enum",
+          "description": null,
+          "ref": null
+        },
+        {
+          "path": "spec.adapters",
+          "required": true,
+          "type": "array",
+          "description": null,
+          "ref": null
+        }
+      ],
+      "enum": null
+    }
+  ],
+  "sync": {
+    "mode": "published",
+    "detail": null
+  }
+}
