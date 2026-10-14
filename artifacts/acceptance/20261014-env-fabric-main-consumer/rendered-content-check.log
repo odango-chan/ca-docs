@@ -1,0 +1,19 @@
+PASS dist/components/env-fabric/index.html: Business API
+PASS dist/components/env-fabric/index.html: network-observation-query
+PASS dist/components/env-fabric/index.html: network-observation-result
+PASS dist/components/env-fabric/index.html: boundary-fault-receipt
+PASS dist/components/env-fabric/index.html: external-interaction-event
+PASS dist/components/env-fabric/index.html: process-config
+PASS dist/components/env-fabric/index.html: process-readiness
+PASS dist/components/env-fabric/index.html: HTTP API
+PASS dist/components/env-fabric/index.html: 数据契约
+PASS dist/en/components/env-fabric/index.html: Business API
+PASS dist/en/components/env-fabric/index.html: network-observation-query
+PASS dist/en/components/env-fabric/index.html: network-observation-result
+PASS dist/en/components/env-fabric/index.html: boundary-fault-receipt
+PASS dist/en/components/env-fabric/index.html: external-interaction-event
+PASS dist/en/components/env-fabric/index.html: process-config
+PASS dist/en/components/env-fabric/index.html: process-readiness
+PASS dist/en/components/env-fabric/index.html: HTTP APIs
+PASS dist/en/components/env-fabric/index.html: Data contracts
+PASS bilingual public pages contain API, Network Observation, fault, external-interaction and process/readiness sections

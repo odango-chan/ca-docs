@@ -1,0 +1,13 @@
+{
+  "component": "env-fabric",
+  "tier": "CROSS_REPO documentation consumer acceptance",
+  "result": "PASS",
+  "envFabricSourceCommit": "d4696c2bbcba3a0c78371102bc934dc051036b5c",
+  "caDocsSourceCommit": "d63a7b448af5b03ed6ccd423faeb2457b4dd4205",
+  "manifest": "docs/public-docs.yaml",
+  "declaredSources": 13,
+  "tests": "PASS",
+  "staticBuild": "PASS; 26 pages including bilingual env-fabric routes",
+  "renderedContentChecks": "PASS; API, Network Observation, boundary fault, external interaction, process config and readiness",
+  "snapshotSha256": "b018189d1aa8469ede0ddef0ec42787b089de616c0ee840dd05f24036cd2c059"
+}
