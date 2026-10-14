@@ -72,6 +72,7 @@ properties:
   assert.equal(api.schemas.Query.fields[1].enum, undefined);
   assert.deepEqual(contract.fields.map((field) => field.path), ['sourceAuthority', 'disposition']);
   assert.equal(contract.fields[1].enum, undefined);
+  assert.equal(contract.metadata.title, 'network-observation');
   assert.equal(JSON.stringify(snapshot).includes('sensitive'), false);
   assert.equal(JSON.stringify(snapshot).includes('internal'), false);
   assert.equal(snapshot.source.commit, 'abc123');

@@ -162,7 +162,7 @@ function summarizeJsonSchema(document, source) {
     path: source.path,
     metadata: publish.has('metadata') ? {
       id: document.$id || null,
-      title: document.title || source.role || path.basename(source.path),
+      title: source.role || document.title || path.basename(source.path),
       description: document.description || '',
     } : null,
     fields: publish.has('fields') ? collectFields(document, publish) : [],
