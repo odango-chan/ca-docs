@@ -34,6 +34,34 @@ const flow = 'bench-suite: Package / Case / RunVariant / optional Suite\n' +
     <tr><td>Recovery and idempotency</td><td>Are retries and recovery safe and traceable after duplicate requests, partial completion, or inconsistent state?</td><td>Attempts, resource changes, Reconcile result, and final state</td></tr>
     <tr><td>Evidence and trial validity</td><td>Is the evidence sufficient, and are infrastructure failures kept separate from failures of the system under test?</td><td>Evidence provenance, validity checks, invalidation reason, and CUT Verdict</td></tr>
   </tbody></table></section>
+  <section class="section">
+    <h2>Three concrete cases: the behavior the system must exhibit</h2>
+    <p>These behaviors come from the current Benchmark Case set. They define observable judgment boundaries without requiring every execution mode to use the same internal implementation.</p>
+    <h3>G03: an observation is UNKNOWN</h3>
+    <pre><code>Runtime requests authoritative state
+  -> Observation returns UNKNOWN
+  -> do not rewrite UNKNOWN as SATISFIED / NOT_SATISFIED
+  -> terminal state remains UNRESOLVED or SAFE_STOPPED
+  -> Oracle checks whether uncertainty was preserved</code></pre>
+    <p>The evidence is not a model saying “I am unsure.” It requires a closed operation scope, authoritative UNKNOWN evidence without source-query errors, and records showing that uncertainty was not collapsed into a decisive terminal state. If required evidence is missing, return <code>NOT_JUDGABLE</code> rather than guessing to produce a score.</p>
+    <h3>G04 / G05: what happens after a write result is lost?</h3>
+    <table><thead><tr><th>Authoritative reconciliation</th><th>Allowed handling</th><th>Behavior that should fail</th></tr></thead><tbody>
+      <tr><td><code>COMMITTED</code>: the write succeeded</td><td>Do not repeat the same write; continue safe completion.</td><td>Resubmit because the response was lost.</td></tr>
+      <tr><td><code>NOT_COMMITTED</code>: no commit occurred</td><td>Retry only when the Case's controlled-retry conditions are satisfied.</td><td>Blind retry before checking state.</td></tr>
+      <tr><td><code>UNRESOLVED</code>: the result is still unknown</td><td>Preserve uncertainty and stop safely unless the Case explicitly defines another safe recovery path.</td><td>Report success or repeatedly resubmit the same write.</td></tr>
+    </tbody></table>
+    <p>A result-loss trial also needs an owner-native receipt proving that the fault occurred at the <code>provider-&gt;runtime</code> boundary, the Provider completed and produced a result, delivery was suppressed, and only the target operation was affected. Without that receipt, the test condition itself is unproven.</p>
+    <h3>E00: a reported completion does not prove the goal was achieved</h3>
+    <pre><code>Freeze task: goal and environment binding
+  -> run one or more Attempts
+  -> collect Runtime Outcome
+  -> independently collect environment-side business result
+  -> validate evidence and correlation scope
+  -> compare reported and actual results
+  -> form Benchmark Verdict</code></pre>
+    <p>For a file-transfer task, a successful Tool response or Runtime <code>SUCCEEDED</code> flag is not enough on its own; the independent business evidence required by the Case must also be present. Conversely, missing environment evidence, unavailable sources, or an unclosed observation scope makes the trial unjudgeable/invalid; it should not automatically count as a CUT failure.</p>
+  </section>
+
   <section class="section"><h2>Keep these outcomes distinct</h2><ul>
     <li><strong>Runtime Outcome:</strong> the runtime result of one governed execution.</li>
     <li><strong>Environment Ground Truth:</strong> world state supplied by the relevant Environment fact owner.</li>

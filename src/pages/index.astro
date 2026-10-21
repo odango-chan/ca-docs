@@ -10,7 +10,7 @@ const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\
     <h1>Sandbox 平台文档</h1>
     <p>Sandbox 将 Agent、工具、环境、实验控制和评估组件组合为可重复运行的系统。这里介绍平台的架构与职责边界，并提供各组件维护的公开接口和契约。</p>
     <div class="home-actions">
-      <a href={href('/architecture/system/')}>平台架构 <span aria-hidden="true">→</span></a>
+      <a href={href('/architecture/system/#real-5gc-workflow')}>真实 5GC 工作流 <span aria-hidden="true">→</span></a>
       <a href={href('/benchmark/')}>Benchmark 设计 <span aria-hidden="true">→</span></a>
     </div>
   </section>
@@ -21,7 +21,7 @@ const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\
     <div class="reading-list">
       <a class="reading-item" href={href('/architecture/system/')}>
         <span class="reading-number">01</span>
-        <span><strong>总体架构与组件边界</strong><small>查看 ConnectionAgent Domain、Tool Plane、Environment Plane、Evaluation、Control / Surface 与 Shared Foundation 的分工。</small></span>
+        <span><strong>总体架构与组件边界</strong><small>从真实 Open5GS / UERANSIM 的 SBI 请求看清 Fabric、SCP、Agent 与 Runtime 如何协作，以及 R1 和 R2-B 的状态差异。</small></span>
         <span class="reading-arrow" aria-hidden="true">↗</span>
       </a>
       <a class="reading-item" href={href('/benchmark/')}>

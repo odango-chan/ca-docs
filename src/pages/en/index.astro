@@ -10,7 +10,7 @@ const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\
     <h1>Sandbox platform documentation</h1>
     <p>Sandbox composes Agent, tool, environment, experiment-control, and evaluation components into repeatable systems. This site describes the platform architecture and responsibility boundaries, and links to public interfaces and contracts maintained by each component.</p>
     <div class="home-actions">
-      <a href={href('/en/architecture/system/')}>Platform architecture <span aria-hidden="true">→</span></a>
+      <a href={href('/en/architecture/system/#real-5gc-workflow')}>Real 5GC workflow <span aria-hidden="true">→</span></a>
       <a href={href('/en/benchmark/')}>Benchmark design <span aria-hidden="true">→</span></a>
     </div>
   </section>
@@ -21,7 +21,7 @@ const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\
     <div class="reading-list">
       <a class="reading-item" href={href('/en/architecture/system/')}>
         <span class="reading-number">01</span>
-        <span><strong>Platform architecture and component boundaries</strong><small>See how the ConnectionAgent Domain, Tool Plane, Environment Plane, Evaluation, Control / Surface, and Shared Foundation fit together.</small></span>
+        <span><strong>Platform architecture and component boundaries</strong><small>Follow an SBI request through Open5GS / UERANSIM, Fabric, SCP, Agent, and Runtime, including the distinction between R1 and R2-B.</small></span>
         <span class="reading-arrow" aria-hidden="true">↗</span>
       </a>
       <a class="reading-item" href={href('/en/benchmark/')}>

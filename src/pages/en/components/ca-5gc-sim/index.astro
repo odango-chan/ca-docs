@@ -19,12 +19,12 @@ const matrix = [
   ['Transfer QoS', 'TRANSFER_QOS', 'BOOST · RECONCILE'],
 ];
 ---
-<SiteLayout title="ca-5gc-sim" lang="en">
+<SiteLayout title="env-5gc-sim" lang="en">
   <section class="hero">
-    <span class="eyebrow">Component / ca-5gc-sim</span>
-    <h1>ca-5gc-sim</h1>
+    <span class="eyebrow">Environment / env-5gc-sim</span>
+    <h1>env-5gc-sim</h1>
     <p class="lede">
-      Simulates 5GC state and NF behavior. The Facts, Operations, and routes below are generated from the current schemas and code.
+      Simulates 5GC state and NF behavior. The Facts, Operations, and routes below come from the published schema and implementation snapshot. The URL retains the former repository name for link compatibility.
     </p>
     <div class="page-tabs"><a class="primary-tab" href={href('/en/components/ca-5gc-sim/api/')}>HTTP API</a><a href={href('/en/components/ca-5gc-sim/facts/')}>Facts</a><a href={href('/en/components/ca-5gc-sim/operations/')}>Operations</a><a href={href('/en/components/ca-5gc-sim/standalone/')}>Standalone</a><a href={href('/en/components/ca-5gc-sim/')}>Overview</a></div>
   </section>
@@ -81,10 +81,10 @@ const matrix = [
       </div>
     </div>
     <div class="grid">
-      <div class="card"><h3>Network faults</h3><p>Drop, delay, reorder, and Network Observation live in <code>ca-service-fabric</code>.</p></div>
+      <div class="card"><h3>Network faults</h3><p>Drop, delay, reorder, and Network Observation live in <code>env-fabric</code>.</p></div>
       <div class="card"><h3>Alias → execution identity</h3><p>Alias-to-execution-identity lookup lives in <code>tool-common</code>.</p></div>
       <div class="card"><h3>Runtime Outcome</h3><p>SUCCEEDED / FAILED / OUTCOME_UNKNOWN and reconcile handling live in <code>ca-runtime</code>.</p></div>
-      <div class="card"><h3>Agent-facing tools</h3><p>The simulator is not exposed directly as an Agent tool. Runtime / <code>ca-mcp</code> provides that interface.</p></div>
+      <div class="card"><h3>Agent-facing tools</h3><p>The simulator is not exposed directly as an Agent tool. Runtime / <code>tool-mcp-gw</code> provides that interface.</p></div>
     </div>
   </section>
 
