@@ -1,0 +1,46 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import test from 'node:test';
+
+const root = process.cwd();
+const css = fs.readFileSync(path.join(root, 'src/styles/global.css'), 'utf8');
+
+test('owner-published Markdown uses the article width for structural blocks', () => {
+  assert.match(
+    css,
+    /\.docs-article \.prose \{\s*width:\s*100%;\s*max-width:\s*none;\s*min-width:\s*0;\s*\}/,
+    'the Markdown wrapper must not be constrained to the paragraph reading measure',
+  );
+  assert.doesNotMatch(
+    css,
+    /\.docs-article \.prose \{\s*max-width:\s*var\(--reading-width\);\s*\}/,
+    'the reading measure must not cap the entire Markdown document',
+  );
+  assert.match(
+    css,
+    /\.docs-article \.prose p,\s*\.docs-article \.prose li \{\s*max-width:\s*var\(--reading-width\);\s*\}/,
+    'paragraphs and list items should retain a comfortable line length',
+  );
+});
+
+test('document headings are not constrained by Latin ch-based width caps', () => {
+  assert.doesNotMatch(
+    css,
+    /\.docs-article h1\s*\{[^}]*max-width:\s*\d+ch/,
+    'document titles should wrap against the available article width, including CJK text',
+  );
+  assert.doesNotMatch(
+    css,
+    /\.home-hero h1\s*\{\s*max-width:\s*18ch/,
+    'mobile homepage titles should not receive a second CJK-unfriendly width cap',
+  );
+});
+
+test('tablet documentation layout uses the available viewport width', () => {
+  assert.doesNotMatch(
+    css,
+    /\.docs-frame\s*\{\s*width:\s*min\(100% - 2rem,\s*900px\)/,
+    'the tablet layout must not hard-cap the full sidebar-plus-content frame at 900px',
+  );
+});
