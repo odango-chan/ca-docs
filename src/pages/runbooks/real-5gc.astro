@@ -1,0 +1,99 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+---
+<SiteLayout title="真实 5GC 运行与验收手册" lang="zh" description="Open5GS、UERANSIM、env-fabric 的启动顺序、接口语义、验收证据与故障定位。">
+<section class="hero"><span class="eyebrow">Runbook / Real 5GC</span><h1>真实 5GC 运行与验收手册</h1><p class="lede">从指定 WSL2 主机上的 Open5GS + UERANSIM 基线开始，逐步验证 R0、R1，再识别 R2-B Agent 治理链路。只使用各 owner 仓已记录的稳定 CLI；不修改 Open5GS/UERANSIM 上游源码，不用 mock 冒充真实验收。</p></section>
+<section class="section"><h2>0. 先判断验收路径</h2>
+<table><thead><tr><th>阶段</th><th>要证明的事实</th><th>状态</th></tr></thead><tbody>
+<tr><td>R0 · local baseline</td><td>Open5GS full-5gc + 原生 N2；注册、会话、PFCP、TUN 和用户面可用。</td><td>先独立通过，作为对照基线。</td></tr>
+<tr><td>R1 · SBI observe-only</td><td>N2 由 gNB 直连 AMF；SBI 经 env-fabric → 必需的 SCP；注册、会话与用户面回归通过。</td><td>已有真实 WSL2 联调 PASS 记录。</td></tr>
+<tr><td>R2-B · Agent-governed SBI</td><td>CreateSMContext 形成 NetworkIntent v2，Runtime 准入通过后才执行精确 held action，再验证会话和用户面。</td><td>M5 live 与 M6 R1 回归证据已记录 PASS；整体 closeout 仍 BLOCKED。</td></tr>
+</tbody></table>
+<p><strong>运行位置：</strong>真实协议验收必须在指定 WSL2 Linux 主机运行。隔离环境可以做静态检查或单元测试，但不能替代 SCTP、TUN、路由和真实 NF 验收。环境仓禁止 Docker，Open5GS/UERANSIM upstream 必须保持 pristine。</p></section>
+<section class="section"><h2>1. R0：建立 Open5GS + UERANSIM 基线</h2><p>每组命令都在对应仓库根目录执行。</p>
+<h3>1.1 Open5GS（env-open5gs/）</h3><pre><code>./bin/env-open5gs doctor
+./bin/env-open5gs verify-upstream
+./bin/env-open5gs build
+./bin/env-open5gs configure --profile local
+sudo ./bin/env-open5gs start --profile local
+./bin/env-open5gs status
+./bin/env-open5gs logs</code></pre>
+<p>预期：host 前置条件满足，upstream 校验通过，配置生成；NRF、SCP、AMF、SMF、UPF、AUSF、UDM、UDR、PCF、NSSF、BSF 达到当前 profile 的 readiness。SCP 是必需路径。进程存在不单独证明 SBI 或 UE 注册成功。</p>
+<h3>1.2 UERANSIM（env-ueransim/）</h3><pre><code>./bin/env-ueransim doctor
+./bin/env-ueransim verify-upstream
+./bin/env-ueransim build
+./bin/env-ueransim configure --profile local
+./bin/env-ueransim start gnb
+./bin/env-ueransim start ue --name UE-A
+./bin/env-ueransim status
+./bin/env-ueransim wait registered --name UE-A</code></pre>
+<p>预期：gNB 已连接 AMF，UE-A 完成注册。Agent-control 基线应先停在 <code>UE_REGISTERED_NO_PDU_SESSION</code>；注册成功不代表会话已建立。需要验证会话时再显式触发：</p><pre><code>./bin/env-ueransim session establish --name UE-A</code></pre>
+<p>PASS 应对应本次触发的新会话进入 active，并有与该 UE/session 关联的 TUN 启动证据。最终用户面验证须使用环境记录的 UE/TUN 映射与已接受的 host procedure；不要猜 <code>uesimtun0</code> 等接口编号，也不要把 smoke fixture 当成真实 ping 证据。</p>
+<h3>1.3 停止和重跑</h3><pre><code># env-ueransim/
+./bin/env-ueransim stop
+
+# env-open5gs/
+./bin/env-open5gs stop</code></pre><p>先停止 UE/gNB，再停止核心网。保留日志与验收证据。TUN、route、netns、forwarding 或防火墙清理必须遵循环境仓已有步骤，不要使用模糊的 pkill。</p></section>
+<section class="section"><h2>2. R1：启用 SBI observe-only</h2><p>先让 R0 通过，再切换到已审核的 Fabric profile。关键拓扑：</p><pre><code>N2: UERANSIM gNB ── SCTP/NGAP ──► Open5GS AMF（直连）
+SBI: Open5GS NF ──► env-fabric ──► SCP ──► 目标 NF</code></pre>
+<p>Open5GS 提供 fabric profile；具体启动顺序必须与指定 WSL2 acceptance manifest 一致：</p><pre><code># env-open5gs/
+./bin/env-open5gs configure --profile fabric
+sudo ./bin/env-open5gs start --profile fabric
+./bin/env-open5gs status
+./bin/env-open5gs logs scp
+./bin/env-open5gs logs amf
+./bin/env-open5gs logs smf</code></pre>
+<p>UERANSIM 的 N2 必须直连 AMF，不能因 profile 名称含 fabric 就把 N2 改为经过 Fabric。R1 是 SBI observe-only：Fabric 记录请求/响应与关联信息并透明转发；不调用 Agent/Harness，不 HOLD，不发布 NetworkIntent。</p>
+<p>env-fabric 的通用 operator 配置检查和本地示例命令如下：</p><pre><code># env-fabric/
+go run ./cmd/env-fabric check-config --config configs/examples/local-topology-v1.yaml
+go run ./cmd/env-fabric serve --config configs/examples/local-topology-v1.yaml</code></pre>
+<p><strong>注意：</strong>该示例配置绑定的是本地 N4/PFCP endpoint，不是真实 R1 SBI profile 的启动命令。真实 SBI acceptance 必须使用已审核的 host 配置、listener/binding 和 acceptance manifest，不能用 N4 示例替代 SBI 路径。R1 必须重新验证注册、PDU Session、PFCP、UE TUN/user-plane readiness 和 ping PASS。</p></section>
+<section class="section"><h2>3. R2-B：NetworkIntent v2 到精确动作</h2><p>R2-B 在真实 SBI 边界增加 Agent 治理；不允许 Agent 直接查询 Open5GS，也不增加第二个 Open5GS 状态 Provider。</p><pre><code>AMF CreateSMContext (SBI)
+  -> env-fabric 保留 source material / 提取白名单字段
+  -> 创建 actionRef；成功发布后 action 进入 HELD
+  -> NetworkIntent v2
+  -> ca-agent-demo 映射到 Skill/Runtime context
+  -> Runtime PredicateEngine admission
+  -> admission PASS 后执行原样的精确 actionRef
+  -> env-fabric -> SCP -> SMF
+  -> 关联响应 + PFCP + UE session + TUN + ping 验证</code></pre>
+<p>首条受治理动作必须同时满足：</p><ul><li><code>operation = PDU_SESSION / ESTABLISH</code>；</li><li><code>source.origin = AMF</code>、<code>source.boundary = SBI</code>；</li><li><code>messageType = 193 / 0xC1</code>、<code>requestType = 1 / INITIAL_REQUEST</code>；</li><li>动作状态为 <code>HELD</code>，revision 精确匹配，deadline 有效；</li><li>subject 与 PDU Session scope 完全匹配。</li></ul>
+<table><thead><tr><th>字段</th><th>语义</th><th>常见错误</th></tr></thead><tbody>
+<tr><td><code>sourceName</code></td><td>固定为 <code>SRF</code>，事件生产者标签。</td><td>不能代替 <code>source.origin=AMF</code>。</td></tr>
+<tr><td><code>timestampUs</code></td><td>SRF 首次接收时的 Unix epoch 微秒。</td><td>下游不能刷新或重算。</td></tr>
+<tr><td><code>messageType</code></td><td>原始 NAS Message Type 字节；当前 PDU Session Establishment Request 为 193（0xC1）。</td><td>不能把 195（0xC3）标成该请求。</td></tr>
+<tr><td><code>seqNo</code></td><td>SRF 分配的事件序号。</td><td>不是 NAS security sequence，不能从 timestamp/actionRef 推导。</td></tr>
+<tr><td><code>subjectRef</code></td><td>CreateSMContext 的 SUPI，trim 后保持原值。</td><td>不经过 tool-common 查询或重写 SUPI。</td></tr>
+<tr><td><code>request.pduSessionId</code></td><td>CreateSMContext 的会话 ID。</td><td>不能关联其他 UE/session 的证据。</td></tr>
+<tr><td><code>request.requestType</code> / <code>pti</code></td><td>白名单协议字段；requestType 是数字，PTI 来自 5GSM header。</td><td>不能丢失数值类型或从事件名称猜测。</td></tr>
+<tr><td><code>actionRef</code> / <code>revision</code> / <code>deadline</code></td><td>精确、受版本与时间约束的 held action。</td><td>不能执行其他 action、旧 revision 或过期动作。</td></tr>
+<tr><td><code>sourceRefs</code></td><td>指向 Fabric 保留的原始证据材料。</td><td>不能复制 raw SBI/N1 建立第二个 authority。</td></tr>
+</tbody></table>
+<p>M5 live governed-action/user-plane 与 M6 R1 regression 均有记录，但整体 R2-B closeout 仍受 owner PR-range diff-check 与 evidence-hygiene 门禁阻塞。不能把组件测试或 Harness double 当成最终 live PASS。</p></section>
+<section class="section"><h2>4. 按证据层排查故障</h2><table><thead><tr><th>症状</th><th>先检查</th><th>不要直接下结论</th></tr></thead><tbody>
+<tr><td>doctor 报 SCTP/TUN/权限问题</td><td>指定 WSL2、内核能力、<code>/dev/net/tun</code>、<code>CAP_NET_ADMIN</code>、工作区是否位于 Linux filesystem。</td><td>不要改 upstream 或退回 mock；标记 <code>ENVIRONMENT_BLOCKED</code>。</td></tr>
+<tr><td>Open5GS NF 未 ready</td><td><code>env-open5gs status</code>、整体日志、SCP/NRF readiness、bind 地址、端口、MongoDB 与生成的 profile。</td><td>进程存在不证明 SBI 可用。</td></tr>
+<tr><td>gNB 无 NGAP 连接</td><td>AMF N2 endpoint、PLMN/TAC、路由、SCTP、gNB 日志。</td><td>R1 中不要先归因 SBI Fabric；N2 应直连。</td></tr>
+<tr><td>UE 注册失败</td><td>gNB connection、SUPI/PLMN、密钥/订阅、NSSAI、UE NAS 日志、AMF/AUSF/UDM/UDR 日志。</td><td>Fabric 看见 SBI 不等于 UE 已注册。</td></tr>
+<tr><td>注册成功但无会话</td><td>是否应保持 registered-only；trigger 是否执行；CreateSMContext；Fabric/SCP/SMF 响应与 PFCP。</td><td>注册不等于会话建立；INITIAL_REQUEST 也不能单独证明会话不存在。</td></tr>
+<tr><td>Runtime 成功但 ping 失败</td><td>SMF/UPF 会话事实、PFCP、UE session active、TUN manifest、路由与原始 ping 结果。</td><td>Runtime Outcome 不是独立用户面 Ground Truth。</td></tr>
+<tr><td>请求/响应超时或丢失</td><td>source refs、请求/响应关联、Fabric receipt、actionRef/revision/deadline 与权威状态。</td><td>不能盲目重试写操作或把未知结果改成成功；必要时保留 <code>OUTCOME_UNKNOWN</code>。</td></tr>
+<tr><td>R2 admission 拒绝</td><td>NetworkIntent v2、AMF/SBI 来源、messageType/requestType、subject/session、held state、revision、deadline。</td><td>不通过直查 Open5GS、增加 Provider 或绕过 Harness 修复。</td></tr>
+<tr><td>证据缺失或范围未闭合</td><td>来源可用性、同一 UE/session 关联、观察窗口与 cleanup scope closure。</td><td>判不可判定/无效，不自动判 CUT FAIL 或 PASS。</td></tr>
+</tbody></table></section>
+<section class="section"><h2>5. 每次验收必须保留的证据</h2><ul>
+<li>Run manifest：时间、主机/环境身份、各仓 commit、profile、配置 digest、执行边界和结果。</li>
+<li>环境健康：doctor/upstream 检查、Open5GS NF 与 SCP readiness、gNB NGAP 连接、UE 注册状态。</li>
+<li>协议证据：可关联的 SBI 请求/响应；R2-B 还需 NetworkIntent、sourceRefs、actionRef、revision、deadline 和 held/execution receipt。</li>
+<li>会话与用户面：SMF/UPF 事实、PFCP、UE session active、TUN 到 UE/session 映射、ping 命令及结果。</li>
+<li>收尾证据：受管进程已停止、资源清理、无残留 fault/lease、观察范围 CLOSED。</li>
+<li>Verdict 分类：组件测试、joined fixture、真实 WSL2 acceptance、R1 regression 与 Benchmark Verdict 必须分开。</li>
+</ul><p>PASS 必须能回答：谁产生了事实、对应哪个 UE/session、何时产生、证据是否完整、使用哪个 commit/config、怎样复现。日志截图本身不足以证明最终 PASS。</p></section>
+<section class="section"><h2>6. 权威资料</h2><ul>
+<li><a href="https://github.com/odango-chan/env-open5gs/blob/main/README.md">env-open5gs README</a> · <a href="https://github.com/odango-chan/env-open5gs/blob/main/docs/runtime.md">Runtime</a> · <a href="https://github.com/odango-chan/env-open5gs/blob/main/docs/troubleshooting.md">Troubleshooting</a></li>
+<li><a href="https://github.com/odango-chan/env-ueransim/blob/main/README.md">env-ueransim README</a> · <a href="https://github.com/odango-chan/env-ueransim/blob/main/docs/runtime.md">Runtime</a> · <a href="https://github.com/odango-chan/env-ueransim/blob/main/docs/troubleshooting.md">Troubleshooting</a></li>
+<li><a href="https://github.com/odango-chan/env-fabric/blob/main/README.zh-CN.md">env-fabric README</a> · <a href="https://github.com/odango-chan/env-fabric/blob/main/docs/WORK.md">Fabric readiness / blockers</a></li>
+<li><a href="https://github.com/odango-chan/connectionagent/blob/main/contracts/schemas/network-intent-v2.schema.yaml">NetworkIntent v2 canonical schema</a></li>
+<li><a href="https://github.com/odango-chan/sandbox/blob/main/docs/design/real-5gc-agent-control.md">Real 5GC design</a> · <a href="https://github.com/odango-chan/sandbox/blob/main/docs/design/r2b-joint-gap-audit.md">R2-B joint gap audit</a> · <a href="https://github.com/odango-chan/sandbox/blob/main/docs/WORK.md">Sandbox WORK status</a></li>
+</ul></section>
+</SiteLayout>
