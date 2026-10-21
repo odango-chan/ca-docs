@@ -164,3 +164,16 @@ test('shared content rules keep only declarations that survive article overrides
     assert.doesNotMatch(css, selector, 'shadowed base selector should not return: ' + selector);
   }
 });
+
+test('API presentation keeps active styles in the shared article layer', () => {
+  assert.match(css, /^\.docs-article \.api-heading \{[^}]*margin-bottom: \.9rem;/m);
+  assert.match(css, /^\.docs-article \.api-meta \{[^}]*align-items: center;/m);
+  assert.match(css, /^\.api-example summary \{\s*color: var\(--accent\);\s*\}/m);
+  assert.doesNotMatch(css, /^\.api-heading\s*\{/m);
+  assert.doesNotMatch(css, /^\.api-meta\s*\{/m);
+  assert.doesNotMatch(css, /^\.response-row\s*\{/m);
+  assert.doesNotMatch(css, /^\.api-example\s*\{/m);
+  assert.doesNotMatch(css, /^\.api-example pre\s*\{/m);
+  assert.doesNotMatch(css, /^\.response-contract table\s*\{/m);
+  assert.doesNotMatch(css, /^\.docs-article \.api-block \{/m);
+});
