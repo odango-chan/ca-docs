@@ -677,6 +677,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 .home-kicker { display: flex; align-items: center; gap: .55rem; margin-bottom: 1.2rem; color: var(--accent); font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .home-kicker::before { content: ''; width: 1.6rem; height: 1px; background: var(--accent); }
 .home-hero h1 { max-width: none; margin: 0; font-size: clamp(2rem,4vw,2.8rem); line-height: 1.2; letter-spacing: -.045em; text-wrap: pretty; }
+.home-hero h1 br { display: none; }
 .home-hero p { max-width: 63ch; margin: 1rem 0 0; color: #59635a; font-size: 1.04rem; line-height: 1.75; }
 .home-actions { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; margin-top: 1.25rem; }
 .home-actions a { display: inline-flex; align-items: center; gap: .55rem; padding-bottom: .25rem; border-bottom: 1px solid #b9c6b7; font-weight: 750; text-decoration: none; }
@@ -731,7 +732,6 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   .reading-item { grid-template-columns: 1.5rem minmax(0,1fr) auto; }
   .home-hero { padding-bottom: 1.65rem; }
   .home-hero h1 { max-width: none; font-size: clamp(1.85rem,7vw,2.35rem); line-height: 1.25; }
-  .home-hero h1 br { display: none; }
   .home-hero p { margin-top: .8rem; font-size: .98rem; }
   .home-section { padding-block: 1.2rem; }
 }
