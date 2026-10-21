@@ -73,7 +73,7 @@ function resolvePageRoute(target, locale) {
 test('home, architecture, and Benchmark links resolve in their own locale', () => {
   for (const page of overviewPages) {
     const source = fs.readFileSync(path.join(root, page.path), 'utf8');
-    const links = [...source.matchAll(/href=\\{href\\('([^']+)'\\)\\}/g)].map((match) => match[1]);
+    const links = [...source.matchAll(/href=\{href\('([^']+)'\)\}/g)].map((match) => match[1]);
     assert.ok(links.length >= 3, `${page.path}: expected navigation links`);
 
     for (const target of links) {
@@ -87,16 +87,16 @@ test('overview pages link to owner sections instead of duplicating long-form det
   for (const page of overviewPages) {
     const source = fs.readFileSync(path.join(root, page.path), 'utf8');
     if (page.kind === 'architecture') {
-      assert.match(source, /components\\/sandbox\\/#platform-architecture/);
+      assert.match(source, /components\/sandbox\/#platform-architecture/);
       assert.doesNotMatch(source, /M5 live governed-action|CreateSMContext|<h3>R2-B/);
     } else if (page.kind === 'benchmark') {
-      assert.match(source, /components\\/sandbox\\/#benchmark-framework/);
-      assert.match(source, /components\\/ca-benchmarks\\/#benchmark-assets/);
-      assert.match(source, /components\\/ca-benchmark-engine\\/#evaluation-lifecycle/);
-      assert.doesNotMatch(source, /G03|G04\\s*\\/\\s*G05|E00:/);
+      assert.match(source, /components\/sandbox\/#benchmark-framework/);
+      assert.match(source, /components\/ca-benchmarks\/#benchmark-assets/);
+      assert.match(source, /components\/ca-benchmark-engine\/#evaluation-lifecycle/);
+      assert.doesNotMatch(source, /G03|G04\s*\/\s*G05|E00:/);
     } else {
-      assert.match(source, /components\\/sandbox\\/#platform-architecture/);
-      assert.doesNotMatch(source, /architecture\\/system\\/#real-5gc-workflow/);
+      assert.match(source, /components\/sandbox\/#platform-architecture/);
+      assert.doesNotMatch(source, /architecture\/system\/#real-5gc-workflow/);
     }
   }
 });
