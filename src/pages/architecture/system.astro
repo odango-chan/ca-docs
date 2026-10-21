@@ -5,118 +5,66 @@ const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\
 const flow = 'Sandbox platform\n' +
   '├── ConnectionAgent Domain  ·  Agent / Runtime / Skills\n' +
   '├── Tool Plane              ·  discovery / gateway / common capabilities\n' +
-  '├── Environment Plane       ·  env-core / simulated & real worlds / env-fabric\n' +
-  '├── Evaluation              ·  bench-suite / bench-engine\n' +
-  '├── Control / Surface       ·  control / console\n' +
+  '├── Environment Plane       ·  environment substrate / simulated & real worlds / env-fabric\n' +
+  '├── Evaluation              ·  Benchmark assets / evaluation engine\n' +
+  '├── Control / Surface       ·  experiment control / console\n' +
   '└── Shared Foundation       ·  nodus\n' +
-  '\nComposition and compatibility are governed at platform level.\n' +
+  '\nPlatform-level composition and compatibility governance.\n' +
   'Each component retains its own contract and fact authority.';
 ---
-<SiteLayout title="Sandbox 总体架构" lang="zh" description="Sandbox 平台分层、组件职责和跨仓权威边界。">
-  <section class="hero">
+<SiteLayout title="Sandbox 总体架构" lang="zh" description="Sandbox 平台分层、主要阅读路径和技术文档权威边界。">
+  <section class="home-hero">
     <span class="eyebrow">Sandbox / Architecture</span>
     <h1>Sandbox 总体架构</h1>
-    <p class="lede">Sandbox 是面向 Agent、工具、环境和评估的产品级组合与治理层。它负责定义组件如何协作、如何兼容以及如何组成可运行的实验系统；各组件仍拥有自己的实现、契约和领域事实。</p>\n    <p><a href={href('/components/sandbox/')}>阅读源仓维护的详细架构与职责边界 →</a></p>
+    <p>Sandbox 将 Agent、工具、环境、实验控制和评估组件组合为可重复运行的系统。本页提供平台级地图和阅读入口；组件职责、技术流程及当前状态以源仓维护的详细文档和验收证据为准。</p>
+    <div class="home-actions">
+      <a href={href('/components/sandbox/#platform-architecture')}>详细架构与职责边界 <span aria-hidden="true">→</span></a>
+      <a href={href('/runbooks/real-5gc/')}>真实 5GC 运行手册 <span aria-hidden="true">→</span></a>
+      <a href={href('/interfaces/real-5gc-evidence/')}>接口与证据 <span aria-hidden="true">→</span></a>
+      <a href={href('/benchmark/')}>Benchmark 评估框架 <span aria-hidden="true">→</span></a>
+    </div>
   </section>
 
-  <section class="section">
-    <div class="grid"><div class="card wide">
-      <h3>平台分层</h3>
-      <pre><code>{flow}</code></pre>
-      <p class="muted">这是目标架构，不代表所有组件迁移和端到端验收均已完成。当前仓名与目标仓名可能不同，具体进度以 Sandbox 的迁移记录和各 owner 仓库为准。</p>
-    </div></div>
+  <section class="home-section">
+    <h2>平台分层</h2>
+    <p>以下是目标职责分类，用于理解各类组件如何组合；它不是已完成迁移或端到端验收的清单。</p>
+    <pre><code>{flow}</code></pre>
+    <p>物理仓名与目标分类可能暂时不同。具体组件的实现、契约和事实由相应 owner 仓库维护，平台文档负责说明它们如何协作。</p>
   </section>
 
-  <section class="section">
-    <h2>各层负责什么</h2>
-    <table>
-      <thead><tr><th>层</th><th>职责</th><th>主要组件（目标分类）</th></tr></thead>
-      <tbody>
-        <tr><td>ConnectionAgent Domain</td><td>Agent Host、规划与路由、Skill source/build、受治理执行、Outcome、Reconcile 与 Recovery。</td><td><code>ca-agent</code>、<code>ca-runtime</code>、<code>ca-dsh</code>、<code>ca-nanobot</code>、<code>ca-skills</code>、<code>ca-skill-toolchain</code></td></tr>
-        <tr><td>Tool Plane</td><td>工具发现与调用协议、gateway 映射、跨环境公共 capability。Gateway 不拥有底层业务效果。</td><td><code>tool-mcp-gw</code>、<code>tool-common</code></td></tr>
-        <tr><td>Environment Plane</td><td>环境实例底座、模拟或真实世界、权威 source facts、外部系统接入、网络观察与受控干预。</td><td><code>env-core</code>、<code>env-5gc-sim</code>、<code>env-5gc-real</code>、<code>env-fabric</code></td></tr>
-        <tr><td>Evaluation</td><td>评测资产定义、任务冻结、执行尝试、证据有效性、Verdict 与结果分析。</td><td><code>bench-suite</code>、<code>bench-engine</code></td></tr>
-        <tr><td>Control / Surface</td><td>选择并组装资源、管理外层生命周期和实验运行；提供人机操作界面。</td><td><code>control</code>、<code>console</code></td></tr>
-        <tr><td>Shared Foundation</td><td>跨领域复用的基础机制，不接管领域语义。</td><td><code>nodus</code></td></tr>
-      </tbody>
-    </table>
+  <section class="home-section">
+    <h2>按问题阅读</h2>
+    <div class="reading-list">
+      <a class="reading-item" href={href('/components/sandbox/#platform-architecture')}>
+        <span class="reading-number">01</span>
+        <span><strong>组件怎样协作，事实由谁负责？</strong><small>源仓维护的平台架构、组件职责、权威边界，以及真实 5GC 的 R1 / R2-B 流程。</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="reading-item" href={href('/runbooks/real-5gc/')}>
+        <span class="reading-number">02</span>
+        <span><strong>如何启动并验收真实 5GC？</strong><small>按运行步骤检查组网、会话、PFCP、用户面连通性和对应证据。</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="reading-item" href={href('/interfaces/real-5gc-evidence/')}>
+        <span class="reading-number">03</span>
+        <span><strong>哪些接口和证据可以证明结果？</strong><small>查看请求/响应契约、事实来源、证据关联范围与独立判定边界。</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="reading-item" href={href('/benchmark/')}>
+        <span class="reading-number">04</span>
+        <span><strong>如何评估 Agent 的可靠性？</strong><small>从平台级评估地图进入资产、执行生命周期和结果判定的 owner 文档。</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
+      </a>
+    </div>
   </section>
 
-  <section class="section">
-    <h2>组合权与事实权威是两回事</h2>
-    <p>Sandbox 可以登记组件、固定兼容版本、定义组合方式并执行系统级集成门禁，但这不意味着平台仓成为所有事实的来源。</p>
+  <section class="home-section">
+    <h2>状态如何解读</h2>
     <ul>
-      <li><code>ca-runtime</code> 拥有受治理执行的 Runtime Outcome；Sandbox 不写入第二份 Outcome。</li>
-      <li>Environment owner 拥有其世界状态和 source facts；Sandbox 不建立一个替代它们的中央状态库。</li>
-      <li>Benchmark Engine 按冻结任务和证据规则形成 Verdict；Sandbox 不另行裁决一次评估。</li>
-      <li>Control 管理资源和实验的外层生命周期；它不因此拥有 Environment 状态或 Benchmark 语义。</li>
-      <li>Console 展示和操作平台能力，不成为底层事实的权威来源。</li>
+      <li><strong>目标架构</strong>说明组件的预期职责和组合关系，不代表所有目标组件都已落地。</li>
+      <li><strong>源仓实现</strong>以组件 owner 仓库中有版本依据的文档、代码和契约为准。</li>
+      <li><strong>验收状态</strong>以对应测试和证据为准；文档同步、代码合并或静态站构建成功都不等同于端到端验收。</li>
     </ul>
-  </section>
-
-  <section class="section">
-    <h2>实验环境与被测对象</h2>
-    <p>Sandbox 可组合模拟、真实和混合环境。环境是被测系统运行和接受观察的对象，不是固定的单一模拟器。一次评估究竟包含 Agent、Runtime、工具还是端到端组合，由该次冻结的 EvaluationTask 明确，而不是由仓库名称推断。</p>
-  </section>
-
-  <section class="section" id="real-5gc-workflow">
-    <p><a href="/runbooks/real-5gc/">按命令运行与验收：真实 5GC 运行手册 →</a></p><p><a href="/interfaces/real-5gc-evidence/">接口与证据：请求/响应契约、事实权威和独立判定 →</a></p>
-    <h2>一条真实 5GC 请求怎样经过 Sandbox</h2>
-    <p>用当前的 Open5GS + UERANSIM 联调链路举例，比单看分层更容易看清各组件的作用。这里需要区分已经验证的 R1 观测路径和仍在收口的 R2-B Agent 治理路径。</p>
-    <h3>R1：观测并转发 SBI，不接管 N2</h3>
-    <pre><code>UERANSIM UE
-  -> gNB
-  -> Open5GS AMF
-  -> env-fabric（观测 SBI 并透明转发）
-  -> SCP
-  -> Open5GS NF（例如 SMF）
-
-N2 / NGAP：gNB -> AMF，直连
-SBI：按当前拓扑经过 env-fabric 与 SCP</code></pre>
-    <table><thead><tr><th>步骤</th><th>组件实际做什么</th><th>下一步依据什么</th></tr></thead><tbody>
-      <tr><td>1. UE 注册与会话请求</td><td>UERANSIM、gNB 和 Open5GS 使用原生状态机处理无线侧流程。Fabric 不拦截 SCTP/N2，也不解析 NGAP。</td><td>AMF 产生的 SBI 请求，而不是 Fabric 推断的 NAS 状态。</td></tr>
-      <tr><td>2. SBI 观测</td><td><code>env-fabric</code> 保留协议来源并观测 SBI 请求；R1 不发布 NetworkIntent，也不阻止请求。</td><td>源请求、来源边界和可关联的观测记录。</td></tr>
-      <tr><td>3. NF 间通信</td><td>请求经必需的 SCP 到达目标 NF，Fabric 继续透明转发。</td><td>实际请求/响应路径与 Open5GS 自身的状态。</td></tr>
-      <tr><td>4. 验证结果</td><td>从环境侧检查注册、PDU Session、PFCP、TUN 与用户面连通性；不把“请求已经转发”当作会话已建立。</td><td>各权威来源的状态与实际用户面测试。</td></tr>
-    </tbody></table>
-    <p>当前记录的 R0/R1 基线包括：NRF/SCP 启动、UE 注册、PDU Session 建立、PFCP，以及 UE 用户面 ping 3/3 PASS。它们是已记录的联调证据，不代表 R2-B 所有收口门禁都已通过。</p>
-    <h3>R2-B：在明确边界上引入 Agent 治理</h3>
-    <pre><code>AMF -- CreateSMContext / N1 SM --> env-fabric
-                                      |
-                                      | 保留原始来源记录
-                                      | 提取白名单协议字段
-                                      | 建立精确 actionRef
-                                      | PREPARED -> HELD
-                                      v
-                              NetworkIntent v2
-                                      |
-                                      v
-                         ca-agent-demo / Runtime
-                                      |
-                              Predicate admission
-                                      |
-                         仅在准入通过后执行精确 actionRef
-                                      |
-                                      v
-                              env-fabric -> SCP -> SMF</code></pre>
-    <table><thead><tr><th>边界</th><th>责任</th><th>禁止的捷径</th></tr></thead><tbody>
-      <tr><td><code>env-fabric</code></td><td>保留 SBI 原始材料，提取权威字段，生成 NetworkIntent v2，并管理精确、受期限约束的 held action。</td><td>不处理 N2/NGAP，不做完整 NAS 解码，也不把未发布的 action 变成可执行动作。</td></tr>
-      <tr><td><code>connectionagent</code></td><td>维护 canonical NetworkIntent schema；v2 是当前 R2-B 契约，v1 保留为历史契约。</td><td>不在 Sandbox 文档仓复制一份竞争性的 Schema。</td></tr>
-      <tr><td><code>ca-agent-demo</code></td><td>消费 NetworkIntent，将其投影到 Skill/Runtime 上下文，并通过 Runtime PredicateEngine 执行准入。</td><td>不直接查询 Open5GS 或 UERANSIM 来绕过 Environment/Observation 边界。</td></tr>
-      <tr><td>Sandbox</td><td>固定跨仓组合、依赖顺序、联合验收与证据收口。</td><td>不替代各组件的领域事实、Outcome 或契约所有权。</td></tr>
-    </tbody></table>
-    <p><strong>当前状态：</strong>R2-B 的 M5 live governed-action/user-plane 证据和 M6 R1 回归证据已记录为 PASS；整体 closeout 仍 BLOCKED，原因包括 owner PR-range diff-check 与 evidence-hygiene 门禁未闭合。因此不能把 R2-B 描述为整体完成。</p>
-    <p>权威细节：<a href="https://github.com/odango-chan/sandbox/blob/main/docs/design/real-5gc-agent-control.md">Real 5GC Agent-Controlled Environment</a> · <a href="https://github.com/odango-chan/sandbox/blob/main/docs/design/r2b-joint-gap-audit.md">R2-B 联合差距审计</a>。</p>
-  </section>
-
-  <section class="section">
-    <h2>当前状态与权威资料</h2>
-    <p>Sandbox 的目标分层已经确定，部分仓库已迁移到目标命名；其余消费者迁移和验收仍在推进。文档描述的是平台目标与当前明确的职责边界，不将计划中的能力表述为已交付功能。</p>
-    <ul>
-      <li><a href="https://github.com/odango-chan/sandbox/blob/main/docs/architecture/sandbox.md">Sandbox 总体架构与边界</a></li>
-      <li><a href="https://github.com/odango-chan/sandbox/blob/main/docs/architecture/repository-topology.md">仓库拓扑与迁移命名</a></li>
-      <li><a href="https://github.com/odango-chan/sandbox/blob/main/docs/ownership.md">Sandbox ownership 规则</a></li>
-      <li><a href="https://github.com/odango-chan/connectionagent/blob/main/docs/architecture.md">ConnectionAgent Domain 的现有架构资料</a></li>
-    </ul>
+    <p>详细技术说明及 R1 / R2-B 的当前状态请阅读<a href={href('/components/sandbox/#platform-architecture')}>源仓架构文档</a>与<a href={href('/runbooks/real-5gc/')}>运行手册</a>，不要从目标名称推断交付状态。</p>
   </section>
 </SiteLayout>
