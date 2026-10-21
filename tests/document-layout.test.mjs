@@ -61,3 +61,19 @@ test('consolidated layout retains section hierarchy and mobile table overflow', 
   assert.match(css, /@media \(max-width: 700px\)\s*\{[\s\S]*?\.component-table \{ display: block; overflow-x: auto; \}/);
 });
 
+test('retired generic layout selectors do not leak into the shared site layout', () => {
+  assert.doesNotMatch(css, /^\.shell\s*\{/m);
+  assert.doesNotMatch(css, /^\.nav-row\s*\{/m);
+  assert.doesNotMatch(css, /^nav\s*\{/m);
+  assert.doesNotMatch(css, /^main\s*\{/m);
+  assert.doesNotMatch(css, /\.component-row/);
+  assert.doesNotMatch(css, /\.component-index/);
+  assert.doesNotMatch(css, /\.footer-row/);
+  assert.doesNotMatch(css, /\.muted-row/);
+  assert.doesNotMatch(css, /\.home-secondary/);
+  assert.doesNotMatch(css, /\.nav-api/);
+});
+
+test('the shared top navigation remains a single horizontal row', () => {
+  assert.match(css, /\.top-nav\s*\{[^}]*flex-wrap:\s*nowrap/);
+});
