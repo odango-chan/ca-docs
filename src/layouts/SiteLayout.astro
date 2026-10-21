@@ -41,8 +41,8 @@ const labels = lang === 'zh'
       systemGroup: 'System design', benchmarkGroup: 'Evaluation', componentGroup: 'Component reference',
       simulatorGroup: '5GC simulator', commonGroup: 'Shared tools', github: 'View source',
     };
-const isActive = (path: string) => currentPath.replace(/\/$/, '') === path.replace(/\/$/, '');
-const isWithin = (path: string) => currentPath.replace(/\/$/, '') === path.replace(/\/$/, '') || currentPath.startsWith(path.replace(/\/$/, '') + '/');
+const normalizedPath = currentPath.startsWith('/en/') ? (currentPath.slice(3) || '/') : currentPath === '/en' ? '/' : currentPath;
+const isActive = (path: string) => normalizedPath.replace(/\/$/, '') === path.replace(/\/$/, '');
 ---
 <!doctype html>
 <html lang={lang === 'zh' ? 'zh-CN' : 'en'}>
@@ -86,16 +86,16 @@ const isWithin = (path: string) => currentPath.replace(/\/$/, '') === path.repla
           <a class:list={{ 'sidebar-home': true, active: isHome }} href={lang === 'zh' ? href('/') : href('/en/')}><span aria-hidden="true">⌂</span>{labels.home}</a>
           <div class="sidebar-group">
             <p>{labels.systemGroup}</p>
-            <a class:list={{ active: isActive(lang === 'zh' ? '/architecture/system' : '/en/architecture/system') }} href={pathFor('/architecture/system/')}>{labels.architecture}</a>
-            <a class:list={{ active: isActive(lang === 'zh' ? '/architecture' : '/en/architecture') }} href={pathFor('/architecture/')}>{labels.governance}</a>
+            <a class:list={{ active: isActive('/architecture/system') }} href={pathFor('/architecture/system/')}>{labels.architecture}</a>
+            <a class:list={{ active: isActive('/architecture') }} href={pathFor('/architecture/')}>{labels.governance}</a>
           </div>
           <div class="sidebar-group">
             <p>{labels.benchmarkGroup}</p>
-            <a class:list={{ active: isActive(lang === 'zh' ? '/benchmark' : '/en/benchmark') }} href={pathFor('/benchmark/')}>{labels.benchmark}</a>
+            <a class:list={{ active: isActive('/benchmark') }} href={pathFor('/benchmark/')}>{labels.benchmark}</a>
           </div>
           <div class="sidebar-group">
             <p>{labels.componentGroup}</p>
-            <a class:list={{ active: isActive(lang === 'zh' ? '/api' : '/en/api') }} href={pathFor('/api/')}>{labels.api}</a>
+            <a class:list={{ active: isActive('/api') }} href={pathFor('/api/')}>{labels.api}</a>
           </div>
           <div class="sidebar-group">
             <p>{labels.simulatorGroup}</p>
@@ -107,7 +107,7 @@ const isWithin = (path: string) => currentPath.replace(/\/$/, '') === path.repla
           </div>
           <div class="sidebar-group">
             <p>{labels.commonGroup}</p>
-            <a class:list={{ active: isActive(lang === 'zh' ? '/components/tool-common' : '/en/components/tool-common') }} href={pathFor('/components/tool-common/')}>{labels.common}</a>
+            <a class:list={{ active: isActive('/components/tool-common') }} href={pathFor('/components/tool-common/')}>{labels.common}</a>
             <a class:list={{ active: currentPath.includes('/components/tool-common/api') }} href={pathFor('/components/tool-common/api/')}>{labels.commonApi}</a>
             <a class:list={{ active: currentPath.includes('/components/tool-common/subject-identity') }} href={pathFor('/components/tool-common/subject-identity/')}>{labels.subject}</a>
             <a class:list={{ active: currentPath.includes('/components/tool-common/boundaries') }} href={pathFor('/components/tool-common/boundaries/')}>{labels.boundaries}</a>
