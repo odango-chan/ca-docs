@@ -1,0 +1,88 @@
+---
+import SiteLayout from '../../../layouts/SiteLayout.astro';
+---
+<SiteLayout title="Real 5GC Runbook and Acceptance" lang="en" description="Reproducible Open5GS, UERANSIM and env-fabric startup, interface semantics, acceptance evidence and troubleshooting.">
+<section class="hero"><span class="eyebrow">Runbook / Real 5GC</span><h1>Real 5GC runbook and acceptance</h1><p class="lede">Start with the Open5GS + UERANSIM baseline on the designated WSL2 host, validate R0 and R1, then identify the R2-B Agent-governed path. Use owner-documented stable CLIs; do not modify upstream source or use mocks as proof of live acceptance.</p></section>
+<section class="section"><h2>0. Choose the path</h2><table><thead><tr><th>Stage</th><th>What must be proven</th><th>Status</th></tr></thead><tbody>
+<tr><td>R0 · local baseline</td><td>Open5GS full-5gc + native N2; registration, session, PFCP, TUN and user-plane connectivity.</td><td>Pass independently as the control baseline.</td></tr>
+<tr><td>R1 · SBI observe-only</td><td>N2 remains direct gNB → AMF; SBI traverses env-fabric → mandatory SCP; registration, session and user-plane regression pass.</td><td>Real WSL2 integration PASS recorded.</td></tr>
+<tr><td>R2-B · Agent-governed SBI</td><td>CreateSMContext becomes NetworkIntent v2; Runtime admission passes before the exact held action executes; then verify session and user plane.</td><td>M5 live and M6 R1 regression evidence recorded PASS; overall closeout remains BLOCKED.</td></tr>
+</tbody></table><p><strong>Execution location:</strong> real protocol acceptance runs on the designated WSL2 Linux host. An isolated environment can run static checks/unit tests but cannot substitute for SCTP, TUN, routes or real NFs. Environment repos prohibit Docker; Open5GS/UERANSIM upstream source must remain pristine.</p></section>
+<section class="section"><h2>1. R0: Open5GS + UERANSIM baseline</h2><p>Run each command group from the root of its own repository.</p>
+<h3>1.1 Open5GS (env-open5gs/)</h3><pre><code>./bin/env-open5gs doctor
+./bin/env-open5gs verify-upstream
+./bin/env-open5gs build
+./bin/env-open5gs configure --profile local
+sudo ./bin/env-open5gs start --profile local
+./bin/env-open5gs status
+./bin/env-open5gs logs</code></pre><p>Expected: host prerequisites pass, upstream integrity is verified, config is generated, and NRF, SCP, AMF, SMF, UPF, AUSF, UDM, UDR, PCF, NSSF and BSF reach profile readiness. SCP is mandatory. A running process alone does not prove SBI or UE registration.</p>
+<h3>1.2 UERANSIM (env-ueransim/)</h3><pre><code>./bin/env-ueransim doctor
+./bin/env-ueransim verify-upstream
+./bin/env-ueransim build
+./bin/env-ueransim configure --profile local
+./bin/env-ueransim start gnb
+./bin/env-ueransim start ue --name UE-A
+./bin/env-ueransim status
+./bin/env-ueransim wait registered --name UE-A</code></pre><p>Expected: gNB is connected to AMF and UE-A is registered. The Agent-control baseline should first stop at <code>UE_REGISTERED_NO_PDU_SESSION</code>; registration does not imply a session exists. Trigger one explicitly when needed:</p><pre><code>./bin/env-ueransim session establish --name UE-A</code></pre><p>PASS should correspond to the new session becoming active and TUN startup evidence correlated with that UE/session. Use the environment's UE/TUN mapping and accepted host procedure for user-plane validation. Do not guess interface names such as <code>uesimtun0</code> or treat smoke fixtures as ping evidence.</p>
+<h3>1.3 Stop and repeat</h3><pre><code># env-ueransim/
+./bin/env-ueransim stop
+
+# env-open5gs/
+./bin/env-open5gs stop</code></pre><p>Stop UE/gNB before the core network. Preserve logs and acceptance evidence. Follow owner procedures for TUN/routes/netns/forwarding/firewall cleanup; do not use broad pkill commands.</p></section>
+<section class="section"><h2>2. R1: SBI observe-only</h2><p>Pass R0 first, then switch to the reviewed Fabric profile. Essential topology:</p><pre><code>N2: UERANSIM gNB ── SCTP/NGAP ──► Open5GS AMF (direct)
+SBI: Open5GS NF ──► env-fabric ──► SCP ──► target NF</code></pre><p>Open5GS provides a fabric profile; keep startup aligned with the designated WSL2 acceptance manifest:</p><pre><code># env-open5gs/
+./bin/env-open5gs configure --profile fabric
+sudo ./bin/env-open5gs start --profile fabric
+./bin/env-open5gs status
+./bin/env-open5gs logs scp
+./bin/env-open5gs logs amf
+./bin/env-open5gs logs smf</code></pre><p>UERANSIM N2 must remain directly connected to AMF. R1 is SBI observe-only: Fabric records request/response and correlation details, then transparently forwards. It does not invoke Agent/Harness, HOLD requests, or publish NetworkIntent.</p><p>The generic env-fabric operator-config check and local example are:</p><pre><code># env-fabric/
+go run ./cmd/env-fabric check-config --config configs/examples/local-topology-v1.yaml
+go run ./cmd/env-fabric serve --config configs/examples/local-topology-v1.yaml</code></pre><p><strong>Important:</strong> this example binds a local N4/PFCP endpoint; it is not the real R1 SBI-profile launch command. Real SBI acceptance must use the reviewed host config, listener/binding and acceptance manifest. Do not substitute the N4 example for SBI. Re-prove registration, PDU Session, PFCP, UE TUN/user-plane readiness and ping PASS.</p></section>
+<section class="section"><h2>3. R2-B: NetworkIntent v2 to exact action</h2><p>R2-B adds Agent governance at the real SBI boundary. The Agent must not query Open5GS directly; no second Open5GS state Provider is introduced.</p><pre><code>AMF CreateSMContext (SBI)
+  -> env-fabric retains source material / extracts whitelisted fields
+  -> creates actionRef; action becomes HELD after successful publication
+  -> NetworkIntent v2
+  -> ca-agent-demo maps to Skill/Runtime context
+  -> Runtime PredicateEngine admission
+  -> execute exact actionRef only after admission passes
+  -> env-fabric -> SCP -> SMF
+  -> correlated response + PFCP + UE session + TUN + ping verification</code></pre><p>The first governed action must satisfy all conditions:</p><ul><li><code>operation = PDU_SESSION / ESTABLISH</code>;</li><li><code>source.origin = AMF</code>, <code>source.boundary = SBI</code>;</li><li><code>messageType = 193 / 0xC1</code>, <code>requestType = 1 / INITIAL_REQUEST</code>;</li><li>action is <code>HELD</code>, revision matches exactly, deadline is valid;</li><li>subject and PDU Session scope match exactly.</li></ul>
+<table><thead><tr><th>Field</th><th>Meaning</th><th>Common mistake</th></tr></thead><tbody>
+<tr><td><code>sourceName</code></td><td>Fixed to <code>SRF</code>, the event producer label.</td><td>It does not replace <code>source.origin=AMF</code>.</td></tr>
+<tr><td><code>timestampUs</code></td><td>Unix epoch microseconds captured at first SRF ingress.</td><td>Do not refresh or recompute downstream.</td></tr>
+<tr><td><code>messageType</code></td><td>Raw NAS Message Type byte; PDU Session Establishment Request is 193 (0xC1).</td><td>Do not label 195 (0xC3) as that request.</td></tr>
+<tr><td><code>seqNo</code></td><td>Sequence assigned by SRF.</td><td>Not NAS security sequence; do not derive from timestamp/actionRef.</td></tr>
+<tr><td><code>subjectRef</code></td><td>CreateSMContext SUPI, trimmed but otherwise unchanged.</td><td>Do not query tool-common or rewrite the SUPI.</td></tr>
+<tr><td><code>request.pduSessionId</code></td><td>Session ID from CreateSMContext.</td><td>Do not correlate another UE/session.</td></tr>
+<tr><td><code>request.requestType</code> / <code>pti</code></td><td>Whitelisted protocol fields; requestType is numeric, PTI comes from 5GSM header.</td><td>Do not drop numeric types or infer values from labels.</td></tr>
+<tr><td><code>actionRef</code> / <code>revision</code> / <code>deadline</code></td><td>Exact held action bounded by version and time.</td><td>Do not execute another, stale or expired action.</td></tr>
+<tr><td><code>sourceRefs</code></td><td>References to source evidence retained by Fabric.</td><td>Do not copy raw SBI/N1 into a competing authority.</td></tr>
+</tbody></table><p>M5 live governed-action/user-plane and M6 R1 regression are recorded, but overall R2-B closeout remains blocked on owner PR-range diff-check and evidence-hygiene gates. Component tests or a Harness double are not final live PASS.</p></section>
+<section class="section"><h2>4. Troubleshoot by evidence layer</h2><table><thead><tr><th>Symptom</th><th>Check first</th><th>Avoid this conclusion</th></tr></thead><tbody>
+<tr><td>doctor reports SCTP/TUN/permission issue</td><td>Designated WSL2, kernel capability, <code>/dev/net/tun</code>, <code>CAP_NET_ADMIN</code>, Linux filesystem checkout.</td><td>Do not patch upstream or fall back to mocks; report <code>ENVIRONMENT_BLOCKED</code>.</td></tr>
+<tr><td>Open5GS NF not ready</td><td><code>env-open5gs status</code>, logs, SCP/NRF readiness, bind address, ports, MongoDB and generated profile.</td><td>A running process does not prove SBI works.</td></tr>
+<tr><td>gNB has no NGAP connection</td><td>AMF N2 endpoint, PLMN/TAC, routes, SCTP and gNB logs.</td><td>Do not blame SBI Fabric first; N2 is direct in R1.</td></tr>
+<tr><td>UE registration fails</td><td>gNB connection, SUPI/PLMN, keys/subscription, NSSAI, UE NAS logs, AMF/AUSF/UDM/UDR logs.</td><td>Fabric seeing SBI does not prove registration.</td></tr>
+<tr><td>Registered but no session</td><td>Expected registered-only state, trigger, CreateSMContext, Fabric/SCP/SMF response and PFCP.</td><td>Registration does not imply session; INITIAL_REQUEST alone does not prove absence.</td></tr>
+<tr><td>Runtime success but ping fails</td><td>SMF/UPF session facts, PFCP, UE session active, TUN manifest, routes and raw ping result.</td><td>Runtime Outcome is not independent user-plane Ground Truth.</td></tr>
+<tr><td>Request/response timeout or loss</td><td>Source refs, correlation, Fabric receipt, actionRef/revision/deadline and authoritative state.</td><td>Do not blindly retry a write or turn uncertainty into success; preserve <code>OUTCOME_UNKNOWN</code>.</td></tr>
+<tr><td>R2 admission rejected</td><td>NetworkIntent v2, AMF/SBI provenance, messageType/requestType, subject/session, held state, revision and deadline.</td><td>Do not query Open5GS directly, add a Provider or bypass Harness.</td></tr>
+<tr><td>Evidence missing or scope open</td><td>Source availability, same UE/session correlation, observation window and cleanup closure.</td><td>Classify as unjudgeable/invalid, not automatically CUT FAIL or PASS.</td></tr>
+</tbody></table></section>
+<section class="section"><h2>5. Evidence required for every acceptance run</h2><ul>
+<li>Run manifest: timestamp, host/environment identity, repository commits, profile, config digest, execution boundary and result.</li>
+<li>Environment health: doctor/upstream checks, Open5GS NF/SCP readiness, gNB NGAP connection and UE registration.</li>
+<li>Protocol evidence: correlatable SBI request/response; for R2-B also NetworkIntent, sourceRefs, actionRef, revision, deadline and held/execution receipt.</li>
+<li>Session/user plane: SMF/UPF facts, PFCP, UE session active, TUN-to-UE/session mapping, ping command and result.</li>
+<li>Teardown evidence: managed processes stopped, resources cleaned, no residual fault/lease, observation scope CLOSED.</li>
+<li>Verdict class: component test, joined fixture, real WSL2 acceptance, R1 regression and Benchmark Verdict stay distinct.</li>
+</ul><p>A PASS must answer who produced the fact, which UE/session it belongs to, when it was produced, whether evidence is complete, which commit/config was used, and how to reproduce it. A log screenshot alone is not sufficient.</p></section>
+<section class="section"><h2>6. Authoritative references</h2><ul>
+<li><a href="https://github.com/odango-chan/env-open5gs/blob/main/README.md">env-open5gs README</a> · <a href="https://github.com/odango-chan/env-open5gs/blob/main/docs/runtime.md">Runtime</a> · <a href="https://github.com/odango-chan/env-open5gs/blob/main/docs/troubleshooting.md">Troubleshooting</a></li>
+<li><a href="https://github.com/odango-chan/env-ueransim/blob/main/README.md">env-ueransim README</a> · <a href="https://github.com/odango-chan/env-ueransim/blob/main/docs/runtime.md">Runtime</a> · <a href="https://github.com/odango-chan/env-ueransim/blob/main/docs/troubleshooting.md">Troubleshooting</a></li>
+<li><a href="https://github.com/odango-chan/env-fabric/blob/main/README.zh-CN.md">env-fabric README</a> · <a href="https://github.com/odango-chan/env-fabric/blob/main/docs/WORK.md">Fabric readiness / blockers</a></li>
+<li><a href="https://github.com/odango-chan/connectionagent/blob/main/contracts/schemas/network-intent-v2.schema.yaml">Canonical NetworkIntent v2 schema</a></li>
+<li><a href="https://github.com/odango-chan/sandbox/blob/main/docs/design/real-5gc-agent-control.md">Real 5GC design</a> · <a href="https://github.com/odango-chan/sandbox/blob/main/docs/design/r2b-joint-gap-audit.md">R2-B joint gap audit</a> · <a href="https://github.com/odango-chan/sandbox/blob/main/docs/WORK.md">Sandbox WORK status</a></li>
+</ul></section>
+</SiteLayout>
