@@ -146,3 +146,21 @@ test('760px responsive overrides are consolidated after their base styles', () =
   assert.match(responsive, /\.source-status \{ align-items: flex-start; flex-direction: column; \}/);
   assert.match(responsive, /\.doc-row \{ align-items: flex-start; \}/);
 });
+
+test('shared content rules keep only declarations that survive article overrides', () => {
+  assert.match(css, /^\.hero \{\s*display: grid;\s*\}/m);
+  assert.match(css, /^\.lede \{\s*margin: 0;\s*\}/m);
+  assert.match(css, /^\.section-head p \{\s*max-width: 660px;\s*\}/m);
+  assert.match(css, /^\.api-heading \{\s*margin-bottom: 0\.9rem;\s*\}/m);
+  for (const selector of [
+    /^\.page-tabs\s*\{/m,
+    /^\.api-card\s*\{/m,
+    /^\.prose\s*\{/m,
+    /^\.prose h1\s*\{/m,
+    /^\.prose h2\s*\{/m,
+    /^\.prose ul\s*,\s*$/m,
+    /^\.prose table\s*\{/m,
+  ]) {
+    assert.doesNotMatch(css, selector, 'shadowed base selector should not return: ' + selector);
+  }
+});
