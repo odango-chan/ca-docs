@@ -1,0 +1,64 @@
+---
+import SiteLayout from '../../../layouts/SiteLayout.astro';
+const flow = 'User intent and constraints\n' +
+  '          │\n' +
+  '          ▼\n' +
+  'Agent: understand · plan · select skills/tools\n' +
+  '          │\n' +
+  '          ▼\n' +
+  'Execution boundary / Runtime\n' +
+  '  enforce constraints · track state · coordinate execution\n' +
+  '          │\n' +
+  '          ▼\n' +
+  'Tool contracts and environment adapters\n' +
+  '          │\n' +
+  '          ▼\n' +
+  'Simulated / sandboxed / real external systems\n' +
+  '          │\n' +
+  '          ▼\n' +
+  'Authoritative external state + evidence\n' +
+  '          │\n' +
+  '          └──── verify outcome; recover or report uncertainty';
+---
+<SiteLayout title="CA System Architecture" lang="en">
+  <section class="hero">
+    <span class="eyebrow">CA Docs / Architecture</span>
+    <h1>ConnectionAgent system architecture</h1>
+    <p class="lede">CA operates external systems under explicit goals and constraints. A generated plan or a successful tool response is not, by itself, proof that the user's goal has been achieved. Decision-making, execution, external state, and outcome evidence are distinct concerns.</p>
+  </section>
+
+  <section class="section">
+    <div class="grid">
+      <div class="card wide">
+        <h3>End-to-end conceptual model</h3>
+        <pre><code>{flow}</code></pre>
+        <p class="muted">This cross-repository conceptual view explains responsibility boundaries; it is not a required process topology for every deployment. Concrete interfaces and implementations remain authoritative in their owning component repositories.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Responsibility boundaries</h2>
+    <div class="grid">
+      <div class="card"><h3>Agent / Planner</h3><p>Understands goals and constraints, plans steps, and selects skills and tools. Model output is not authoritative evidence of external state.</p></div>
+      <div class="card"><h3>Runtime / Execution</h3><p>Manages steps, constraints, state, and outcomes within a defined execution boundary. Completed, failed, and unconfirmed outcomes must remain distinct.</p></div>
+      <div class="card"><h3>Tools / Providers</h3><p>Expose operations and observations through explicit contracts. A successful call proves only what that call guarantees, not automatically that the higher-level user goal is satisfied.</p></div>
+      <div class="card"><h3>Environment / External system</h3><p>Simulators, sandboxes, and real systems provide different validation conditions. Verify outcomes against authoritative system state where possible and retain auditable evidence.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Reliability principles</h2>
+    <div class="grid">
+      <div class="card"><h3>Fail closed</h3><p>When a critical precondition, target identity, or required evidence cannot be established, do not report an uncertain outcome as success.</p></div>
+      <div class="card"><h3>External state first</h3><p>Verify goal completion against authoritative system state rather than relying only on agent text or optimistic intermediate status.</p></div>
+      <div class="card"><h3>Traceability</h3><p>Correlate intent, plan, tool calls, environment state, and final adjudication for review and debugging.</p></div>
+      <div class="card"><h3>Explicit environment boundaries</h3><p>Simulator, sandbox, and real-system results must be reported separately rather than treated as interchangeable.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <p>For component interfaces, configuration, and implementation status, start with <a href="../../en/architecture/">documentation architecture and source governance</a>, then follow links to the owning component's authoritative docs. This page explains cross-component concepts and does not redefine component contracts.</p>
+    <p><strong>Status:</strong> This is an architecture overview. Concrete component connections, deployment topology, and capability maturity must be verified against owner-repository contracts and reproducible evidence.</p>
+  </section>
+</SiteLayout>
