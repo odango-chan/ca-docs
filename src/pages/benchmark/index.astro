@@ -1,72 +1,49 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
-const flow = 'Benchmark definition\n' +
-  '  goals · scenario · constraints · expected outcome\n' +
+const flow = 'ca-benchmarks (what to evaluate)\n' +
+  '  Package / Case / RunVariant / optional Suite\n' +
   '                 │\n' +
   '                 ▼\n' +
-  'Declared system under test (CUT)\n' +
-  '  agent-only / runtime-only / end-to-end\n' +
+  'ca-benchmark-engine (how to evaluate)\n' +
+  '  validate → resolve → preview → freeze\n' +
   '                 │\n' +
   '                 ▼\n' +
-  'Trial orchestration + controlled environment\n' +
+  'Immutable EvaluationTask\n' +
   '                 │\n' +
   '                 ▼\n' +
-  'Observations + evidence collection\n' +
+  'ExecutionAttempt(s) → Agent / Runtime / Environment\n' +
   '                 │\n' +
   '                 ▼\n' +
-  'Oracle / adjudication rules\n' +
+  'Semantic evidence → validity gate → EvaluationResult\n' +
   '                 │\n' +
   '                 ▼\n' +
-  'Result + metrics + provenance';
+  'Aggregation / regression / certification / query';
 ---
 <SiteLayout title="CA Benchmark 架构" lang="zh">
-  <section class="hero">
-    <span class="eyebrow">CA Docs / Benchmark</span>
-    <h1>Benchmark 架构与评估边界</h1>
-    <p class="lede">CA Benchmark 用可说明、可复现的实验评估 Agent 与执行系统。每个结果都必须明确被测对象、运行条件、判定规则和证据来源；不能把单次演示或工具返回的 PASS 当作通用可靠性结论。</p>
-  </section>
-
-  <section class="section">
-    <div class="grid">
-      <div class="card wide">
-        <h3>评估流水线</h3>
-        <pre><code>{flow}</code></pre>
-        <p class="muted">这是逻辑架构，不代表当前已有一个独立实现的 Benchmark Engine 或所有执行模式均已落地。</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <h2>每项评估必须声明什么</h2>
-    <div class="grid">
-      <div class="card"><h3>被测对象（CUT）</h3><p>明确评估 Agent、Runtime，还是包含工具与环境的端到端系统。不同边界的分数不可直接视为同一指标。</p></div>
-      <div class="card"><h3>场景与约束</h3><p>声明初始状态、用户目标、限制条件、可用工具、环境版本和预期终态。</p></div>
-      <div class="card"><h3>Oracle / 判定规则</h3><p>定义成功、失败、部分完成和无法确认的条件。判定应基于权威状态或明确的证据规则，而非模型自评。</p></div>
-      <div class="card"><h3>运行来源</h3><p>记录测试资产、Engine、Agent/模型配置、环境版本和关键依赖，保证结果可追溯。</p></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <h2>可靠性评估重点</h2>
-    <div class="grid">
-      <div class="card"><h3>错误预防</h3><p>在前置条件不满足或操作违反约束时，系统是否能阻止危险或无效执行。</p></div>
-      <div class="card"><h3>结果真实性</h3><p>是否识别中间层的 false-positive，且只在权威状态支持时判定成功。</p></div>
-      <div class="card"><h3>失败与不确定性</h3><p>是否区分失败、超时、未知结果和证据不足，避免将未知状态伪装成成功。</p></div>
-      <div class="card"><h3>恢复与可审计性</h3><p>是否安全处理重复执行、状态不一致、恢复过程，并保留可复核证据。</p></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <h2>不要混淆的结果</h2>
-    <div class="grid">
-      <div class="card"><h3>模拟环境通过</h3><p>证明指定模拟场景与测试规则下的行为，不自动证明真实网络行为。</p></div>
-      <div class="card"><h3>真实环境通过</h3><p>只对记录的真实环境、配置、初始状态和证据范围负责，不代表对所有环境普遍成立。</p></div>
-      <div class="card"><h3>组件测试通过</h3><p>只证明声明的组件边界，不自动证明完整 Agent-to-Outcome 闭环。</p></div>
-      <div class="card"><h3>端到端通过</h3><p>必须有端到端预期结果与足够证据，不能只累计各组件的局部 PASS。</p></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <p><strong>当前状态：</strong>本页定义 Benchmark 的公开架构和评估纪律，不宣称所有指标、运行模式或测试资产已经实现。后续接入具体 Benchmark 仓时，应从其权威定义和可复现运行记录生成详细页面。</p>
-  </section>
+  <section class="hero"><span class="eyebrow">CA Docs / Benchmark</span><h1>Benchmark 架构与评估边界</h1><p class="lede">CA Benchmark 以版本化资产定义评估问题，并将编译冻结、执行、证据判定和结果聚合分开。它评估 Agent / Runtime / 环境组合的指定行为，不替代 Runtime 的业务执行，也不把模型自报 PASS 当作评估结论。</p></section>
+  <section class="section"><div class="grid"><div class="card wide"><h3>评估生命周期</h3><pre><code>{flow}</code></pre><p class="muted">这是根据当前两个 owner 仓库的职责整理的逻辑模型；实际可用能力以各自版本化契约和验收状态为准。</p></div></div></section>
+  <section class="section"><h2>谁负责什么</h2><div class="grid">
+    <div class="card"><h3>ca-benchmarks：What</h3><p>正式作者资产仓。拥有 Benchmark Package / Case / RunVariant、可选 Suite，以及必要时的 package-local Probe / Normalizer / Oracle 源码。<code>benchmarks/manifest.yaml</code> 是当前公开 Benchmark catalog 的成员权威。</p></div>
+    <div class="card"><h3>ca-benchmark-engine：How</h3><p>拥有 Schema 与校验、资产解析、编译、Preview / Freeze、EvaluationTask、ExecutionAttempt、调度、证据有效性、Verdict / EvaluationResult、统计、回归和认证投影。</p></div>
+    <div class="card"><h3>Environment / Sandbox / Lab</h3><p>环境 owner 提供真实能力 inventory、观察和 Ground Truth；Sandbox 提供受控环境与故障能力；Lab 选择资源、管理生命周期并编排实验。Benchmark 资产不绑定具体 endpoint 或实例。</p></div>
+    <div class="card"><h3>被测对象（CUT）</h3><p>每次评估需声明边界：Agent、Runtime，或包含工具与环境的端到端组合。不同 CUT 边界的结果不能直接当作同一个指标比较。</p></div>
+  </div></section>
+  <section class="section"><h2>可靠性评估重点</h2><div class="grid">
+    <div class="card"><h3>约束与错误预防</h3><p>当前置条件不满足或动作违反约束时，系统能否阻止不安全或无效执行。</p></div>
+    <div class="card"><h3>权威结果与证据</h3><p>是否依据 owner 权威状态与 admitted evidence 判定结果，而不是依赖中间层乐观状态或模型自评。</p></div>
+    <div class="card"><h3>未知、失败与无效运行</h3><p>区分 CUT 失败、未知结果和基础设施无效；无效运行不应被直接算成 CUT 失败。</p></div>
+    <div class="card"><h3>恢复与重试</h3><p>验证重复操作、结果不确定、状态不一致和恢复路径，同时保留尝试级证据。</p></div>
+  </div></section>
+  <section class="section"><h2>不能混为一谈的概念</h2><div class="grid">
+    <div class="card"><h3>Runtime Outcome</h3><p>Runtime 对一次受治理执行的结果负责。</p></div>
+    <div class="card"><h3>Benchmark Verdict</h3><p>Engine 根据冻结任务、证据有效性和 Case 规则形成评估结论；它不是 Runtime Outcome 的别名。</p></div>
+    <div class="card"><h3>Environment Ground Truth</h3><p>由环境 / Sandbox 等事实 owner 提供，不由 Benchmark Engine 伪造或取代。</p></div>
+    <div class="card"><h3>Invalid Trial</h3><p>环境或基础设施未满足有效运行条件时，应标记无效并保留原因，不能自动归罪于 CUT。</p></div>
+  </div></section>
+  <section class="section"><h2>权威来源</h2><ul>
+    <li><a href="https://github.com/odango-chan/ca-benchmarks">ca-benchmarks — 正式评估资产与当前 Case 集</a></li>
+    <li><a href="https://github.com/odango-chan/ca-benchmarks/blob/main/docs/architecture/benchmark-model.md">Benchmark 领域模型</a></li>
+    <li><a href="https://github.com/odango-chan/ca-benchmark-engine">ca-benchmark-engine — 编译、执行与评估</a></li>
+    <li><a href="https://github.com/odango-chan/ca-benchmark-engine/blob/main/docs/architecture/engine-model.md">Benchmark Engine 领域模型</a></li>
+  </ul><p class="muted">本页是全局导览，不替代上述仓库的正式定义，也不宣称所有评估模式和指标均已具备生产就绪状态。</p></section>
 </SiteLayout>
