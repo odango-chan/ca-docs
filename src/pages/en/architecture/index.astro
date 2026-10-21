@@ -20,44 +20,20 @@ const flow = 'owner repository\n' +
 ---
 <SiteLayout title="Documentation architecture" lang="en">
   <section class="hero">
-    <span class="eyebrow">CA Docs / Architecture</span>
+    <span class="eyebrow">CA Docs / Governance</span>
     <h1>Data stays in the component repositories</h1>
-    <p class="lede">
-      OpenAPI, schemas, and implementation stay in each <code>ca-*</code> repository. CA Docs reads them and builds a common set of pages.
-    </p>
+    <p class="lede">OpenAPI, schemas, and implementation stay in each owning component repository. Each repository uses <code>docs/public-docs.yaml</code> to declare what may be published. CA Docs consumes only declared sources.</p>
   </section>
-
-  <section class="section">
-    <div class="grid">
-      <div class="card wide">
-        <h3>How data gets here</h3>
-        <pre><code>{flow}</code></pre>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="grid">
-      <div class="card">
-        <h3>Original definitions</h3>
-        <p>Kept and versioned with the component that owns it.</p>
-      </div>
-      <div class="card">
-        <h3>What CA Docs adds</h3>
-        <p>Navigation, notes, examples, and links between repositories.</p>
-      </div>
-      <div class="card">
-        <h3>When OpenAPI and code differ</h3>
-        <p>The difference is shown directly.</p>
-      </div>
-      <div class="card">
-        <h3>Adding another repository</h3>
-        <p>Pick the schema/API/code files to read, then add that repository.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <a href={href('/en/components/ca-5gc-sim/')}>View the first integrated component →</a>
-  </section>
+  <section class="section"><div class="grid"><div class="card wide"><h3>How data gets here</h3><pre><code>{flow}</code></pre></div></div></section>
+  <section class="section"><div class="grid">
+    <div class="card"><h3>Original definitions</h3><p>Kept and versioned with the component that owns them.</p></div>
+    <div class="card"><h3>What CA Docs adds</h3><p>Navigation, explanations, examples, and links between repositories.</p></div>
+    <div class="card"><h3>When OpenAPI and code differ</h3><p>The difference is shown directly rather than silently ignored.</p></div>
+    <div class="card"><h3>Adding another repository</h3><p>Declare public sources and let the common sync pipeline validate and publish them.</p></div>
+  </div></section>
+  <section class="section"><h2>Public architecture docs</h2><div class="grid">
+    <a class="card" href={href('/en/architecture/system/')}><h3>CA system architecture →</h3><p>Cross-component boundaries, execution loop, and reliability principles.</p></a>
+    <a class="card" href={href('/en/benchmark/')}><h3>Benchmark architecture →</h3><p>System under test, evidence, oracle, and result provenance.</p></a>
+  </div></section>
+  <section class="section"><a href={href('/en/components/ca-5gc-sim/')}>View the first integrated component →</a></section>
 </SiteLayout>
