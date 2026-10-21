@@ -2,7 +2,7 @@ version: 1
 
 components:
   - id: ca-5gc-sim
-    repository: odango-chan/ca-5gc-sim
+    repository: odango-chan/env-5gc-sim
     status: active
     sourceIdentity: env-5gc-sim
     title:
