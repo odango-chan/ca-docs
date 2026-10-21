@@ -4,34 +4,34 @@ import data from '../../data/generated/ca-5gc-sim.json';
 const base = import.meta.env.BASE_URL;
 const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\/+/, '')}`;
 ---
-<SiteLayout title="ConnectionAgent 文档" lang="zh" description="ConnectionAgent 的系统架构、可靠性评估与组件公开文档。">
+<SiteLayout title="Sandbox 文档" lang="zh" description="Sandbox 平台的总体架构、组件职责、可靠性 Benchmark 与公开接口文档。">
   <section class="home-hero">
-    <div class="home-kicker">ConnectionAgent · Documentation</div>
-    <h1>理解系统。验证可靠性。</h1>
-    <p>这里介绍 ConnectionAgent 的整体设计、可靠性评估方法，以及各组件公开的接口与契约。先从全局理解，再按需深入具体组件。</p>
+    <div class="home-kicker">SANDBOX · PLATFORM DOCUMENTATION</div>
+    <h1>Sandbox 平台文档</h1>
+    <p>Sandbox 将 Agent、工具、环境、实验控制和评估组件组合为可重复运行的系统。这里介绍平台的架构与职责边界，并提供各组件维护的公开接口和契约。</p>
     <div class="home-actions">
-      <a href={href('/architecture/system/')}>阅读系统架构 <span aria-hidden="true">→</span></a>
-      <a href={href('/benchmark/')}>了解 Benchmark <span aria-hidden="true">→</span></a>
+      <a href={href('/architecture/system/')}>平台架构 <span aria-hidden="true">→</span></a>
+      <a href={href('/benchmark/')}>Benchmark 设计 <span aria-hidden="true">→</span></a>
     </div>
   </section>
 
   <section class="home-section">
-    <h2>从这里开始</h2>
-    <p>如果你第一次了解 CA，建议按以下顺序阅读。</p>
+    <h2>平台概览</h2>
+    <p>Sandbox 是产品级组合与治理层，不是一个模拟器，也不接管各组件的领域事实。它支持在模拟、真实或混合环境中组合不同实现。</p>
     <div class="reading-list">
       <a class="reading-item" href={href('/architecture/system/')}>
         <span class="reading-number">01</span>
-        <span><strong>系统架构与职责边界</strong><small>理解 Agent Host、Runtime、Provider、环境与 Lab 如何协作，以及哪些组件拥有权威状态。</small></span>
+        <span><strong>总体架构与组件边界</strong><small>查看 ConnectionAgent Domain、Tool Plane、Environment Plane、Evaluation、Control / Surface 与 Shared Foundation 的分工。</small></span>
         <span class="reading-arrow" aria-hidden="true">↗</span>
       </a>
       <a class="reading-item" href={href('/benchmark/')}>
         <span class="reading-number">02</span>
-        <span><strong>Benchmark 评估模型</strong><small>理解评估资产、冻结任务、执行尝试、证据有效性与最终判定之间的关系。</small></span>
+        <span><strong>Benchmark 与可靠性评估</strong><small>了解评估资产、被测对象、冻结任务、执行尝试、证据判定与结果聚合的边界。</small></span>
         <span class="reading-arrow" aria-hidden="true">↗</span>
       </a>
       <a class="reading-item" href={href('/architecture/')}>
         <span class="reading-number">03</span>
-        <span><strong>文档来源与治理</strong><small>了解为什么各组件维护自己的公开来源，以及 ca-docs 如何同步和发布这些内容。</small></span>
+        <span><strong>文档来源与治理</strong><small>了解组件如何声明公开文档来源，以及本站如何校验、同步和发布快照。</small></span>
         <span class="reading-arrow" aria-hidden="true">↗</span>
       </a>
     </div>
@@ -39,28 +39,28 @@ const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\
 
   <section class="home-section">
     <h2>组件参考</h2>
-    <p>全局文档解释系统关系；组件参考提供更具体的公开接口、状态与操作说明。</p>
+    <p>平台级文档说明组件如何组合；接口、状态和操作的具体定义仍由各组件所属仓库维护。</p>
     <table class="component-table">
-      <thead><tr><th>组件</th><th>职责</th><th>公开参考</th></tr></thead>
+      <thead><tr><th>组件</th><th>所属层</th><th>公开参考</th></tr></thead>
       <tbody>
         <tr>
-          <td><a href={href('/components/ca-5gc-sim/')}>ca-5gc-sim</a></td>
-          <td>5GC 模拟环境与相关能力</td>
+          <td><a href={href('/components/ca-5gc-sim/')}>env-5gc-sim</a></td>
+          <td>Environment Plane</td>
           <td><a href={href('/api/')}>API</a> · <a href={href('/components/ca-5gc-sim/facts/')}>Facts（{data.counts.facts}）</a> · <a href={href('/components/ca-5gc-sim/operations/')}>Operations（{data.counts.operations}）</a></td>
         </tr>
         <tr>
           <td><a href={href('/components/tool-common/')}>tool-common</a></td>
-          <td>Subject Identity 与公共工具契约</td>
-          <td><a href={href('/components/tool-common/')}>组件概览</a></td>
+          <td>Tool Plane</td>
+          <td><a href={href('/components/tool-common/')}>组件概览</a> · <a href={href('/components/tool-common/subject-identity/')}>Subject Identity</a></td>
         </tr>
       </tbody>
     </table>
-    <p class="home-footnote">组件清单会随着各所属仓库发布公开文档清单而扩展。并非所有仓库或能力都已接入。</p>
+    <p class="home-footnote">上表只列出当前已接入的公开参考，不代表 Sandbox 的完整组件清单。组件迁移和仓名变更按各 owner 仓库的状态推进。</p>
   </section>
 
   <section class="home-section">
-    <h2>关于这些文档</h2>
-    <p>CA Docs 负责跨仓库的解释、导航与公开快照。机器契约、实现行为和业务事实仍以各组件所属仓库为准；快照记录来源版本，便于追溯与复核。</p>
-    <p><a href={href('/architecture/')}>了解文档治理与来源同步 →</a></p>
+    <h2>文档与实现的关系</h2>
+    <p>本站负责平台级说明、跨仓导航和经过校验的公开快照。各组件所属仓库仍是其实现、机器契约和权威事实的来源。Sandbox 的目标架构已建立，跨仓迁移和消费者验收仍在分阶段进行；设计已接受不等于所有能力均已实现。</p>
+    <p><a href={href('/architecture/')}>查看文档来源与同步规则 →</a></p>
   </section>
 </SiteLayout>

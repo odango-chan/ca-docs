@@ -5,8 +5,8 @@ const {
   title,
   lang = 'zh',
   description = lang === 'zh'
-    ? 'ConnectionAgent 的系统架构、可靠性评估与组件公开文档。'
-    : 'ConnectionAgent system architecture, reliability evaluation, and public component documentation.',
+    ? 'Sandbox 平台架构、组件职责、可靠性评估与公开接口文档。'
+    : 'Sandbox platform architecture, component ownership, reliability evaluation, and public interface documentation.',
 } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\/+/, '')}`;
@@ -19,25 +19,25 @@ const isHome = currentPath === '/' || currentPath === '/en' || currentPath === '
 const pathFor = (zh: string) => lang === 'zh' ? href(zh) : href(`/en${zh === '/' ? '/' : zh}`);
 const labels = lang === 'zh'
   ? {
-      nav: '主导航', language: '语言', home: '文档首页', architecture: '系统架构',
+      nav: '主导航', language: '语言', home: '文档首页', architecture: '平台架构',
       governance: '文档来源与治理', benchmark: 'Benchmark 架构', api: 'API 总览',
       components: '组件参考', simulator: '5GC 模拟器', simulatorApi: 'HTTP API',
       facts: 'Facts', operations: 'Operations', standalone: '独立运行',
       common: '公共工具契约', commonApi: 'HTTP API', subject: 'Subject Identity',
       boundaries: '职责边界', source: '文档与契约来源',
-      footer: 'CA Docs 负责跨仓解释与导航；机器契约、实现行为和权威事实以各所属仓库为准。',
+      footer: 'Sandbox Docs 负责平台级说明与跨仓导航；机器契约、实现行为和权威事实以各所属仓库为准。',
       systemGroup: '系统设计', benchmarkGroup: '评估方法', componentGroup: '组件参考',
       simulatorGroup: '5GC 模拟器', commonGroup: '公共工具', github: '查看源码',
     }
   : {
       nav: 'Main navigation', language: 'Language', home: 'Documentation home',
-      architecture: 'System architecture', governance: 'Sources & governance',
+      architecture: 'Platform architecture', governance: 'Sources & governance',
       benchmark: 'Benchmark architecture', api: 'API overview', components: 'Components',
       simulator: '5GC simulator', simulatorApi: 'HTTP API', facts: 'Facts',
       operations: 'Operations', standalone: 'Standalone',
       common: 'Shared tool contracts', commonApi: 'HTTP API', subject: 'Subject Identity',
       boundaries: 'Responsibility boundaries', source: 'Docs & contract ownership',
-      footer: 'CA Docs owns cross-repository explanations and navigation; machine contracts, implementation behavior, and authoritative facts remain in their owner repositories.',
+      footer: 'Sandbox Docs owns platform-level explanations and cross-repository navigation; machine contracts, implementation behavior, and authoritative facts remain in their owner repositories.',
       systemGroup: 'System design', benchmarkGroup: 'Evaluation', componentGroup: 'Component reference',
       simulatorGroup: '5GC simulator', commonGroup: 'Shared tools', github: 'View source',
     };
@@ -55,14 +55,14 @@ const isActive = (path: string) => normalizedPath.replace(/\/$/, '') === path.re
     <link rel="alternate" hreflang="zh-CN" href={new URL(href(zhPath), Astro.url.origin)} />
     <link rel="alternate" hreflang="en" href={new URL(href(enPath), Astro.url.origin)} />
     <link rel="alternate" hreflang="x-default" href={new URL(href(zhPath), Astro.url.origin)} />
-    <title>{title} · CA Docs</title>
+    <title>{title} · Sandbox Docs</title>
   </head>
   <body>
     <a class="skip-link" href="#main-content">{lang === 'zh' ? '跳到正文' : 'Skip to content'}</a>
     <header class="site-header">
       <div class="header-inner">
-        <a class="brand" href={lang === 'zh' ? href('/') : href('/en/')} aria-label="CA Docs home">
-          <span class="brand-mark">CA</span><span class="brand-name">ConnectionAgent <span>Docs</span></span>
+        <a class="brand" href={lang === 'zh' ? href('/') : href('/en/')} aria-label="Sandbox Docs home">
+          <span class="brand-mark">SB</span><span class="brand-name">Sandbox <span>Docs</span></span>
         </a>
         <nav class="top-nav" aria-label={labels.nav}>
           <a class:list={{ 'top-link-active': currentPath.includes('/architecture') }} href={pathFor('/architecture/system/')}>{labels.architecture}</a>
@@ -122,7 +122,7 @@ const isActive = (path: string) => normalizedPath.replace(/\/$/, '') === path.re
       </div>
     )}
     <footer class="site-footer">
-      <div class="footer-inner"><a class="footer-brand" href={lang === 'zh' ? href('/') : href('/en/')}>CA Docs</a><span>{labels.footer}</span><a href="https://github.com/odango-chan/ca-docs">GitHub ↗</a></div>
+      <div class="footer-inner"><a class="footer-brand" href={lang === 'zh' ? href('/') : href('/en/')}>Sandbox Docs</a><span>{labels.footer}</span><a href="https://github.com/odango-chan/ca-docs">GitHub ↗</a></div>
     </footer>
   </body>
 </html>

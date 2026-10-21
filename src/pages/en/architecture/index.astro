@@ -1,39 +1,18 @@
 ---
 import SiteLayout from '../../../layouts/SiteLayout.astro';
-
 const base = import.meta.env.BASE_URL;
 const href = (value: string) => `${base}${value.replace(/^\//, '')}`;
-const flow = 'owner repository\n' +
-  '  ├─ OpenAPI\n' +
-  '  ├─ JSON Schema\n' +
-  '  └─ implementation\n' +
-  '         │\n' +
-  '         ▼\n' +
-  'ca-docs sync / validation\n' +
-  '         │\n' +
-  '         ├─ semantic inventory\n' +
-  '         ├─ route inventory\n' +
-  '         └─ drift detection\n' +
-  '         │\n' +
-  '         ▼\n' +
-  'GitHub Pages docs';
+const flow = 'component owner repository\n  └─ docs/public-docs.yaml\n       ├─ OpenAPI / JSON Schema\n       ├─ public Markdown\n       └─ implementation checks\n              │\n              ▼\nSandbox Docs synchronization and validation\n              │\n              ▼\nVersioned public snapshots\n              │\n              ▼\nStatic documentation site';
 ---
-<SiteLayout title="Documentation architecture" lang="en">
-  <section class="hero">
-    <span class="eyebrow">CA Docs / Governance</span>
-    <h1>Data stays in the component repositories</h1>
-    <p class="lede">OpenAPI, schemas, and implementation stay in each owning component repository. Each repository uses <code>docs/public-docs.yaml</code> to declare what may be published. CA Docs consumes only declared sources.</p>
-  </section>
-  <section class="section"><div class="grid"><div class="card wide"><h3>How data gets here</h3><pre><code>{flow}</code></pre></div></div></section>
-  <section class="section"><div class="grid">
-    <div class="card"><h3>Original definitions</h3><p>Kept and versioned with the component that owns them.</p></div>
-    <div class="card"><h3>What CA Docs adds</h3><p>Navigation, explanations, examples, and links between repositories.</p></div>
-    <div class="card"><h3>When OpenAPI and code differ</h3><p>The difference is shown directly rather than silently ignored.</p></div>
-    <div class="card"><h3>Adding another repository</h3><p>Declare public sources and let the common sync pipeline validate and publish them.</p></div>
-  </div></section>
-  <section class="section"><h2>Public architecture docs</h2><div class="grid">
-    <a class="card" href={href('/en/architecture/system/')}><h3>CA system architecture →</h3><p>Cross-component boundaries, execution loop, and reliability principles.</p></a>
-    <a class="card" href={href('/en/benchmark/')}><h3>Benchmark architecture →</h3><p>System under test, evidence, oracle, and result provenance.</p></a>
-  </div></section>
-  <section class="section"><a href={href('/en/components/ca-5gc-sim/')}>View the first integrated component →</a></section>
+<SiteLayout title="Documentation sources and governance" lang="en" description="Public documentation sources, cross-repository synchronization, and authority boundaries for Sandbox Docs.">
+  <section class="hero"><span class="eyebrow">Sandbox / Documentation</span><h1>Components own their definitions; platform docs connect them</h1><p class="lede">Interfaces, schemas, and implementation notes are maintained in the repositories that own them. Each component uses <code>docs/public-docs.yaml</code> to declare publishable material. Sandbox Docs validates those declarations, synchronizes snapshots, and provides cross-repository navigation.</p></section>
+  <section class="section"><div class="grid"><div class="card wide"><h3>Publication flow</h3><pre><code>{flow}</code></pre></div></div></section>
+  <section class="section"><h2>Sources and responsibilities</h2><table><thead><tr><th>Content</th><th>Authority</th><th>What Sandbox Docs does</th></tr></thead><tbody>
+    <tr><td>Interfaces and schemas</td><td>The component repository that defines them</td><td>Validates public manifests and presents versioned references</td></tr>
+    <tr><td>Implementation behavior and domain facts</td><td>The relevant implementation or fact owner</td><td>Explains cross-component relationships without creating a competing source of truth</td></tr>
+    <tr><td>Platform architecture and repository relationships</td><td><a href="https://github.com/odango-chan/sandbox">sandbox</a> governance repository and owner decisions</td><td>Provides an external-facing overview and navigation</td></tr>
+    <tr><td>Evaluation assets and adjudication rules</td><td>Benchmark asset repository and Engine contracts</td><td>Explains the evaluation system without redefining Case semantics</td></tr>
+  </tbody></table></section>
+  <section class="section"><h2>Handling discrepancies</h2><p>If a public declaration differs from implementation, show the discrepancy and have the owner correct it. Snapshots record their source revision for review; a successful sync does not by itself prove end-to-end acceptance.</p></section>
+  <section class="section"><h2>Related documents</h2><ul><li><a href={href('/en/architecture/system/')}>Sandbox platform architecture</a></li><li><a href={href('/en/benchmark/')}>Benchmark architecture and reliability evaluation</a></li><li><a href="https://github.com/odango-chan/sandbox/blob/main/docs/README.md">Sandbox governance documentation index</a></li></ul></section>
 </SiteLayout>

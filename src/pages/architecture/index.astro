@@ -1,10 +1,16 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
-const flow='组件所属仓库\n  └─ docs/public-docs.yaml\n       ├─ OpenAPI\n       ├─ JSON Schema\n       ├─ public Markdown\n       └─ implementation-check\n              │\n              ▼\nca-docs 同步 / 校验\n              │\n              ▼\n安全的 public snapshot\n              │\n              ▼\nGitHub Pages 文档';
+const flow='组件所属仓库\n  └─ docs/public-docs.yaml\n       ├─ OpenAPI / JSON Schema\n       ├─ public Markdown\n       └─ implementation checks\n              │\n              ▼\nSandbox Docs 同步与校验\n              │\n              ▼\n带来源版本的公开快照\n              │\n              ▼\n静态文档站';
 ---
-<SiteLayout title="文档架构" lang="zh">
-<section class="hero"><span class="eyebrow">CA Docs / Governance</span><h1>数据从各仓库来，这里只负责整理</h1><p class="lede">OpenAPI、Schema 和实现仍由各个组件所属仓库维护。每个仓库用 <code>docs/public-docs.yaml</code> 明确哪些内容可以进入公共文档，CA Docs 只读取清单里声明的内容。</p></section>
-<section class="section"><div class="grid"><div class="card wide"><h3>数据怎么过来</h3><pre><code>{flow}</code></pre></div></div></section>
-<section class="section"><div class="grid"><div class="card"><h3>原始定义</h3><p>放在对应组件仓库里，并跟着组件一起版本化。</p></div><div class="card"><h3>这里补什么</h3><p>补导航、说明、示例，以及各仓库之间的关系。</p></div><div class="card"><h3>OpenAPI 和实现不一致</h3><p>直接把差异列出来，不自动忽略。</p></div><div class="card"><h3>怎么扩展</h3><p>每个组件自己声明公开文档来源。有没有 OpenAPI 都没关系，按实际内容生成 API、Contracts、Capabilities 或 Boundaries 页面。</p></div></div></section>
-<section class="section"><h2>对外架构文档</h2><div class="grid"><a class="card" href="../architecture/system/"><h3>CA 系统架构 →</h3><p>查看跨组件职责边界、执行闭环与可靠性原则。</p></a><a class="card" href="../benchmark/"><h3>Benchmark 架构 →</h3><p>查看被测对象、证据、Oracle 与结果可追溯要求。</p></a></div></section>
+<SiteLayout title="文档来源与治理" lang="zh" description="Sandbox Docs 的公开文档来源、跨仓同步和权威边界。">
+<section class="hero"><span class="eyebrow">Sandbox / Documentation</span><h1>组件维护定义，平台文档负责串联</h1><p class="lede">接口、Schema 和实现说明由各组件所属仓库维护。组件通过 <code>docs/public-docs.yaml</code> 声明允许公开的内容；Sandbox Docs 校验声明、同步快照并提供跨仓导航。</p></section>
+<section class="section"><div class="grid"><div class="card wide"><h3>发布流程</h3><pre><code>{flow}</code></pre></div></div></section>
+<section class="section"><h2>来源与责任</h2><table><thead><tr><th>内容</th><th>权威来源</th><th>Sandbox Docs 的作用</th></tr></thead><tbody>
+<tr><td>接口和 Schema</td><td>定义它们的组件仓库</td><td>校验公开清单，展示有版本依据的参考</td></tr>
+<tr><td>实现行为与领域事实</td><td>对应实现或事实 owner</td><td>说明跨组件关系，不创建替代事实源</td></tr>
+<tr><td>平台架构与仓库关系</td><td><a href="https://github.com/odango-chan/sandbox">sandbox</a> 治理仓及各 owner 决策</td><td>提供面向外部读者的概览与导航</td></tr>
+<tr><td>评估资产与判定规则</td><td>Benchmark 资产仓和 Engine 契约</td><td>解释评估体系，不另行定义 Case 语义</td></tr>
+</tbody></table></section>
+<section class="section"><h2>差异如何处理</h2><p>公开声明与实际实现不一致时，应明确呈现差异并由 owner 修正。快照记录源仓版本，便于复核；同步成功本身不代表接口已通过端到端验收。</p></section>
+<section class="section"><h2>相关文档</h2><ul><li><a href="../architecture/system/">Sandbox 总体架构</a></li><li><a href="../benchmark/">Benchmark 架构与可靠性评估</a></li><li><a href="https://github.com/odango-chan/sandbox/blob/main/docs/README.md">Sandbox 治理文档索引</a></li></ul></section>
 </SiteLayout>
