@@ -1,0 +1,72 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+const flow = 'Benchmark definition\n' +
+  '  goals · scenario · constraints · expected outcome\n' +
+  '                 │\n' +
+  '                 ▼\n' +
+  'Declared system under test (CUT)\n' +
+  '  agent-only / runtime-only / end-to-end\n' +
+  '                 │\n' +
+  '                 ▼\n' +
+  'Trial orchestration + controlled environment\n' +
+  '                 │\n' +
+  '                 ▼\n' +
+  'Observations + evidence collection\n' +
+  '                 │\n' +
+  '                 ▼\n' +
+  'Oracle / adjudication rules\n' +
+  '                 │\n' +
+  '                 ▼\n' +
+  'Result + metrics + provenance';
+---
+<SiteLayout title="CA Benchmark Architecture" lang="en">
+  <section class="hero">
+    <span class="eyebrow">CA Docs / Benchmark</span>
+    <h1>Benchmark architecture and evaluation boundaries</h1>
+    <p class="lede">CA Benchmark evaluates agents and execution systems through explainable, reproducible experiments. Every result must identify the system under test, run conditions, adjudication rules, and evidence sources. A single demo or a tool's PASS response is not a general reliability claim.</p>
+  </section>
+
+  <section class="section">
+    <div class="grid">
+      <div class="card wide">
+        <h3>Evaluation pipeline</h3>
+        <pre><code>{flow}</code></pre>
+        <p class="muted">This is a logical architecture. It does not imply that a standalone Benchmark Engine exists today or that all execution modes have been implemented.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Required declaration for each evaluation</h2>
+    <div class="grid">
+      <div class="card"><h3>System under test (CUT)</h3><p>State whether the evaluation covers the agent, the runtime, or the end-to-end system including tools and environment. Scores with different boundaries are not automatically comparable.</p></div>
+      <div class="card"><h3>Scenario and constraints</h3><p>Declare initial state, user goal, constraints, available tools, environment version, and expected terminal state.</p></div>
+      <div class="card"><h3>Oracle / adjudication</h3><p>Define success, failure, partial completion, and unconfirmed outcomes. Use authoritative state or explicit evidence rules rather than model self-assessment.</p></div>
+      <div class="card"><h3>Run provenance</h3><p>Record benchmark assets, engine, agent/model configuration, environment version, and key dependencies for traceability.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Reliability evaluation focus</h2>
+    <div class="grid">
+      <div class="card"><h3>Error prevention</h3><p>Can the system prevent unsafe or invalid execution when preconditions are not met or constraints would be violated?</p></div>
+      <div class="card"><h3>Outcome truthfulness</h3><p>Can it detect intermediate false positives and declare success only when authoritative state supports that conclusion?</p></div>
+      <div class="card"><h3>Failure and uncertainty</h3><p>Can it distinguish failure, timeout, unknown outcome, and insufficient evidence without disguising uncertainty as success?</p></div>
+      <div class="card"><h3>Recovery and auditability</h3><p>Can it safely handle retries, duplicate execution, inconsistent state, and recovery while retaining reviewable evidence?</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Results that must not be conflated</h2>
+    <div class="grid">
+      <div class="card"><h3>Simulation pass</h3><p>Demonstrates behavior under the declared simulated scenario and rules; it does not automatically prove real-network behavior.</p></div>
+      <div class="card"><h3>Real-environment pass</h3><p>Applies to the recorded environment, configuration, initial state, and evidence scope; it is not a universal claim across environments.</p></div>
+      <div class="card"><h3>Component pass</h3><p>Validates the declared component boundary and does not automatically prove the full agent-to-outcome loop.</p></div>
+      <div class="card"><h3>End-to-end pass</h3><p>Requires an end-to-end expected outcome and sufficient evidence; component-level PASS results cannot simply be added together.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <p><strong>Status:</strong> This page defines the public Benchmark architecture and evaluation discipline. It does not claim that all metrics, execution modes, or benchmark assets are implemented. Detailed pages should be generated from the owning Benchmark repository's authoritative definitions and reproducible run records.</p>
+  </section>
+</SiteLayout>
