@@ -55,6 +55,21 @@ const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\
           <td>Tool Plane</td>
           <td><a href={href('/components/tool-common/')}>组件概览</a> · <a href={href('/components/tool-common/subject-identity/')}>Subject Identity</a></td>
         </tr>
+        <tr>
+          <td><a href={href('/components/sandbox/')}>Sandbox 架构</a></td>
+          <td>Platform / Governance</td>
+          <td>详细架构、职责边界与 Benchmark 框架</td>
+        </tr>
+        <tr>
+          <td><a href={href('/components/ca-benchmarks/')}>Benchmark 资产</a></td>
+          <td>Evaluation</td>
+          <td>13 个首批 Case、Mode 适用范围与证据语义</td>
+        </tr>
+        <tr>
+          <td><a href={href('/components/ca-benchmark-engine/')}>Benchmark Engine</a></td>
+          <td>Evaluation</td>
+          <td>Task 冻结、Attempt、Validity 与结果语义</td>
+        </tr>
       </tbody>
     </table>
     <p class="home-footnote">上表只列出当前已接入的公开参考，不代表 Sandbox 的完整组件清单。组件迁移和仓名变更按各 owner 仓库的状态推进。</p>
