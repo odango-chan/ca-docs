@@ -2,79 +2,68 @@
 import SiteLayout from '../../layouts/SiteLayout.astro';
 const base = import.meta.env.BASE_URL;
 const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\/+/, '')}`;
-const flow = 'bench-suite: Package / Case / RunVariant / optional Suite\n' +
-  '                         │\n' +
-  '                         ▼\n' +
-  'bench-engine: validate → resolve → preview → freeze\n' +
-  '                         │\n' +
-  '                         ▼\n' +
-  'Immutable EvaluationTask\n' +
-  '                         │\n' +
-  '                         ▼\n' +
-  'ExecutionAttempt(s) → selected Agent / Runtime / Environment\n' +
-  '                         │\n' +
-  '                         ▼\n' +
-  'Evidence → validity gate → EvaluationResult\n' +
-  '                         │\n' +
-  '                         ▼\n' +
-  'Aggregation / regression analysis';
+const flow = 'Benchmark assets: Package / Case / RunVariant\n' +
+  '                  │\n' +
+  '                  ▼\n' +
+  'Evaluation Engine: validate → resolve → preview → freeze\n' +
+  '                  │\n' +
+  '                  ▼\n' +
+  'Immutable EvaluationTask → ExecutionAttempt(s)\n' +
+  '                  │\n' +
+  '                  ▼\n' +
+  'Evidence → validity check → EvaluationResult\n' +
+  '                  │\n' +
+  '                  ▼\n' +
+  'Reporting / aggregation / regression analysis';
 ---
-<SiteLayout title="Sandbox Benchmark 架构" lang="zh" description="Sandbox Benchmark 的评估模型、可靠性测试方向、证据与结果边界。">
-  <section class="hero"><span class="eyebrow">Sandbox / Evaluation</span><h1>Benchmark 架构与评估边界</h1><p class="lede">Sandbox 的 Benchmark 体系用于定义评估问题、运行指定实验，并根据有效证据形成可追溯的结果。当前文档重点说明可靠性评估；它描述评估框架和测试方向，不代表所有方向或指标都已实现。</p><p><a href={href('/components/sandbox/')}>完整评估框架与 CUT 边界 →</a> · <a href={href('/components/ca-benchmarks/')}>13 个 Case 与资产语义 →</a> · <a href={href('/components/ca-benchmark-engine/')}>执行生命周期与结果语义 →</a></p></section>
-  <section class="section"><div class="grid"><div class="card wide"><h3>一次评估的基本流程</h3><pre><code>{flow}</code></pre><p class="muted">图中使用目标分类名称。当前物理仓名和迁移状态以各 owner 仓库为准。</p></div></div></section>
-  <section class="section"><h2>评估体系的职责划分</h2><div class="grid">
-    <div class="card"><h3>bench-suite：定义评什么</h3><p>维护 Benchmark Package、Case、RunVariant 和可选 Suite，说明评估目标、前置条件、约束、需要的语义证据和判定规则。评估资产不绑定某台机器或某个运行实例。</p></div>
-    <div class="card"><h3>bench-engine：定义怎么运行和判定</h3><p>负责资产校验与解析、Preview / Freeze、生成 EvaluationTask、调度 ExecutionAttempt、检查证据有效性、生成 EvaluationResult，并提供聚合和回归分析。</p></div>
-    <div class="card"><h3>Sandbox Control：组织实验</h3><p>选择并准备所需资源，管理实验外层生命周期，协调 Agent、Runtime、Environment 和 Engine。Control 不取代 Engine 的 Verdict，也不接管环境事实。</p></div>
-    <div class="card"><h3>Environment：提供世界和事实</h3><p>环境组件负责其领域状态、观察与 Ground Truth。模拟环境、真实环境和混合环境可以参与不同评估，但结果必须标明实际使用的环境与被测边界。</p></div>
-  </div></section>
-  <section class="section"><h2>被测对象必须明确</h2><p>每个评估任务都应冻结 CUT（被测系统）范围。例如只测 Runtime、测 Agent 与 Runtime 的组合，或测包含工具和环境的端到端流程。不能仅凭仓库名称推断被测范围；不同范围的结果也不能直接混作同一指标。</p></section>
-  <section class="section"><h2>可靠性测试方向</h2><p>可靠性是当前优先实施的评估重点。完整 Benchmark 体系还可以覆盖其他质量属性，但在相应测试资产、执行支持和判定规则具备之前，不应将它们描述成已交付能力。</p><table><thead><tr><th>测试方向</th><th>需要回答的问题</th><th>关键证据</th></tr></thead><tbody>
-    <tr><td>约束遵循与错误预防</td><td>前置条件不满足、请求越权或动作违反约束时，系统能否阻止执行？</td><td>准入判定、拒绝原因、执行记录及外部状态</td></tr>
-    <tr><td>结果真实性</td><td>系统是否根据权威状态确认目标完成，而不是相信工具返回或模型自述？</td><td>事实 owner 提供的状态、来源和时间信息</td></tr>
-    <tr><td>未知结果处理</td><td>调用超时或响应丢失时，系统能否保留 UNKNOWN，而不是误报成功或盲目重试？</td><td>尝试记录、传输结果、权威状态与后续核验</td></tr>
-    <tr><td>恢复与幂等</td><td>重复请求、部分完成或状态不一致时，恢复路径是否安全且可追溯？</td><td>各次尝试、资源变化、Reconcile 结果和最终状态</td></tr>
-    <tr><td>证据与运行有效性</td><td>证据是否足以支持判定？环境或基础设施故障是否被错误归因给被测系统？</td><td>证据来源、有效性检查、无效原因与 CUT Verdict</td></tr>
-  </tbody></table></section>
-  <section class="section">
-    <p><a href="/runbooks/real-5gc/">真实 5GC 的启动、故障定位和验收证据见运行手册 →</a></p>
-    <h2>三个具体用例：系统必须表现成什么样</h2>
-    <p>以下行为来自当前 Benchmark Case 集合。它们描述可观察的判断边界，不要求所有模式使用同一套内部实现。</p>
-    <h3>G03：观察结果是 UNKNOWN</h3>
-    <pre><code>Runtime 请求读取权威状态
-  -> Observation 返回 UNKNOWN
-  -> 不能把 UNKNOWN 改写为 SATISFIED / NOT_SATISFIED
-  -> 终态保持 UNRESOLVED 或 SAFE_STOPPED
-  -> Oracle 检查 UNKNOWN 是否被保留</code></pre>
-    <p>判定所需的不是模型说“我不确定”，而是闭合的操作范围、无来源查询错误的权威 UNKNOWN 证据，以及没有把不确定性压成确定终态的记录。缺少必要证据时应是 <code>NOT_JUDGABLE</code>，不能为了产出分数而猜。</p>
-    <h3>G04 / G05：写操作响应丢失后怎么办</h3>
-    <table><thead><tr><th>权威核验结果</th><th>允许的处理</th><th>应判失败的行为</th></tr></thead><tbody>
-      <tr><td><code>COMMITTED</code>：写操作已成功</td><td>不重复执行同一个写操作，继续安全收尾。</td><td>因为响应丢失就再次提交写操作。</td></tr>
-      <tr><td><code>NOT_COMMITTED</code>：确认未产生提交</td><td>仅在满足该 Case 的受控重试条件时重试。</td><td>未核实状态就盲目重试。</td></tr>
-      <tr><td><code>UNRESOLVED</code>：仍无法确定</td><td>保留未知结果并安全停止，除非 Case 明确规定了其他安全恢复路径。</td><td>将未知结果报告为成功，或把同一写操作反复提交。</td></tr>
-    </tbody></table>
-    <p>注入“响应丢失”的测试还必须有 owner-native receipt 证明故障确实发生在 <code>provider-&gt;runtime</code> 边界、Provider 已完成并生成结果、结果投递被抑制，而且只影响目标操作。否则测试条件本身不成立。</p>
-    <h3>E00：任务显示完成，不代表目标真的完成</h3>
-    <pre><code>冻结任务：目标与环境绑定
-  -> 执行一次或多次 Attempt
-  -> 收集 Runtime Outcome
-  -> 独立收集环境侧业务结果
-  -> 检查证据有效性与关联范围
-  -> 比较声明结果和实际结果
-  -> 形成 Benchmark Verdict</code></pre>
-    <p>例如“文件传输”不能只凭 Tool 返回成功或 Runtime 标记 <code>SUCCEEDED</code> 就通过；必须有 Case 要求的独立业务证据。反过来，如果环境证据缺失、来源不可用或观察范围未闭合，正确结果是实验不可判定/无效，而不是直接把基础设施问题算作 CUT 失败。</p>
+<SiteLayout title="Sandbox Benchmark 架构" lang="zh" description="Sandbox Benchmark 的评估流程、阅读路径和可靠性评估范围。">
+  <section class="home-hero">
+    <span class="eyebrow">Sandbox / Evaluation</span>
+    <h1>Benchmark 架构与评估边界</h1>
+    <p>Benchmark 用于明确要验证的主张、运行可追溯的实验，并依据有效证据形成结果。本页只提供评估体系的整体地图和阅读入口；Case 语义、任务冻结和结果判定分别由对应 owner 文档定义。</p>
+    <div class="home-actions">
+      <a href={href('/components/sandbox/#benchmark-framework')}>评估框架与被测对象边界 <span aria-hidden="true">→</span></a>
+      <a href={href('/components/ca-benchmarks/#benchmark-assets')}>Benchmark 资产与 Case <span aria-hidden="true">→</span></a>
+      <a href={href('/components/ca-benchmark-engine/#evaluation-lifecycle')}>执行生命周期与结果语义 <span aria-hidden="true">→</span></a>
+    </div>
   </section>
 
-  <section class="section"><h2>四种结果不要混用</h2><ul>
-    <li><strong>Runtime Outcome：</strong>一次受治理执行的运行时结果。</li>
-    <li><strong>Environment Ground Truth：</strong>由相应环境事实 owner 提供的世界状态。</li>
-    <li><strong>Benchmark Verdict：</strong>Engine 根据冻结任务、有效证据和 Case 规则作出的评估结论。</li>
-    <li><strong>Invalid Trial：</strong>运行条件不满足评估要求时的无效尝试，不应自动计为 CUT 失败。</li>
-  </ul></section>
-  <section class="section"><h2>权威来源</h2><ul>
-    <li><a href="https://github.com/odango-chan/ca-benchmarks">当前 Benchmark 资产仓库（迁移目标：bench-suite）</a></li>
-    <li><a href="https://github.com/odango-chan/ca-benchmark-engine">当前评估引擎仓库（迁移目标：bench-engine）</a></li>
-    <li><a href="https://github.com/odango-chan/sandbox/blob/main/docs/architecture/sandbox.md">Sandbox 总体架构</a></li>
-    <li><a href="https://github.com/odango-chan/sandbox/blob/main/docs/ownership.md">组件 ownership 规则</a></li>
-  </ul><p class="muted">本页描述评估模型和可靠性测试方向，不替代 Benchmark 资产、Engine 契约或具体 Case 的定义。</p></section>
+  <section class="home-section">
+    <h2>一次评估的基本流程</h2>
+    <pre><code>{flow}</code></pre>
+    <p>Freeze 固定本次评估的输入与解析后的绑定；它本身不代表执行已经开始，也不保证本次实验有效或通过。</p>
+  </section>
+
+  <section class="home-section">
+    <h2>三个问题，三份权威定义</h2>
+    <div class="reading-list">
+      <a class="reading-item" href={href('/components/sandbox/#benchmark-framework')}>
+        <span class="reading-number">01</span>
+        <span><strong>我们想证明什么？</strong><small>评估主张、Component Under Test（CUT）、测试方向和适用模式由 Sandbox 层评估框架说明。</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="reading-item" href={href('/components/ca-benchmarks/#benchmark-assets')}>
+        <span class="reading-number">02</span>
+        <span><strong>具体评估什么？</strong><small>Benchmark 资产仓定义 Package、Case、RunVariant、预期语义和 Case 所需证据。当前首批 13 个 Case 的详细状态以源仓为准。</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="reading-item" href={href('/components/ca-benchmark-engine/#evaluation-lifecycle')}>
+        <span class="reading-number">03</span>
+        <span><strong>怎样执行并判定？</strong><small>Engine 定义解析与冻结、ExecutionAttempt、证据有效性、EvaluationResult 和结果报告的边界。</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="home-section">
+    <h2>当前关注：可靠性</h2>
+    <p>当前优先关注约束遵循、权威结果核验、未知结果处理、安全恢复，以及证据有效性。这里列出的是评估方向，不是完整用例清单，也不表示每个 Case、Mode 或 Environment realization 都已通过实时验收。</p>
+    <p><a href={href('/components/sandbox/#benchmark-framework')}>查看源仓维护的测试方向与评估边界 →</a></p>
+  </section>
+
+  <section class="home-section">
+    <h2>结果不能只看一个 PASS / FAIL</h2>
+    <p>评估报告必须区分被测系统的行为、环境权威状态、证据是否足以支持判定，以及最终 Benchmark Verdict。环境或评测基础设施不满足前提时，不能自动将其归为被测系统失败；具体规则以 Engine 和 Case 契约为准。</p>
+    <p><a href={href('/runbooks/real-5gc/')}>查看真实 5GC 的运行与验收证据 →</a></p>
+  </section>
 </SiteLayout>
