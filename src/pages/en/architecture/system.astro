@@ -55,6 +55,55 @@ const flow = 'Sandbox platform\n' +
   </section>
 
   <section class="section">
+    <h2>How a real 5GC request moves through Sandbox</h2>
+    <p>The current Open5GS + UERANSIM integration makes the boundaries concrete. Keep the validated R1 observation path separate from the R2-B Agent-governed path, whose overall closeout is still blocked.</p>
+    <h3>R1: observe and forward SBI without taking over N2</h3>
+    <pre><code>UERANSIM UE
+  -> gNB
+  -> Open5GS AMF
+  -> env-fabric (observe and transparently forward SBI)
+  -> SCP
+  -> Open5GS NF (for example, SMF)
+
+N2 / NGAP: direct gNB -> AMF
+SBI: traverses env-fabric and the mandatory SCP in the current topology</code></pre>
+    <table><thead><tr><th>Step</th><th>What the component does</th><th>What supports the next step</th></tr></thead><tbody>
+      <tr><td>1. UE registration and session request</td><td>UERANSIM, gNB, and Open5GS use their native state machines for the radio-side flow. Fabric does not intercept SCTP/N2 or parse NGAP.</td><td>The SBI request produced by AMF, not a NAS state inferred by Fabric.</td></tr>
+      <tr><td>2. SBI observation</td><td><code>env-fabric</code> retains protocol provenance and observes SBI requests. R1 neither publishes NetworkIntent nor blocks the request.</td><td>The source request, boundary, and correlatable observation record.</td></tr>
+      <tr><td>3. NF communication</td><td>The request reaches the target NF through the required SCP while Fabric forwards it transparently.</td><td>The actual request/response path and Open5GS-owned state.</td></tr>
+      <tr><td>4. Verify the result</td><td>Check registration, PDU Session, PFCP, TUN, and user-plane connectivity from environment-side evidence. Forwarding a request does not prove that a session was established.</td><td>Owner-authoritative state and an actual user-plane test.</td></tr>
+    </tbody></table>
+    <p>The recorded R0/R1 baseline includes NRF/SCP startup, UE registration, PDU Session establishment, PFCP, and UE user-plane ping 3/3 PASS. These are recorded integration results, not proof that every R2-B closeout gate has passed.</p>
+    <h3>R2-B: add Agent governance at an explicit boundary</h3>
+    <pre><code>AMF -- CreateSMContext / N1 SM --> env-fabric
+                                      |
+                                      | retain source material
+                                      | extract whitelisted fields
+                                      | create exact actionRef
+                                      | PREPARED -> HELD
+                                      v
+                              NetworkIntent v2
+                                      |
+                                      v
+                         ca-agent-demo / Runtime
+                                      |
+                              Predicate admission
+                                      |
+                         execute exact actionRef only after admission
+                                      |
+                                      v
+                              env-fabric -> SCP -> SMF</code></pre>
+    <table><thead><tr><th>Boundary</th><th>Responsibility</th><th>Shortcuts that are not allowed</th></tr></thead><tbody>
+      <tr><td><code>env-fabric</code></td><td>Retains original SBI material, extracts authoritative fields, produces NetworkIntent v2, and manages an exact held action with a deadline.</td><td>No N2/NGAP handling, no full NAS decoding, and no execution of an action before it is published and held.</td></tr>
+      <tr><td><code>connectionagent</code></td><td>Owns the canonical NetworkIntent schema; v2 is current for R2-B and v1 remains historical.</td><td>Do not create a competing copy of the schema in the Sandbox documentation repository.</td></tr>
+      <tr><td><code>ca-agent-demo</code></td><td>Consumes NetworkIntent, projects it into Skill/Runtime context, and performs admission through the Runtime PredicateEngine.</td><td>Do not query Open5GS or UERANSIM directly to bypass Environment/Observation boundaries.</td></tr>
+      <tr><td>Sandbox</td><td>Owns cross-repository composition, dependency ordering, joined acceptance, and evidence closeout.</td><td>Does not replace component ownership of domain facts, Outcomes, or contracts.</td></tr>
+    </tbody></table>
+    <p><strong>Current status:</strong> M5 live governed-action/user-plane evidence and the separate M6 R1 regression evidence are recorded as PASS. Overall R2-B closeout remains BLOCKED on owner PR-range diff-check and evidence-hygiene gates. Do not describe R2-B as fully complete.</p>
+    <p>Canonical details: <a href="https://github.com/odango-chan/sandbox/blob/main/docs/design/real-5gc-agent-control.md">Real 5GC Agent-Controlled Environment</a> · <a href="https://github.com/odango-chan/sandbox/blob/main/docs/design/r2b-joint-gap-audit.md">R2-B joint gap audit</a>.</p>
+  </section>
+
+  <section class="section">
     <h2>Status and authoritative references</h2>
     <p>The target planes are established and some repositories have moved to their target names. Consumer migration and acceptance continue in stages. This page describes the target architecture and established responsibility boundaries; planned capabilities are not presented as delivered features.</p>
     <ul>
