@@ -1,5 +1,7 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
+const base = import.meta.env.BASE_URL;
+const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\/+/, '')}`;
 const flow = 'bench-suite: Package / Case / RunVariant / optional Suite\n' +
   '                         │\n' +
   '                         ▼\n' +
@@ -18,7 +20,7 @@ const flow = 'bench-suite: Package / Case / RunVariant / optional Suite\n' +
   'Aggregation / regression analysis';
 ---
 <SiteLayout title="Sandbox Benchmark 架构" lang="zh" description="Sandbox Benchmark 的评估模型、可靠性测试方向、证据与结果边界。">
-  <section class="hero"><span class="eyebrow">Sandbox / Evaluation</span><h1>Benchmark 架构与评估边界</h1><p class="lede">Sandbox 的 Benchmark 体系用于定义评估问题、运行指定实验，并根据有效证据形成可追溯的结果。当前文档重点说明可靠性评估；它描述评估框架和测试方向，不代表所有方向或指标都已实现。</p></section>
+  <section class="hero"><span class="eyebrow">Sandbox / Evaluation</span><h1>Benchmark 架构与评估边界</h1><p class="lede">Sandbox 的 Benchmark 体系用于定义评估问题、运行指定实验，并根据有效证据形成可追溯的结果。当前文档重点说明可靠性评估；它描述评估框架和测试方向，不代表所有方向或指标都已实现。</p><p><a href={href('/components/sandbox/')}>完整评估框架与 CUT 边界 →</a> · <a href={href('/components/ca-benchmarks/')}>13 个 Case 与资产语义 →</a> · <a href={href('/components/ca-benchmark-engine/')}>执行生命周期与结果语义 →</a></p></section>
   <section class="section"><div class="grid"><div class="card wide"><h3>一次评估的基本流程</h3><pre><code>{flow}</code></pre><p class="muted">图中使用目标分类名称。当前物理仓名和迁移状态以各 owner 仓库为准。</p></div></div></section>
   <section class="section"><h2>评估体系的职责划分</h2><div class="grid">
     <div class="card"><h3>bench-suite：定义评什么</h3><p>维护 Benchmark Package、Case、RunVariant 和可选 Suite，说明评估目标、前置条件、约束、需要的语义证据和判定规则。评估资产不绑定某台机器或某个运行实例。</p></div>

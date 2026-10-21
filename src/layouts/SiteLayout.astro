@@ -20,7 +20,7 @@ const pathFor = (zh: string) => lang === 'zh' ? href(zh) : href(`/en${zh === '/'
 const labels = lang === 'zh'
   ? {
       nav: '主导航', language: '语言', home: '文档首页', architecture: '平台架构',
-      governance: '文档来源与治理', benchmark: 'Benchmark 架构', api: 'API 总览',
+      governance: '文档来源与治理', sandboxSource: '平台详细架构', benchmark: 'Benchmark 架构', benchmarkAssets: 'Benchmark 资产与用例', benchmarkEngine: '执行生命周期与结果', api: 'API 总览',
       components: '组件参考', simulator: '5GC 模拟器', simulatorApi: 'HTTP API',
       facts: 'Facts', operations: 'Operations', standalone: '独立运行',
       common: '公共工具契约', commonApi: 'HTTP API', subject: 'Subject Identity',
@@ -31,8 +31,8 @@ const labels = lang === 'zh'
     }
   : {
       nav: 'Main navigation', language: 'Language', home: 'Documentation home',
-      architecture: 'Platform architecture', governance: 'Sources & governance',
-      benchmark: 'Benchmark architecture', api: 'API overview', components: 'Components',
+      architecture: 'Platform architecture', governance: 'Sources & governance', sandboxSource: 'Detailed platform architecture',
+      benchmark: 'Benchmark architecture', benchmarkAssets: 'Benchmark assets and Cases', benchmarkEngine: 'Execution lifecycle and results', api: 'API overview', components: 'Components',
       simulator: '5GC simulator', simulatorApi: 'HTTP API', facts: 'Facts',
       operations: 'Operations', standalone: 'Standalone',
       common: 'Shared tool contracts', commonApi: 'HTTP API', subject: 'Subject Identity',
@@ -88,10 +88,13 @@ const isActive = (path: string) => normalizedPath.replace(/\/$/, '') === path.re
             <p>{labels.systemGroup}</p>
             <a class:list={{ active: isActive('/architecture/system') }} href={pathFor('/architecture/system/')}>{labels.architecture}</a>
             <a class:list={{ active: isActive('/architecture') }} href={pathFor('/architecture/')}>{labels.governance}</a>
+            <a class:list={{ active: isActive('/components/sandbox') }} href={pathFor('/components/sandbox/')}>{labels.sandboxSource}</a>
           </div>
           <div class="sidebar-group">
             <p>{labels.benchmarkGroup}</p>
             <a class:list={{ active: isActive('/benchmark') }} href={pathFor('/benchmark/')}>{labels.benchmark}</a>
+            <a class:list={{ active: isActive('/components/ca-benchmarks') }} href={pathFor('/components/ca-benchmarks/')}>{labels.benchmarkAssets}</a>
+            <a class:list={{ active: isActive('/components/ca-benchmark-engine') }} href={pathFor('/components/ca-benchmark-engine/')}>{labels.benchmarkEngine}</a>
           </div>
           <div class="sidebar-group">
             <p>{labels.componentGroup}</p>

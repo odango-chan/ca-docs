@@ -47,3 +47,30 @@ components:
     title:
       zh: MCP 接口
       en: MCP interface
+
+  - id: sandbox
+    repository: odango-chan/sandbox
+    status: active
+    sync: manifest
+    title:
+      zh: Sandbox 平台架构与 Benchmark
+      en: Sandbox Architecture and Benchmark
+    manifest: docs/public-docs.yaml
+
+  - id: ca-benchmarks
+    repository: odango-chan/ca-benchmarks
+    status: active
+    sync: manifest
+    title:
+      zh: Benchmark 资产与用例语义
+      en: Benchmark Assets and Case Semantics
+    manifest: docs/public-docs.yaml
+
+  - id: ca-benchmark-engine
+    repository: odango-chan/ca-benchmark-engine
+    status: active
+    sync: manifest
+    title:
+      zh: Benchmark 执行引擎
+      en: Benchmark Evaluation Engine
+    manifest: docs/public-docs.yaml
