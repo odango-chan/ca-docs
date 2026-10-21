@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import yaml from 'js-yaml';
+import { pinSourceContext } from './source-revision.mjs';
 
 const token = process.env.CA_DOCS_SOURCE_TOKEN || '';
 const strict = process.env.CA_DOCS_SYNC_STRICT === '1';
@@ -152,9 +153,8 @@ export async function syncToolCommon(component) {
 
   try {
     const rev = await revision(ctx);
-    if (!rev.commit) throw new Error(`source ref ${ctx.ref} did not resolve to an immutable commit SHA`);
     // Read the manifest and all declared files from the same immutable revision.
-    const pinnedCtx = { ...ctx, ref: rev.commit, sourceRef: ctx.ref };
+    const pinnedCtx = pinSourceContext(ctx, rev);
     const manifestText = await fetchText(pinnedCtx, manifestPath);
     const manifest = yaml.load(manifestText);
     if (!manifest || manifest.kind !== 'PublicDocsManifest' || manifest.component !== component.id) {
