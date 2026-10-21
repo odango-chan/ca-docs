@@ -7,7 +7,7 @@ const root = process.cwd();
 const css = fs.readFileSync(path.join(root, 'src/styles/global.css'), 'utf8');
 
 function listCssRulesByContext(source) {
-  const withoutComments = source.replace(/\\/\\*[\\s\\S]*?\\*\\//g, '');
+  const withoutComments = source.replace(/\/\*[\s\S]*?\*\//g, '');
   const rules = [];
   const frames = [];
   const contexts = [];
@@ -15,7 +15,7 @@ function listCssRulesByContext(source) {
 
   for (let i = 0; i < withoutComments.length; i += 1) {
     if (withoutComments[i] === '{') {
-      const prelude = withoutComments.slice(start, i).trim().replace(/\\s+/g, ' ');
+      const prelude = withoutComments.slice(start, i).trim().replace(/\s+/g, ' ');
       if (prelude.startsWith('@')) {
         frames.push({ kind: 'at-rule' });
         contexts.push(prelude);
