@@ -13,8 +13,8 @@ const currentPath = Astro.url.pathname.startsWith(basePath) ? (Astro.url.pathnam
 const zhPath = currentPath.startsWith('/en') ? (currentPath.slice(3) || '/') : currentPath;
 const enPath = currentPath.startsWith('/en') ? currentPath : `/en${currentPath === '/' ? '/' : currentPath}`;
 const labels = lang === 'zh'
-  ? { architecture: '架构', footer: '机器契约仍以各组件所属仓库为权威来源。', nav: '主导航', language: '语言' }
-  : { architecture: 'Architecture', footer: 'Owner repositories remain the contract authority.', nav: 'Main navigation', language: 'Language' };
+  ? { governance: '文档治理', system: '系统架构', benchmark: 'Benchmark', footer: '机器契约仍以各组件所属仓库为权威来源。', nav: '主导航', language: '语言' }
+  : { governance: 'Docs governance', system: 'System architecture', benchmark: 'Benchmark', footer: 'Owner repositories remain the contract authority.', nav: 'Main navigation', language: 'Language' };
 ---
 <!doctype html>
 <html lang={lang === 'zh' ? 'zh-CN' : 'en'}>
@@ -36,7 +36,9 @@ const labels = lang === 'zh'
           <a class="nav-api" href={lang === 'zh' ? href('/api/') : href('/en/api/')}>API</a>
           <a href={lang === 'zh' ? href('/components/ca-5gc-sim/') : href('/en/components/ca-5gc-sim/')}>ca-5gc-sim</a>
           <a href={lang === 'zh' ? href('/components/tool-common/') : href('/en/components/tool-common/')}>tool-common</a>
-          <a href={lang === 'zh' ? href('/architecture/') : href('/en/architecture/')}>{labels.architecture}</a>
+          <a href={lang === 'zh' ? href('/architecture/') : href('/en/architecture/')}>{labels.governance}</a>
+          <a href={lang === 'zh' ? href('/architecture/system/') : href('/en/architecture/system/')}>{labels.system}</a>
+          <a href={lang === 'zh' ? href('/benchmark/') : href('/en/benchmark/')}>{labels.benchmark}</a>
           <span class="language-switch" aria-label={labels.language}>
             <a class:list={[{ active: lang === 'zh' }]} href={href(zhPath)}>中文</a><span>/</span><a class:list={[{ active: lang === 'en' }]} href={href(enPath)}>English</a>
           </span>

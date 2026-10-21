@@ -1,0 +1,58 @@
+---
+import SiteLayout from '../../../layouts/SiteLayout.astro';
+const flow = 'User goal / constraints\n' +
+  '      │\n' +
+  '      ▼\n' +
+  'Selected Agent Host (parallel implementations; choose one)\n' +
+  'ca-agent / ca-dsh / ca-nanobot\n' +
+  '      │ MCP\n' +
+  '      ▼\n' +
+  'tool-mcp-gw (Agent-facing edge adapter)\n' +
+  '      │ adapts to Runtime public port\n' +
+  '      ▼\n' +
+  'ca-runtime::RuntimeHost.v1\n' +
+  '      │\n' +
+  '      ▼\n' +
+  'ca-runtime: admission, governed execution, Outcome, Reconcile\n' +
+  '      │ ProviderContract / ProviderBinding\n' +
+  '      ▼\n' +
+  'Runtime-side Provider Adapter\n' +
+  '      │\n' +
+  '      ▼\n' +
+  'Simulated or real external system / authoritative business facts';
+---
+<SiteLayout title="CA System Architecture" lang="en">
+  <section class="hero">
+    <span class="eyebrow">CA Docs / Architecture</span>
+    <h1>ConnectionAgent system architecture</h1>
+    <p class="lede">CA separates non-deterministic model reasoning from deterministic reliable execution. The Agent understands goals, plans, and selects tools; Runtime governs side effects and owns execution outcomes, unknown states, and recovery.</p>
+  </section>
+  <section class="section"><div class="grid"><div class="card wide">
+    <h3>Core call path</h3><pre><code>{flow}</code></pre>
+    <p class="muted">This is a logical call path, not a required deployment chain. Trusted system-control integrations may call RuntimeHost.v1 directly under their contracts.</p>
+  </div></div></section>
+  <section class="section"><h2>Component responsibilities and authority</h2><div class="grid">
+    <div class="card"><h3>Agent Hosts</h3><p><code>ca-agent</code>, <code>ca-dsh</code>, and <code>ca-nanobot</code> are alternative Host implementations, not a service chain. They own goal interpretation, model interaction, planning, Skill selection, and agent trajectory—not authoritative Runtime outcomes or underlying business facts.</p></div>
+    <div class="card"><h3>tool-mcp-gw</h3><p>The single long-term Agent-facing MCP edge adapter maps MCP Tools to RuntimeHost.v1. It is not Runtime and does not own tool eligibility, business execution, Provider binding, or Benchmark verdicts.</p></div>
+    <div class="card"><h3>ca-runtime</h3><p>The deterministic reliability kernel and NF trust boundary. It owns admission and tool eligibility, authorization, Procedure execution, Outcome / OUTCOME_UNKNOWN, RunRecord, Reconcile, and Recovery.</p></div>
+    <div class="card"><h3>Providers and external systems</h3><p>Runtime interacts through ProviderContract / ProviderBinding and Runtime-side Provider Adapters. Provider and environment owners retain their business interfaces and authoritative facts; Runtime does not replace them.</p></div>
+    <div class="card"><h3>Skill Source / Toolchain</h3><p><code>ca-skills</code> owns Skill source; <code>ca-skill-toolchain</code> owns compilation, immutable Artifacts / Variants, and qualification. Runtime owns runtime admission and execution.</p></div>
+    <div class="card"><h3>Environment, Fabric, and Lab</h3><p><code>env-5gc-sim</code> owns the simulated 5GC world and domain facts; <code>env-fabric</code> owns network observation, protocol mediation, and boundary-fault enforcement facts; <code>ca-sandbox</code> provides controlled environment/fault capabilities; <code>ca-lab</code> owns resource lifecycle and experiment orchestration.</p></div>
+  </div></section>
+  <section class="section"><h2>Benchmark is a separate evaluation plane</h2><div class="grid">
+    <div class="card"><h3>ca-benchmarks: what to evaluate</h3><p>Owns formal Benchmark Packages, Cases, RunVariants, and optional Suites. It defines the evaluation question, required semantic evidence, and judgment boundary.</p></div>
+    <div class="card"><h3>ca-benchmark-engine: how to evaluate</h3><p>Owns validation, resolution, frozen EvaluationTasks, ExecutionAttempt scheduling, evidence validity, EvaluationResults, aggregation, and regression analysis.</p></div>
+  </div><p>Benchmark Verdict is not Runtime Outcome; infrastructure invalidity is not automatically a CUT failure. See <a href="../../benchmark/">Benchmark architecture and evaluation boundaries</a>.</p></section>
+  <section class="section"><h2>Reliability principles</h2><div class="grid">
+    <div class="card"><h3>Authoritative state first</h3><p>A tool response or Agent self-report is insufficient proof of goal completion; verify state under the owning system's contract.</p></div>
+    <div class="card"><h3>Unknown is not success</h3><p>Distinguish Host transport RESULT_UNKNOWN from Runtime execution OUTCOME_UNKNOWN. Do not hide uncertainty behind optimistic intermediate state.</p></div>
+    <div class="card"><h3>Single responsibility</h3><p>Each repository owns its contracts, facts, and lifecycle. Cross-repository orchestration does not transfer authority or create a second source of truth.</p></div>
+    <div class="card"><h3>Traceable results</h3><p>Correlate benchmark asset versions, frozen tasks, attempts, evidence, and results. Keep simulation, sandbox, component, and end-to-end claims distinct.</p></div>
+  </div></section>
+  <section class="section"><h2>Authoritative design references</h2><ul>
+    <li><a href="https://github.com/odango-chan/connectionagent/blob/main/docs/architecture.md">ConnectionAgent system architecture</a></li>
+    <li><a href="https://github.com/odango-chan/connectionagent/blob/main/docs/ownership.md">Repository ownership and fact authority</a></li>
+    <li><a href="https://github.com/odango-chan/ca-benchmarks">ca-benchmarks: evaluation assets</a></li>
+    <li><a href="https://github.com/odango-chan/ca-benchmark-engine">ca-benchmark-engine: evaluation execution and results</a></li>
+  </ul><p class="muted">This is a system-level public guide. Interfaces, schemas, implementation status, and machine contracts remain authoritative in versioned owner-repository content.</p></section>
+</SiteLayout>

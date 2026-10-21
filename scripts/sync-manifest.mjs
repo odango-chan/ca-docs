@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import yaml from 'js-yaml';
+import { pinSourceContext } from './source-revision.mjs';
 import Ajv2020 from 'ajv/dist/2020.js';
 
 const token = process.env.CA_DOCS_SOURCE_TOKEN || '';
@@ -208,7 +209,7 @@ export async function buildSnapshot(component, manifestText, context, revision, 
     title: manifest.title || component.title || { zh: manifest.component, en: manifest.component },
     source: {
       repository: component.repository,
-      ref: context.ref,
+      ref: context.sourceRef || context.ref,
       commit: revision.commit,
       commitDate: revision.commitDate,
       private: true,
@@ -238,11 +239,19 @@ export async function syncManifest(component) {
     return fallback(snapshotPath, new Error('source token not configured'));
   }
   try {
-    const [manifestText, rev] = await Promise.all([
-      fetchText(context, component.manifest || 'docs/public-docs.yaml'),
-      sourceRevision(context),
-    ]);
-    const snapshot = await buildSnapshot(component, manifestText, context, rev);
+    const rev = await sourceRevision(context);
+    // Resolve the moving ref once, then read the manifest and every declared file
+    // from that exact commit. This prevents a moving branch from producing a
+    // snapshot whose provenance points at a different revision than its content.
+    const pinnedContext = pinSourceContext(context, rev);
+    const manifestText = await fetchText(pinnedContext, component.manifest || 'docs/public-docs.yaml');
+    const snapshot = await buildSnapshot(
+      component,
+      manifestText,
+      pinnedContext,
+      rev,
+      (sourcePath) => fetchText(pinnedContext, sourcePath),
+    );
     await fs.mkdir(path.dirname(snapshotPath), { recursive: true });
     await fs.writeFile(snapshotPath, JSON.stringify(snapshot, null, 2) + '\n');
     console.log(`${component.id}: refreshed ${snapshot.sources.length} declared public sources from ${rev.commit}`);

@@ -72,6 +72,7 @@ $defs:
         then:
           properties:
             publish:
+              type: array
               items:
                 enum: [metadata, implementation-summary]
       - if:
@@ -81,5 +82,6 @@ $defs:
         then:
           properties:
             publish:
+              type: array
               items:
                 enum: [metadata, body]

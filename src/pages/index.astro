@@ -8,67 +8,39 @@ const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\
 <SiteLayout title="ConnectionAgent 文档" lang="zh">
   <section class="home-hero">
     <h1>CA Docs</h1>
-    <p>查 API、Facts、Operations 和组件边界。</p>
+    <p>了解 ConnectionAgent 的整体架构、Benchmark 评估体系，以及各组件公开接口与契约。</p>
   </section>
 
   <section class="home-section">
-    <h2>常用入口</h2>
+    <h2>整体架构与评估</h2>
     <div class="doc-index">
-      <a class="doc-row primary" href={href('/api/')}>
-        <div>
-          <strong>API</strong>
-          <span>查看所有已接入组件的接口</span>
-        </div>
-        <span aria-hidden="true">→</span>
+      <a class="doc-row primary" href={href('/architecture/system/')}>
+        <div><strong>CA 系统架构</strong><span>Agent、Runtime、Provider、环境与多仓职责边界</span></div><span aria-hidden="true">→</span>
       </a>
-      <a class="doc-row" href={href('/components/ca-5gc-sim/facts/')}>
-        <div>
-          <strong>Facts</strong>
-          <span>{data.counts.facts} 个可读取的状态</span>
-        </div>
-        <span aria-hidden="true">→</span>
+      <a class="doc-row primary" href={href('/benchmark/')}>
+        <div><strong>Benchmark 架构</strong><span>评估资产、冻结任务、执行尝试、证据与结果判定</span></div><span aria-hidden="true">→</span>
       </a>
-      <a class="doc-row" href={href('/components/ca-5gc-sim/operations/')}>
-        <div>
-          <strong>Operations</strong>
-          <span>{data.counts.operations} 个可执行操作</span>
-        </div>
-        <span aria-hidden="true">→</span>
-      </a>
-      <a class="doc-row" href={href('/components/ca-5gc-sim/standalone/')}>
-        <div>
-          <strong>Standalone</strong>
-          <span>怎么单独启动和调用 ca-5gc-sim</span>
-        </div>
-        <span aria-hidden="true">→</span>
+      <a class="doc-row" href={href('/architecture/')}>
+        <div><strong>文档治理</strong><span>公开来源、快照同步与组件文档职责</span></div><span aria-hidden="true">→</span>
       </a>
     </div>
   </section>
 
   <section class="home-section">
-    <h2>组件</h2>
-    <div class="component-index">
-      <a class="component-row" href={href('/components/ca-5gc-sim/')}>
-        <div>
-          <strong>ca-5gc-sim</strong>
-          <span>5GC 模拟器 · {data.counts.documentedRoutes} 个 OpenAPI 接口 · {data.counts.implementationRoutes} 条实现路由</span>
-        </div>
-        <span aria-hidden="true">→</span>
-      </a>
-      <a class="component-row" href={href('/components/tool-common/')}>
-        <div>
-          <strong>tool-common</strong>
-          <span>Subject Identity · Provider API + Trusted Control API</span>
-        </div>
-        <span aria-hidden="true">→</span>
-      </a>
-      <div class="component-row muted-row">
-        <div><strong>其他 ca-* 组件</strong><span>后续按组件逐步接入。</span></div>
-      </div>
+    <h2>组件文档</h2>
+    <div class="doc-index">
+      <a class="doc-row" href={href('/api/')}><div><strong>API</strong><span>查看已接入组件的公开接口</span></div><span aria-hidden="true">→</span></a>
+      <a class="doc-row" href={href('/components/ca-5gc-sim/facts/')}><div><strong>Facts</strong><span>{data.counts.facts} 个可读取的状态</span></div><span aria-hidden="true">→</span></a>
+      <a class="doc-row" href={href('/components/ca-5gc-sim/operations/')}><div><strong>Operations</strong><span>{data.counts.operations} 个可执行操作</span></div><span aria-hidden="true">→</span></a>
+      <a class="doc-row" href={href('/components/ca-5gc-sim/standalone/')}><div><strong>ca-5gc-sim Standalone</strong><span>独立启动和调用方式</span></div><span aria-hidden="true">→</span></a>
     </div>
   </section>
 
-  <section class="home-section home-secondary">
-    <a href={href('/architecture/')}>文档怎么同步、各仓库怎么分工 →</a>
+  <section class="home-section">
+    <h2>当前已接入组件</h2>
+    <div class="component-index">
+      <a class="component-row" href={href('/components/ca-5gc-sim/')}><div><strong>ca-5gc-sim</strong><span>5GC 模拟器 · {data.counts.documentedRoutes} 个 OpenAPI 接口 · {data.counts.implementationRoutes} 条实现路由</span></div><span aria-hidden="true">→</span></a>
+      <a class="component-row" href={href('/components/tool-common/')}><div><strong>tool-common</strong><span>Subject Identity · Provider API + Trusted Control API</span></div><span aria-hidden="true">→</span></a>
+    </div>
   </section>
 </SiteLayout>

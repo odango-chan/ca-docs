@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import yaml from 'js-yaml';
+import { pinSourceContext } from './source-revision.mjs';
 
 const token = process.env.CA_DOCS_SOURCE_TOKEN || '';
 const strict = process.env.CA_DOCS_SYNC_STRICT === '1';
@@ -307,10 +308,10 @@ export async function syncCa5gcSim(component) {
   }
 
   try {
-    const [manifestText, revision] = await Promise.all([
-      fetchRepoText(ctx, manifestPath),
-      sourceRevision(ctx),
-    ]);
+    const revision = await sourceRevision(ctx);
+    // Resolve the moving ref once and pin every source read to that commit.
+    const pinnedCtx = pinSourceContext(ctx, revision);
+    const manifestText = await fetchRepoText(pinnedCtx, manifestPath);
     const manifest = yaml.load(manifestText);
 
     if (
@@ -339,11 +340,11 @@ export async function syncCa5gcSim(component) {
     );
 
     const texts = await Promise.all([
-      fetchRepoText(ctx, openApiSource.path),
-      fetchRepoText(ctx, factSource.path),
-      fetchRepoText(ctx, operationSource.path),
-      fetchRepoText(ctx, implementationSource.path),
-      ...publicSchemaSources.map((source) => fetchRepoText(ctx, source.path)),
+      fetchRepoText(pinnedCtx, openApiSource.path),
+      fetchRepoText(pinnedCtx, factSource.path),
+      fetchRepoText(pinnedCtx, operationSource.path),
+      fetchRepoText(pinnedCtx, implementationSource.path),
+      ...publicSchemaSources.map((source) => fetchRepoText(pinnedCtx, source.path)),
     ]);
 
     const [openApiText, factSchemaText, operationSchemaText, serverSource, ...schemaTexts] = texts;
@@ -394,7 +395,7 @@ export async function syncCa5gcSim(component) {
       component: component.id,
       source: {
         repository: component.repository,
-        ref,
+        ref: ctx.sourceRef || ctx.ref,
         commit: revision.commit,
         commitDate: revision.commitDate,
         private: true,
