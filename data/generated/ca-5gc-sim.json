@@ -1,13 +1,13 @@
 {
   "component": "ca-5gc-sim",
   "source": {
-    "repository": "odango-chan/ca-5gc-sim",
+    "repository": "odango-chan/env-5gc-sim",
     "ref": "main",
-    "commit": "c94121b90274c6aa5a20be2fb8220958bb7e4f25",
-    "commitDate": "2026-10-13T07:49:39Z",
+    "commit": "b10561eff8ef2911b187503d27e0442afd54b991",
+    "commitDate": "2026-10-21T03:27:45Z",
     "private": true,
     "publicDocsManifest": "docs/public-docs.yaml",
-    "openApi": "schemas/v1alpha1/fivegc-sim.openapi.yaml",
+    "openApi": "schemas/v1alpha1/provider.openapi.yaml",
     "factSchema": "schemas/v1alpha1/fivegc-sim-fact-read-request.schema.yaml",
     "operationSchema": "schemas/v1alpha1/fivegc-sim-operation-request.schema.yaml",
     "httpServer": "internal/httpapi/server.go"
@@ -26,7 +26,7 @@
           "fields",
           "enums"
         ],
-        "title": "FiveGCSimProcessIdentity.v1",
+        "title": "FiveGCSimProcessIdentity.v2",
         "description": "Safe process identity and exact supported-contract advertisement.",
         "fields": [
           {
@@ -54,7 +54,7 @@
             "description": null,
             "ref": null,
             "oneOfRefs": [],
-            "const": "v1"
+            "const": "v2"
           },
           {
             "path": "spec",
@@ -71,7 +71,7 @@
             "description": null,
             "ref": null,
             "oneOfRefs": [],
-            "const": "ca-5gc-sim"
+            "const": "env-5gc-sim"
           },
           {
             "path": "spec.processInstanceRef",
@@ -105,8 +105,7 @@
             "ref": null,
             "oneOfRefs": [],
             "enum": [
-              "integrated-reference-simulation",
-              "standalone-deterministic-simulator"
+              "local-topology-v1"
             ]
           },
           {
@@ -145,8 +144,7 @@
         "rules": [],
         "enums": {
           "spec.processProfile": [
-            "integrated-reference-simulation",
-            "standalone-deterministic-simulator"
+            "local-topology-v1"
           ]
         },
         "examplesAllowed": false
@@ -160,7 +158,7 @@
           "fields",
           "enums"
         ],
-        "title": "FiveGCSimProcessHealth.v1",
+        "title": "FiveGCSimProcessHealth.v2",
         "description": "Process readiness projection. It is not a 5GC domain fact.",
         "fields": [
           {
@@ -188,7 +186,7 @@
             "description": null,
             "ref": null,
             "oneOfRefs": [],
-            "const": "v1"
+            "const": "v2"
           },
           {
             "path": "spec",
@@ -205,7 +203,7 @@
             "description": null,
             "ref": null,
             "oneOfRefs": [],
-            "const": "ca-5gc-sim"
+            "const": "env-5gc-sim"
           },
           {
             "path": "spec.processInstanceRef",
@@ -288,7 +286,7 @@
             "oneOfRefs": []
           },
           {
-            "path": "spec.bindings.fabric",
+            "path": "spec.bindings.n4",
             "required": true,
             "type": "ref",
             "description": null,
@@ -341,7 +339,7 @@
                 "const": "READY"
               },
               {
-                "path": "spec.bindings.fabric",
+                "path": "spec.bindings.n4",
                 "required": false,
                 "type": null,
                 "description": null,
@@ -349,7 +347,7 @@
                 "oneOfRefs": []
               },
               {
-                "path": "spec.bindings.fabric.status",
+                "path": "spec.bindings.n4.status",
                 "required": false,
                 "type": "const",
                 "description": null,
@@ -587,7 +585,7 @@
             "description": null,
             "ref": null,
             "oneOfRefs": [],
-            "const": "ca-5gc-sim"
+            "const": "env-5gc-sim"
           },
           {
             "path": "spec.worldRef",
@@ -1874,6 +1872,14 @@
             ]
           },
           {
+            "path": "spec.pfcpResourceRef",
+            "required": false,
+            "type": "ref",
+            "description": null,
+            "ref": "fivegc-sim-common.schema.yaml#/$defs/opaqueRef",
+            "oneOfRefs": []
+          },
+          {
             "path": "spec.worldRef",
             "required": true,
             "type": "ref",
@@ -1965,6 +1971,14 @@
             "oneOfRefs": []
           },
           {
+            "path": "spec.protocolTransactions",
+            "required": false,
+            "type": "array",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
             "path": "spec.sourceFactRefs",
             "required": false,
             "type": "array",
@@ -2021,6 +2035,34 @@
                 "oneOfRefs": []
               }
             ]
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.operationSemantic": [
+                "PDU_SESSION_CREATE"
+              ],
+              "spec.backendEffectDispatch": [
+                "DISPATCHED"
+              ]
+            },
+            "required": [
+              "spec.pfcpResourceRef"
+            ],
+            "fields": []
+          },
+          {
+            "scope": "spec",
+            "when": {
+              "spec.operationSemantic": [
+                "PDU_SESSION_CREATE"
+              ],
+              "spec.backendEffectDispatch": [
+                "NOT_DISPATCHED"
+              ]
+            },
+            "required": [],
+            "fields": []
           },
           {
             "scope": "spec",
@@ -2580,16 +2622,16 @@
       },
       {
         "kind": "json-schema",
-        "path": "schemas/v1alpha1/fivegc-sim-standalone-config.schema.yaml",
-        "role": "standalone-config",
+        "path": "schemas/v1alpha1/fivegc-sim-process-config.schema.yaml",
+        "role": "process-config",
         "publish": [
           "metadata",
           "fields",
           "enums",
           "examples"
         ],
-        "title": "FiveGCSimStandaloneConfig.v1",
-        "description": "Minimal caller-owned configuration for the independent deterministic simulator process profile.",
+        "title": "FiveGCSimProcessConfig.v3",
+        "description": "Sole process configuration with local world scheduling and independent SMF/UPF PFCP endpoints.",
         "fields": [
           {
             "path": "apiVersion",
@@ -2607,7 +2649,7 @@
             "description": null,
             "ref": null,
             "oneOfRefs": [],
-            "const": "FiveGCSimStandaloneConfig"
+            "const": "FiveGCSimProcessConfig"
           },
           {
             "path": "contractVersion",
@@ -2616,7 +2658,7 @@
             "description": null,
             "ref": null,
             "oneOfRefs": [],
-            "const": "v1"
+            "const": "v3"
           },
           {
             "path": "spec",
@@ -2635,8 +2677,24 @@
             "oneOfRefs": []
           },
           {
-            "path": "spec.process.listen",
+            "path": "spec.process.providerListen",
             "required": true,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.process.controlListen",
+            "required": true,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.process.stateDir",
+            "required": false,
             "type": "string",
             "description": null,
             "ref": null,
@@ -2697,6 +2755,62 @@
             "description": null,
             "ref": null,
             "oneOfRefs": []
+          },
+          {
+            "path": "spec.n4",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.n4.smf",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.n4.smf.local",
+            "required": true,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.n4.smf.peer",
+            "required": true,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.n4.upf",
+            "required": true,
+            "type": "object",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.n4.upf.local",
+            "required": true,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
+          },
+          {
+            "path": "spec.n4.responseTimeout",
+            "required": true,
+            "type": "string",
+            "description": null,
+            "ref": null,
+            "oneOfRefs": []
           }
         ],
         "rules": [],
@@ -2713,7 +2827,7 @@
           "enums"
         ],
         "title": "FiveGCSim Common Definitions v1",
-        "description": "Shared machine definitions for ca-5gc-sim C2/C6 contracts.",
+        "description": "Shared machine definitions for env-5gc-sim C2/C6 contracts.",
         "fields": [],
         "rules": [],
         "enums": {},
@@ -2773,7 +2887,7 @@
             "description": null,
             "ref": null,
             "oneOfRefs": [],
-            "const": "ca-5gc-sim"
+            "const": "env-5gc-sim"
           },
           {
             "path": "spec.factRef",
@@ -3325,8 +3439,8 @@
   "counts": {
     "facts": 9,
     "operations": 15,
-    "documentedRoutes": 6,
-    "implementationRoutes": 10
+    "documentedRoutes": 3,
+    "implementationRoutes": 13
   },
   "facts": [
     "UE_REGISTRATION",
@@ -3359,46 +3473,13 @@
   "routes": [
     {
       "method": "GET",
-      "path": "/healthz",
-      "surface": "Diagnostics",
-      "operationId": "getProcessHealth",
+      "path": "/docs/",
+      "surface": "Owner API",
+      "operationId": null,
       "description": "",
       "request": null,
-      "responses": [
-        {
-          "status": "200",
-          "description": "Process is READY.",
-          "schema": "schemas/v1alpha1/fivegc-sim-process-health.schema.yaml"
-        },
-        {
-          "status": "503",
-          "description": "Process is alive but not READY, or is draining/blocked.",
-          "schema": "schemas/v1alpha1/fivegc-sim-process-health.schema.yaml"
-        }
-      ],
-      "documented": true,
-      "implemented": true
-    },
-    {
-      "method": "GET",
-      "path": "/identity",
-      "surface": "Diagnostics",
-      "operationId": "getProcessIdentity",
-      "description": "Returns metadata about this ca-5gc-sim process and the owner contracts\nit supports. Think of this endpoint as \"who is this simulator process\nand what does it serve?\", not \"who is UE-B?\".\n\nThis endpoint never performs user-visible name/alias -> SUPI/IMSI\nresolution. That cross-domain identity mapping belongs to\nca-provider-common and is exposed there as\nPOST /v1/subject-identities/lookup.\n",
-      "request": null,
-      "responses": [
-        {
-          "status": "200",
-          "description": "Process identity and exact supported-contract advertisement.",
-          "schema": "schemas/v1alpha1/fivegc-sim-process-identity.schema.yaml"
-        },
-        {
-          "status": "503",
-          "description": "Process/control error because the owner service is not available for this request.",
-          "schema": "schemas/v1alpha1/fivegc-sim-process-error.schema.yaml"
-        }
-      ],
-      "documented": true,
+      "responses": [],
+      "documented": false,
       "implemented": true
     },
     {
@@ -3425,7 +3506,29 @@
     },
     {
       "method": "GET",
+      "path": "/management/v1/operations/{operationId}",
+      "surface": "Owner API",
+      "operationId": null,
+      "description": "",
+      "request": null,
+      "responses": [],
+      "documented": false,
+      "implemented": true
+    },
+    {
+      "method": "GET",
       "path": "/management/v1/readyz",
+      "surface": "Owner API",
+      "operationId": null,
+      "description": "",
+      "request": null,
+      "responses": [],
+      "documented": false,
+      "implemented": true
+    },
+    {
+      "method": "GET",
+      "path": "/openapi.yaml",
       "surface": "Owner API",
       "operationId": null,
       "description": "",
@@ -3458,8 +3561,8 @@
     },
     {
       "method": "POST",
-      "path": "/internal/fabric/delivery",
-      "surface": "Fabric integration",
+      "path": "/internal/v1/world/reset",
+      "surface": "Host control",
       "operationId": null,
       "description": "",
       "request": null,
@@ -3469,38 +3572,13 @@
     },
     {
       "method": "POST",
-      "path": "/internal/v1/world/reset",
-      "surface": "Host control",
-      "operationId": "resetWorld",
-      "description": "Host-only control surface. Not a Runtime business capability and never an Agent Tool.",
-      "request": {
-        "required": true,
-        "contentType": "application/json",
-        "schema": "schemas/v1alpha1/fivegc-sim-world-reset-request.schema.yaml"
-      },
-      "responses": [
-        {
-          "status": "200",
-          "description": "New generation and required bindings are READY.",
-          "schema": "schemas/v1alpha1/fivegc-sim-world-reset-result.schema.yaml"
-        },
-        {
-          "status": "400",
-          "description": "Process/control error outside accepted C2/C6 semantic results.",
-          "schema": "schemas/v1alpha1/fivegc-sim-process-error.schema.yaml"
-        },
-        {
-          "status": "409",
-          "description": "Process/control error outside accepted C2/C6 semantic results.",
-          "schema": "schemas/v1alpha1/fivegc-sim-process-error.schema.yaml"
-        },
-        {
-          "status": "503",
-          "description": "Process/control error outside accepted C2/C6 semantic results.",
-          "schema": "schemas/v1alpha1/fivegc-sim-process-error.schema.yaml"
-        }
-      ],
-      "documented": true,
+      "path": "/management/v1/drain",
+      "surface": "Owner API",
+      "operationId": null,
+      "description": "",
+      "request": null,
+      "responses": [],
+      "documented": false,
       "implemented": true
     },
     {
@@ -3590,6 +3668,17 @@
     "implementationOnlyRoutes": [
       {
         "method": "GET",
+        "path": "/docs/",
+        "surface": "Owner API",
+        "operationId": null,
+        "description": "",
+        "request": null,
+        "responses": [],
+        "documented": false,
+        "implemented": true
+      },
+      {
+        "method": "GET",
         "path": "/management/v1/healthz",
         "surface": "Owner API",
         "operationId": null,
@@ -3612,6 +3701,17 @@
       },
       {
         "method": "GET",
+        "path": "/management/v1/operations/{operationId}",
+        "surface": "Owner API",
+        "operationId": null,
+        "description": "",
+        "request": null,
+        "responses": [],
+        "documented": false,
+        "implemented": true
+      },
+      {
+        "method": "GET",
         "path": "/management/v1/readyz",
         "surface": "Owner API",
         "operationId": null,
@@ -3622,9 +3722,31 @@
         "implemented": true
       },
       {
+        "method": "GET",
+        "path": "/openapi.yaml",
+        "surface": "Owner API",
+        "operationId": null,
+        "description": "",
+        "request": null,
+        "responses": [],
+        "documented": false,
+        "implemented": true
+      },
+      {
         "method": "POST",
-        "path": "/internal/fabric/delivery",
-        "surface": "Fabric integration",
+        "path": "/internal/v1/world/reset",
+        "surface": "Host control",
+        "operationId": null,
+        "description": "",
+        "request": null,
+        "responses": [],
+        "documented": false,
+        "implemented": true
+      },
+      {
+        "method": "POST",
+        "path": "/management/v1/drain",
+        "surface": "Owner API",
         "operationId": null,
         "description": "",
         "request": null,
