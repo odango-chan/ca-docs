@@ -5,115 +5,66 @@ const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\
 const flow = 'Sandbox platform\n' +
   '├── ConnectionAgent Domain  ·  Agent / Runtime / Skills\n' +
   '├── Tool Plane              ·  discovery / gateway / common capabilities\n' +
-  '├── Environment Plane       ·  env-core / simulated & real worlds / env-fabric\n' +
-  '├── Evaluation              ·  bench-suite / bench-engine\n' +
-  '├── Control / Surface       ·  control / console\n' +
+  '├── Environment Plane       ·  environment substrate / simulated & real worlds / env-fabric\n' +
+  '├── Evaluation              ·  Benchmark assets / evaluation engine\n' +
+  '├── Control / Surface       ·  experiment control / console\n' +
   '└── Shared Foundation       ·  nodus\n' +
   '\nPlatform-level composition and compatibility governance.\n' +
   'Each component retains its own contract and fact authority.';
 ---
-<SiteLayout title="Sandbox Platform Architecture" lang="en" description="Sandbox platform layers, component responsibilities, and cross-repository authority boundaries.">
-  <section class="hero">
+<SiteLayout title="Sandbox Platform Architecture" lang="en" description="Sandbox platform layers, reading paths, and technical documentation authority boundaries.">
+  <section class="home-hero">
     <span class="eyebrow">Sandbox / Architecture</span>
     <h1>Sandbox platform architecture</h1>
-    <p class="lede">Sandbox is the product-level composition and governance layer for Agents, tools, environments, and evaluation. It defines how components work together, remain compatible, and form runnable experiments. Each component retains ownership of its implementation, contracts, and domain facts.</p>\n    <p><a href={href('/components/sandbox/')}>Read the detailed architecture and responsibility boundaries maintained by the owner repository →</a></p>
+    <p>Sandbox composes Agent, tool, environment, experiment-control, and evaluation components into repeatable systems. This page is the platform-level map and reading guide; component responsibilities, technical flows, and current status belong to owner-maintained documentation and acceptance evidence.</p>
+    <div class="home-actions">
+      <a href={href('/components/sandbox/#platform-architecture-en')}>Detailed architecture and responsibility boundaries <span aria-hidden="true">→</span></a>
+      <a href={href('/runbooks/real-5gc/')}>Real 5GC runbook <span aria-hidden="true">→</span></a>
+      <a href={href('/interfaces/real-5gc-evidence/')}>Interfaces and evidence <span aria-hidden="true">→</span></a>
+      <a href={href('/benchmark/')}>Benchmark evaluation framework <span aria-hidden="true">→</span></a>
+    </div>
   </section>
 
-  <section class="section"><div class="grid"><div class="card wide">
-    <h3>Platform layers</h3><pre><code>{flow}</code></pre>
-    <p class="muted">This is the target architecture, not a claim that every component migration or end-to-end acceptance is complete. Current repository names may differ from target names; consult Sandbox migration records and owner repositories for status.</p>
-  </div></div></section>
-
-  <section class="section">
-    <h2>Responsibilities by plane</h2>
-    <table>
-      <thead><tr><th>Plane</th><th>Responsibility</th><th>Main components (target taxonomy)</th></tr></thead>
-      <tbody>
-        <tr><td>ConnectionAgent Domain</td><td>Agent Hosts, planning and routing, Skill source/build, governed execution, Outcome, Reconcile, and Recovery.</td><td><code>ca-agent</code>, <code>ca-runtime</code>, <code>ca-dsh</code>, <code>ca-nanobot</code>, <code>ca-skills</code>, <code>ca-skill-toolchain</code></td></tr>
-        <tr><td>Tool Plane</td><td>Tool discovery and invocation protocols, gateway mapping, and cross-environment capabilities. The gateway does not own underlying business effects.</td><td><code>tool-mcp-gw</code>, <code>tool-common</code></td></tr>
-        <tr><td>Environment Plane</td><td>Environment substrate, simulated or real worlds, authoritative source facts, external-system integration, network observation, and controlled intervention.</td><td><code>env-core</code>, <code>env-5gc-sim</code>, <code>env-5gc-real</code>, <code>env-fabric</code></td></tr>
-        <tr><td>Evaluation</td><td>Evaluation assets, task freezing, execution attempts, evidence validity, Verdicts, and result analysis.</td><td><code>bench-suite</code>, <code>bench-engine</code></td></tr>
-        <tr><td>Control / Surface</td><td>Select and compose resources, manage outer lifecycle and experiment runs, and provide the human-facing interface.</td><td><code>control</code>, <code>console</code></td></tr>
-        <tr><td>Shared Foundation</td><td>Reusable domain-neutral mechanics without taking over domain semantics.</td><td><code>nodus</code></td></tr>
-      </tbody>
-    </table>
+  <section class="home-section">
+    <h2>Platform layers</h2>
+    <p>The diagram shows the target responsibility taxonomy. It is not a claim that every migration or end-to-end acceptance step is complete.</p>
+    <pre><code>{flow}</code></pre>
+    <p>Physical repository names may differ from target names. The relevant owner repository defines each component's implementation, contract, and authoritative facts; platform documentation explains how components work together.</p>
   </section>
 
-  <section class="section">
-    <h2>Composition authority is not fact authority</h2>
-    <p>Sandbox can register components, pin compatible versions, define compositions, and enforce system-level integration gates. That does not make the platform repository the source of every fact.</p>
+  <section class="home-section">
+    <h2>Choose a reading path</h2>
+    <div class="reading-list">
+      <a class="reading-item" href={href('/components/sandbox/#platform-architecture-en')}>
+        <span class="reading-number">01</span>
+        <span><strong>How do components work together, and who owns each fact?</strong><small>Owner-maintained platform architecture, component responsibilities, authority boundaries, and the R1 / R2-B real 5GC flows.</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="reading-item" href={href('/runbooks/real-5gc/')}>
+        <span class="reading-number">02</span>
+        <span><strong>How do I run and validate a real 5GC?</strong><small>Step-by-step checks for topology, sessions, PFCP, user-plane connectivity, and supporting evidence.</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="reading-item" href={href('/interfaces/real-5gc-evidence/')}>
+        <span class="reading-number">03</span>
+        <span><strong>Which interfaces and evidence establish the result?</strong><small>Request/response contracts, fact sources, evidence correlation, and independent judgment boundaries.</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="reading-item" href={href('/benchmark/')}>
+        <span class="reading-number">04</span>
+        <span><strong>How is Agent reliability evaluated?</strong><small>Start with the platform-level evaluation map, then read the owner docs for assets, execution lifecycle, and judgment.</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="home-section">
+    <h2>How to read status</h2>
     <ul>
-      <li><code>ca-runtime</code> owns Runtime Outcomes for governed execution; Sandbox must not create a second writer.</li>
-      <li>Environment owners own their world state and source facts; Sandbox does not replace them with a central state store.</li>
-      <li>The Benchmark Engine forms Verdicts from frozen tasks and evidence rules; Sandbox does not adjudicate the same trial separately.</li>
-      <li>Control manages outer resource and experiment lifecycle; that does not give it ownership of Environment state or Benchmark semantics.</li>
-      <li>Console presents and operates platform capabilities but is not authoritative for underlying facts.</li>
+      <li><strong>Target architecture</strong> describes intended responsibilities and composition, not completed delivery.</li>
+      <li><strong>Owner implementation</strong> is defined by versioned documentation, code, and contracts in the component's repository.</li>
+      <li><strong>Acceptance status</strong> depends on the relevant tests and evidence; documentation sync, code merge, or a successful static-site build does not establish end-to-end acceptance.</li>
     </ul>
-  </section>
-
-  <section class="section">
-    <h2>Environments and the system under test</h2>
-    <p>Sandbox can compose simulated, real, and hybrid environments. An environment is where the system under test runs and is observed; it is not synonymous with a single simulator. The frozen EvaluationTask declares whether a trial includes the Agent, Runtime, tools, or an end-to-end composition. Repository names do not determine the test boundary.</p>
-  </section>
-
-  <section class="section" id="real-5gc-workflow">
-    <p><a href="/en/runbooks/real-5gc/">Run and validate this workflow: Real 5GC runbook →</a></p><p><a href="/en/interfaces/real-5gc-evidence/">Interfaces and evidence: contracts, authority and independent verdicts →</a></p>
-    <h2>How a real 5GC request moves through Sandbox</h2>
-    <p>The current Open5GS + UERANSIM integration makes the boundaries concrete. Keep the validated R1 observation path separate from the R2-B Agent-governed path, whose overall closeout is still blocked.</p>
-    <h3>R1: observe and forward SBI without taking over N2</h3>
-    <pre><code>UERANSIM UE
-  -> gNB
-  -> Open5GS AMF
-  -> env-fabric (observe and transparently forward SBI)
-  -> SCP
-  -> Open5GS NF (for example, SMF)
-
-N2 / NGAP: direct gNB -> AMF
-SBI: traverses env-fabric and the mandatory SCP in the current topology</code></pre>
-    <table><thead><tr><th>Step</th><th>What the component does</th><th>What supports the next step</th></tr></thead><tbody>
-      <tr><td>1. UE registration and session request</td><td>UERANSIM, gNB, and Open5GS use their native state machines for the radio-side flow. Fabric does not intercept SCTP/N2 or parse NGAP.</td><td>The SBI request produced by AMF, not a NAS state inferred by Fabric.</td></tr>
-      <tr><td>2. SBI observation</td><td><code>env-fabric</code> retains protocol provenance and observes SBI requests. R1 neither publishes NetworkIntent nor blocks the request.</td><td>The source request, boundary, and correlatable observation record.</td></tr>
-      <tr><td>3. NF communication</td><td>The request reaches the target NF through the required SCP while Fabric forwards it transparently.</td><td>The actual request/response path and Open5GS-owned state.</td></tr>
-      <tr><td>4. Verify the result</td><td>Check registration, PDU Session, PFCP, TUN, and user-plane connectivity from environment-side evidence. Forwarding a request does not prove that a session was established.</td><td>Owner-authoritative state and an actual user-plane test.</td></tr>
-    </tbody></table>
-    <p>The recorded R0/R1 baseline includes NRF/SCP startup, UE registration, PDU Session establishment, PFCP, and UE user-plane ping 3/3 PASS. These are recorded integration results, not proof that every R2-B closeout gate has passed.</p>
-    <h3>R2-B: add Agent governance at an explicit boundary</h3>
-    <pre><code>AMF -- CreateSMContext / N1 SM --> env-fabric
-                                      |
-                                      | retain source material
-                                      | extract whitelisted fields
-                                      | create exact actionRef
-                                      | PREPARED -> HELD
-                                      v
-                              NetworkIntent v2
-                                      |
-                                      v
-                         ca-agent-demo / Runtime
-                                      |
-                              Predicate admission
-                                      |
-                         execute exact actionRef only after admission
-                                      |
-                                      v
-                              env-fabric -> SCP -> SMF</code></pre>
-    <table><thead><tr><th>Boundary</th><th>Responsibility</th><th>Shortcuts that are not allowed</th></tr></thead><tbody>
-      <tr><td><code>env-fabric</code></td><td>Retains original SBI material, extracts authoritative fields, produces NetworkIntent v2, and manages an exact held action with a deadline.</td><td>No N2/NGAP handling, no full NAS decoding, and no execution of an action before it is published and held.</td></tr>
-      <tr><td><code>connectionagent</code></td><td>Owns the canonical NetworkIntent schema; v2 is current for R2-B and v1 remains historical.</td><td>Do not create a competing copy of the schema in the Sandbox documentation repository.</td></tr>
-      <tr><td><code>ca-agent-demo</code></td><td>Consumes NetworkIntent, projects it into Skill/Runtime context, and performs admission through the Runtime PredicateEngine.</td><td>Do not query Open5GS or UERANSIM directly to bypass Environment/Observation boundaries.</td></tr>
-      <tr><td>Sandbox</td><td>Owns cross-repository composition, dependency ordering, joined acceptance, and evidence closeout.</td><td>Does not replace component ownership of domain facts, Outcomes, or contracts.</td></tr>
-    </tbody></table>
-    <p><strong>Current status:</strong> M5 live governed-action/user-plane evidence and the separate M6 R1 regression evidence are recorded as PASS. Overall R2-B closeout remains BLOCKED on owner PR-range diff-check and evidence-hygiene gates. Do not describe R2-B as fully complete.</p>
-    <p>Canonical details: <a href="https://github.com/odango-chan/sandbox/blob/main/docs/design/real-5gc-agent-control.md">Real 5GC Agent-Controlled Environment</a> · <a href="https://github.com/odango-chan/sandbox/blob/main/docs/design/r2b-joint-gap-audit.md">R2-B joint gap audit</a>.</p>
-  </section>
-
-  <section class="section">
-    <h2>Status and authoritative references</h2>
-    <p>The target planes are established and some repositories have moved to their target names. Consumer migration and acceptance continue in stages. This page describes the target architecture and established responsibility boundaries; planned capabilities are not presented as delivered features.</p>
-    <ul>
-      <li><a href="https://github.com/odango-chan/sandbox/blob/main/docs/architecture/sandbox.md">Sandbox architecture and boundaries</a></li>
-      <li><a href="https://github.com/odango-chan/sandbox/blob/main/docs/architecture/repository-topology.md">Repository topology and migration names</a></li>
-      <li><a href="https://github.com/odango-chan/sandbox/blob/main/docs/ownership.md">Sandbox ownership rules</a></li>
-      <li><a href="https://github.com/odango-chan/connectionagent/blob/main/docs/architecture.md">Existing ConnectionAgent Domain architecture material</a></li>
-    </ul>
+    <p>For technical details and the current R1 / R2-B status, read the <a href={href('/components/sandbox/#platform-architecture-en')}>owner architecture document</a> and the <a href={href('/runbooks/real-5gc/')}>runbook</a>. Do not infer delivery status from target names.</p>
   </section>
 </SiteLayout>
