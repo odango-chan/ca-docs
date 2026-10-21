@@ -111,3 +111,15 @@ test('homepage responsive rules share the canonical 700px breakpoint', () => {
   assert.equal(css.split('@media (max-width: 700px)').length - 1, 1);
   assert.doesNotMatch(css, /Homepage hero: editorial scale/);
 });
+
+test('retired component and navigation primitives stay removed', () => {
+  for (const selector of ['.component-card', '.component-link', '.pills', '.private-source', '.top-api']) {
+    assert.equal(css.includes(selector), false, 'retired selector should not return: ' + selector);
+  }
+});
+
+test('root typography and design tokens share one canonical root block', () => {
+  assert.equal(css.split(':root {').length - 1, 1);
+  assert.match(css, /:root \{[^}]*font-family:[^}]*font-synthesis:\s*none/);
+  assert.match(css, /:root \{[^}]*--page:\s*#f8f8f5/);
+});
