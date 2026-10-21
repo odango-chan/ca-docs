@@ -44,3 +44,20 @@ test('tablet documentation layout uses the available viewport width', () => {
     'the tablet layout must not hard-cap the full sidebar-plus-content frame at 900px',
   );
 });
+
+test('superseded documentation redesign layer stays removed', () => {
+  assert.doesNotMatch(
+    css,
+    /Documentation-first redesign: restrained surfaces, clear reading measure, stable navigation/,
+    'keep one canonical documentation layout layer instead of appending a second copy',
+  );
+  assert.match(css, /Full-site finish: semantic navigation, readable long-form content, robust responsive behavior/);
+});
+
+test('consolidated layout retains section hierarchy and mobile table overflow', () => {
+  assert.match(css, /\.docs-article \.section h2\s*\{/);
+  assert.match(css, /\.docs-article \.section h3\s*\{/);
+  assert.match(css, /\.docs-article \.section > p\s*\{/);
+  assert.match(css, /@media \(max-width: 700px\)\s*\{[\s\S]*?\.component-table \{ display: block; overflow-x: auto; \}/);
+});
+
