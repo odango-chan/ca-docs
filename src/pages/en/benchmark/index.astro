@@ -1,72 +1,49 @@
 ---
 import SiteLayout from '../../../layouts/SiteLayout.astro';
-const flow = 'Benchmark definition\n' +
-  '  goals · scenario · constraints · expected outcome\n' +
+const flow = 'ca-benchmarks (what to evaluate)\n' +
+  '  Package / Case / RunVariant / optional Suite\n' +
   '                 │\n' +
   '                 ▼\n' +
-  'Declared system under test (CUT)\n' +
-  '  agent-only / runtime-only / end-to-end\n' +
+  'ca-benchmark-engine (how to evaluate)\n' +
+  '  validate → resolve → preview → freeze\n' +
   '                 │\n' +
   '                 ▼\n' +
-  'Trial orchestration + controlled environment\n' +
+  'Immutable EvaluationTask\n' +
   '                 │\n' +
   '                 ▼\n' +
-  'Observations + evidence collection\n' +
+  'ExecutionAttempt(s) → Agent / Runtime / Environment\n' +
   '                 │\n' +
   '                 ▼\n' +
-  'Oracle / adjudication rules\n' +
+  'Semantic evidence → validity gate → EvaluationResult\n' +
   '                 │\n' +
   '                 ▼\n' +
-  'Result + metrics + provenance';
+  'Aggregation / regression / certification / query';
 ---
 <SiteLayout title="CA Benchmark Architecture" lang="en">
-  <section class="hero">
-    <span class="eyebrow">CA Docs / Benchmark</span>
-    <h1>Benchmark architecture and evaluation boundaries</h1>
-    <p class="lede">CA Benchmark evaluates agents and execution systems through explainable, reproducible experiments. Every result must identify the system under test, run conditions, adjudication rules, and evidence sources. A single demo or a tool's PASS response is not a general reliability claim.</p>
-  </section>
-
-  <section class="section">
-    <div class="grid">
-      <div class="card wide">
-        <h3>Evaluation pipeline</h3>
-        <pre><code>{flow}</code></pre>
-        <p class="muted">This is a logical architecture. It does not imply that a standalone Benchmark Engine exists today or that all execution modes have been implemented.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <h2>Required declaration for each evaluation</h2>
-    <div class="grid">
-      <div class="card"><h3>System under test (CUT)</h3><p>State whether the evaluation covers the agent, the runtime, or the end-to-end system including tools and environment. Scores with different boundaries are not automatically comparable.</p></div>
-      <div class="card"><h3>Scenario and constraints</h3><p>Declare initial state, user goal, constraints, available tools, environment version, and expected terminal state.</p></div>
-      <div class="card"><h3>Oracle / adjudication</h3><p>Define success, failure, partial completion, and unconfirmed outcomes. Use authoritative state or explicit evidence rules rather than model self-assessment.</p></div>
-      <div class="card"><h3>Run provenance</h3><p>Record benchmark assets, engine, agent/model configuration, environment version, and key dependencies for traceability.</p></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <h2>Reliability evaluation focus</h2>
-    <div class="grid">
-      <div class="card"><h3>Error prevention</h3><p>Can the system prevent unsafe or invalid execution when preconditions are not met or constraints would be violated?</p></div>
-      <div class="card"><h3>Outcome truthfulness</h3><p>Can it detect intermediate false positives and declare success only when authoritative state supports that conclusion?</p></div>
-      <div class="card"><h3>Failure and uncertainty</h3><p>Can it distinguish failure, timeout, unknown outcome, and insufficient evidence without disguising uncertainty as success?</p></div>
-      <div class="card"><h3>Recovery and auditability</h3><p>Can it safely handle retries, duplicate execution, inconsistent state, and recovery while retaining reviewable evidence?</p></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <h2>Results that must not be conflated</h2>
-    <div class="grid">
-      <div class="card"><h3>Simulation pass</h3><p>Demonstrates behavior under the declared simulated scenario and rules; it does not automatically prove real-network behavior.</p></div>
-      <div class="card"><h3>Real-environment pass</h3><p>Applies to the recorded environment, configuration, initial state, and evidence scope; it is not a universal claim across environments.</p></div>
-      <div class="card"><h3>Component pass</h3><p>Validates the declared component boundary and does not automatically prove the full agent-to-outcome loop.</p></div>
-      <div class="card"><h3>End-to-end pass</h3><p>Requires an end-to-end expected outcome and sufficient evidence; component-level PASS results cannot simply be added together.</p></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <p><strong>Status:</strong> This page defines the public Benchmark architecture and evaluation discipline. It does not claim that all metrics, execution modes, or benchmark assets are implemented. Detailed pages should be generated from the owning Benchmark repository's authoritative definitions and reproducible run records.</p>
-  </section>
+  <section class="hero"><span class="eyebrow">CA Docs / Benchmark</span><h1>Benchmark architecture and evaluation boundaries</h1><p class="lede">CA Benchmark uses versioned assets to define evaluation questions, then separates compilation and freezing from execution, evidence adjudication, and aggregation. It evaluates declared Agent / Runtime / environment behavior; it does not replace Runtime business execution or treat a model's self-reported PASS as an evaluation result.</p></section>
+  <section class="section"><div class="grid"><div class="card wide"><h3>Evaluation lifecycle</h3><pre><code>{flow}</code></pre><p class="muted">This logical model reflects the current ownership split between the two authoritative repositories. Available capabilities remain subject to their versioned contracts and acceptance status.</p></div></div></section>
+  <section class="section"><h2>Responsibility split</h2><div class="grid">
+    <div class="card"><h3>ca-benchmarks: What</h3><p>The formal authoring-asset repository. It owns Benchmark Packages / Cases / RunVariants, optional Suites, and package-local Probe / Normalizer / Oracle source where needed. <code>benchmarks/manifest.yaml</code> is the current public catalog membership authority.</p></div>
+    <div class="card"><h3>ca-benchmark-engine: How</h3><p>Owns schemas and validation, asset resolution, compilation, Preview / Freeze, EvaluationTask, ExecutionAttempt, scheduling, evidence validity, Verdict / EvaluationResult, statistics, regression, and certification projections.</p></div>
+    <div class="card"><h3>Environment / Sandbox / Lab</h3><p>Environment owners provide real capability inventories, observations, and Ground Truth; Sandbox provides controlled-environment and fault capabilities; Lab selects resources, manages lifecycle, and orchestrates experiments. Benchmark assets do not bind concrete endpoints or instances.</p></div>
+    <div class="card"><h3>System under test (CUT)</h3><p>Declare whether an evaluation targets the Agent, Runtime, or an end-to-end composition including tools and environment. Results with different CUT boundaries are not automatically comparable.</p></div>
+  </div></section>
+  <section class="section"><h2>Reliability evaluation focus</h2><div class="grid">
+    <div class="card"><h3>Constraints and prevention</h3><p>Can the system prevent unsafe or invalid execution when preconditions are missing or an action violates constraints?</p></div>
+    <div class="card"><h3>Authoritative outcomes and evidence</h3><p>Are results adjudicated from owner-authoritative state and admitted evidence rather than optimistic intermediate status or model self-assessment?</p></div>
+    <div class="card"><h3>Unknown, failure, and invalid trials</h3><p>Distinguish CUT failure, unknown outcome, and infrastructure-invalid execution. An invalid trial must not automatically count as a CUT failure.</p></div>
+    <div class="card"><h3>Recovery and retry</h3><p>Evaluate duplicate operations, uncertain results, inconsistent state, and recovery paths while retaining attempt-level evidence.</p></div>
+  </div></section>
+  <section class="section"><h2>Concepts that must remain distinct</h2><div class="grid">
+    <div class="card"><h3>Runtime Outcome</h3><p>Runtime owns the outcome of an individual governed execution.</p></div>
+    <div class="card"><h3>Benchmark Verdict</h3><p>The Engine forms an evaluation judgment from the frozen task, evidence validity, and Case rules; it is not another name for Runtime Outcome.</p></div>
+    <div class="card"><h3>Environment Ground Truth</h3><p>Provided by the Environment / Sandbox fact owner, not fabricated or replaced by the Benchmark Engine.</p></div>
+    <div class="card"><h3>Invalid trial</h3><p>If environment or infrastructure preconditions for a valid run are unmet, mark the trial invalid and retain the reason instead of automatically blaming the CUT.</p></div>
+  </div></section>
+  <section class="section"><h2>Authoritative sources</h2><ul>
+    <li><a href="https://github.com/odango-chan/ca-benchmarks">ca-benchmarks — formal evaluation assets and current Case set</a></li>
+    <li><a href="https://github.com/odango-chan/ca-benchmarks/blob/main/docs/architecture/benchmark-model.md">Benchmark domain model</a></li>
+    <li><a href="https://github.com/odango-chan/ca-benchmark-engine">ca-benchmark-engine — compilation, execution, and evaluation</a></li>
+    <li><a href="https://github.com/odango-chan/ca-benchmark-engine/blob/main/docs/architecture/engine-model.md">Benchmark Engine domain model</a></li>
+  </ul><p class="muted">This is a global guide, not a replacement for the authoritative repositories. It does not claim that every evaluation mode or metric is production-ready.</p></section>
 </SiteLayout>
