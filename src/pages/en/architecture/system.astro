@@ -18,10 +18,10 @@ const flow = 'Sandbox platform\n' +
     <h1>Sandbox platform architecture</h1>
     <p>Sandbox composes Agent, tool, environment, experiment-control, and evaluation components into repeatable systems. This page is the platform-level map and reading guide; component responsibilities, technical flows, and current status belong to owner-maintained documentation and acceptance evidence.</p>
     <div class="home-actions">
-      <a href={href('/components/sandbox/#platform-architecture-en')}>Detailed architecture and responsibility boundaries <span aria-hidden="true">→</span></a>
-      <a href={href('/runbooks/real-5gc/')}>Real 5GC runbook <span aria-hidden="true">→</span></a>
-      <a href={href('/interfaces/real-5gc-evidence/')}>Interfaces and evidence <span aria-hidden="true">→</span></a>
-      <a href={href('/benchmark/')}>Benchmark evaluation framework <span aria-hidden="true">→</span></a>
+      <a href={href('/en/components/sandbox/#platform-architecture-en')}>Detailed architecture and responsibility boundaries <span aria-hidden="true">→</span></a>
+      <a href={href('/en/runbooks/real-5gc/')}>Real 5GC runbook <span aria-hidden="true">→</span></a>
+      <a href={href('/en/interfaces/real-5gc-evidence/')}>Interfaces and evidence <span aria-hidden="true">→</span></a>
+      <a href={href('/en/benchmark/')}>Benchmark evaluation framework <span aria-hidden="true">→</span></a>
     </div>
   </section>
 
@@ -35,22 +35,22 @@ const flow = 'Sandbox platform\n' +
   <section class="home-section">
     <h2>Choose a reading path</h2>
     <div class="reading-list">
-      <a class="reading-item" href={href('/components/sandbox/#platform-architecture-en')}>
+      <a class="reading-item" href={href('/en/components/sandbox/#platform-architecture-en')}>
         <span class="reading-number">01</span>
         <span><strong>How do components work together, and who owns each fact?</strong><small>Owner-maintained platform architecture, component responsibilities, authority boundaries, and the R1 / R2-B real 5GC flows.</small></span>
         <span class="reading-arrow" aria-hidden="true">↗</span>
       </a>
-      <a class="reading-item" href={href('/runbooks/real-5gc/')}>
+      <a class="reading-item" href={href('/en/runbooks/real-5gc/')}>
         <span class="reading-number">02</span>
         <span><strong>How do I run and validate a real 5GC?</strong><small>Step-by-step checks for topology, sessions, PFCP, user-plane connectivity, and supporting evidence.</small></span>
         <span class="reading-arrow" aria-hidden="true">↗</span>
       </a>
-      <a class="reading-item" href={href('/interfaces/real-5gc-evidence/')}>
+      <a class="reading-item" href={href('/en/interfaces/real-5gc-evidence/')}>
         <span class="reading-number">03</span>
         <span><strong>Which interfaces and evidence establish the result?</strong><small>Request/response contracts, fact sources, evidence correlation, and independent judgment boundaries.</small></span>
         <span class="reading-arrow" aria-hidden="true">↗</span>
       </a>
-      <a class="reading-item" href={href('/benchmark/')}>
+      <a class="reading-item" href={href('/en/benchmark/')}>
         <span class="reading-number">04</span>
         <span><strong>How is Agent reliability evaluated?</strong><small>Start with the platform-level evaluation map, then read the owner docs for assets, execution lifecycle, and judgment.</small></span>
         <span class="reading-arrow" aria-hidden="true">↗</span>
@@ -65,6 +65,6 @@ const flow = 'Sandbox platform\n' +
       <li><strong>Owner implementation</strong> is defined by versioned documentation, code, and contracts in the component's repository.</li>
       <li><strong>Acceptance status</strong> depends on the relevant tests and evidence; documentation sync, code merge, or a successful static-site build does not establish end-to-end acceptance.</li>
     </ul>
-    <p>For technical details and the current R1 / R2-B status, read the <a href={href('/components/sandbox/#platform-architecture-en')}>owner architecture document</a> and the <a href={href('/runbooks/real-5gc/')}>runbook</a>. Do not infer delivery status from target names.</p>
+    <p>For technical details and the current R1 / R2-B status, read the <a href={href('/en/components/sandbox/#platform-architecture-en')}>owner architecture document</a> and the <a href={href('/en/runbooks/real-5gc/')}>runbook</a>. Do not infer delivery status from target names.</p>
   </section>
 </SiteLayout>
