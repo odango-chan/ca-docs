@@ -58,6 +58,55 @@ const flow = 'Sandbox platform\n' +
   </section>
 
   <section class="section">
+    <h2>一条真实 5GC 请求怎样经过 Sandbox</h2>
+    <p>用当前的 Open5GS + UERANSIM 联调链路举例，比单看分层更容易看清各组件的作用。这里需要区分已经验证的 R1 观测路径和仍在收口的 R2-B Agent 治理路径。</p>
+    <h3>R1：观测并转发 SBI，不接管 N2</h3>
+    <pre><code>UERANSIM UE
+  -> gNB
+  -> Open5GS AMF
+  -> env-fabric（观测 SBI 并透明转发）
+  -> SCP
+  -> Open5GS NF（例如 SMF）
+
+N2 / NGAP：gNB -> AMF，直连
+SBI：按当前拓扑经过 env-fabric 与 SCP</code></pre>
+    <table><thead><tr><th>步骤</th><th>组件实际做什么</th><th>下一步依据什么</th></tr></thead><tbody>
+      <tr><td>1. UE 注册与会话请求</td><td>UERANSIM、gNB 和 Open5GS 使用原生状态机处理无线侧流程。Fabric 不拦截 SCTP/N2，也不解析 NGAP。</td><td>AMF 产生的 SBI 请求，而不是 Fabric 推断的 NAS 状态。</td></tr>
+      <tr><td>2. SBI 观测</td><td><code>env-fabric</code> 保留协议来源并观测 SBI 请求；R1 不发布 NetworkIntent，也不阻止请求。</td><td>源请求、来源边界和可关联的观测记录。</td></tr>
+      <tr><td>3. NF 间通信</td><td>请求经必需的 SCP 到达目标 NF，Fabric 继续透明转发。</td><td>实际请求/响应路径与 Open5GS 自身的状态。</td></tr>
+      <tr><td>4. 验证结果</td><td>从环境侧检查注册、PDU Session、PFCP、TUN 与用户面连通性；不把“请求已经转发”当作会话已建立。</td><td>各权威来源的状态与实际用户面测试。</td></tr>
+    </tbody></table>
+    <p>当前记录的 R0/R1 基线包括：NRF/SCP 启动、UE 注册、PDU Session 建立、PFCP，以及 UE 用户面 ping 3/3 PASS。它们是已记录的联调证据，不代表 R2-B 所有收口门禁都已通过。</p>
+    <h3>R2-B：在明确边界上引入 Agent 治理</h3>
+    <pre><code>AMF -- CreateSMContext / N1 SM --> env-fabric
+                                      |
+                                      | 保留原始来源记录
+                                      | 提取白名单协议字段
+                                      | 建立精确 actionRef
+                                      | PREPARED -> HELD
+                                      v
+                              NetworkIntent v2
+                                      |
+                                      v
+                         ca-agent-demo / Runtime
+                                      |
+                              Predicate admission
+                                      |
+                         仅在准入通过后执行精确 actionRef
+                                      |
+                                      v
+                              env-fabric -> SCP -> SMF</code></pre>
+    <table><thead><tr><th>边界</th><th>责任</th><th>禁止的捷径</th></tr></thead><tbody>
+      <tr><td><code>env-fabric</code></td><td>保留 SBI 原始材料，提取权威字段，生成 NetworkIntent v2，并管理精确、受期限约束的 held action。</td><td>不处理 N2/NGAP，不做完整 NAS 解码，也不把未发布的 action 变成可执行动作。</td></tr>
+      <tr><td><code>connectionagent</code></td><td>维护 canonical NetworkIntent schema；v2 是当前 R2-B 契约，v1 保留为历史契约。</td><td>不在 Sandbox 文档仓复制一份竞争性的 Schema。</td></tr>
+      <tr><td><code>ca-agent-demo</code></td><td>消费 NetworkIntent，将其投影到 Skill/Runtime 上下文，并通过 Runtime PredicateEngine 执行准入。</td><td>不直接查询 Open5GS 或 UERANSIM 来绕过 Environment/Observation 边界。</td></tr>
+      <tr><td>Sandbox</td><td>固定跨仓组合、依赖顺序、联合验收与证据收口。</td><td>不替代各组件的领域事实、Outcome 或契约所有权。</td></tr>
+    </tbody></table>
+    <p><strong>当前状态：</strong>R2-B 的 M5 live governed-action/user-plane 证据和 M6 R1 回归证据已记录为 PASS；整体 closeout 仍 BLOCKED，原因包括 owner PR-range diff-check 与 evidence-hygiene 门禁未闭合。因此不能把 R2-B 描述为整体完成。</p>
+    <p>权威细节：<a href="https://github.com/odango-chan/sandbox/blob/main/docs/design/real-5gc-agent-control.md">Real 5GC Agent-Controlled Environment</a> · <a href="https://github.com/odango-chan/sandbox/blob/main/docs/design/r2b-joint-gap-audit.md">R2-B 联合差距审计</a>。</p>
+  </section>
+
+  <section class="section">
     <h2>当前状态与权威资料</h2>
     <p>Sandbox 的目标分层已经确定，部分仓库已迁移到目标命名；其余消费者迁移和验收仍在推进。文档描述的是平台目标与当前明确的职责边界，不将计划中的能力表述为已交付功能。</p>
     <ul>
