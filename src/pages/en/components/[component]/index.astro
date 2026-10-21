@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import yaml from 'js-yaml';
 import SiteLayout from '../../../../layouts/SiteLayout.astro';
+import { renderPublicMarkdown } from '../../../../lib/public-markdown.mjs';
 
 export function getStaticPaths() {
   const registry = yaml.load(fs.readFileSync(path.resolve('data/components.yaml'), 'utf8'));
@@ -17,6 +18,8 @@ export function getStaticPaths() {
 
 const { data } = Astro.props;
 const title = data.title?.en || data.component;
+const markdownSources = data.sources.filter((source) => source.kind === 'markdown' && source.body && (!source.language || source.language === 'en'));
+const publicDocs = markdownSources.map((source) => ({ source, ...renderPublicMarkdown(source.body, { ...data.source, path: source.path, role: source.role }) }));
 const apiSources = data.sources.filter((source) => source.kind === 'openapi');
 const contractSources = data.sources.filter((source) => source.kind === 'json-schema');
 const fieldDescription = (field) => {
@@ -34,6 +37,12 @@ const href = (value) => `${base.replace(/\/?$/, '/')}${value.replace(/^\/+/, '')
     <h1>{title}</h1>
     <div class="page-tabs"><a class="primary-tab" href={href(`/en/components/${data.component}/`)}>APIs &amp; contracts</a></div>
   </section>
+
+  {publicDocs.map(({ source, title: documentTitle, html }) => <section class="section" id={source.role}>
+    <div class="section-head"><div><span class="eyebrow">Owner documentation</span><h2>{documentTitle}</h2></div></div>
+    <div class="prose owner-document" set:html={html}></div>
+    <p class="source-note">Source snapshot: <code>{data.source.repository}@{data.source.commit?.slice(0, 8) || data.source.ref}</code> · <code>{source.path}</code></p>
+  </section>)}
 
   {apiSources.length > 0 && <section class="section">
     <div class="section-head"><div><span class="eyebrow">OpenAPI</span><h2>HTTP APIs</h2></div></div>
