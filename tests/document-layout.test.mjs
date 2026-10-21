@@ -81,6 +81,7 @@ test('the shared top navigation remains a single horizontal row', () => {
 test('homepage styling has one canonical definition with explicit mobile overrides', () => {
   assert.doesNotMatch(css, /Home page: documentation index first, decoration second/);
   assert.match(css, /\.home-hero h1\s*\{[^}]*max-width:\s*none/);
+  assert.match(css, /\.home-hero h1 br \{ display: none; \}/);
   assert.match(css, /@media \(max-width: 700px\)\s*\{[\s\S]*?\.home-hero h1 \{ max-width: none;/);
 });
 
