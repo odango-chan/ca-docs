@@ -338,13 +338,6 @@ td { font-size: 0.9rem; }
   font-size: 0.82rem;
 }
 
-.footer-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-block: 1.5rem;
-}
-
 @media (max-width: 760px) {
   .card, .component-card { grid-column: span 12; }
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
