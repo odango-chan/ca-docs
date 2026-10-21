@@ -22,9 +22,9 @@ const flow = 'Benchmark assets: Package / Case / RunVariant\n' +
     <h1>Benchmark architecture and evaluation boundaries</h1>
     <p>A Benchmark states what claim should be tested, runs a traceable experiment, and produces a result from valid evidence. This page is the overall map and reading guide; Case semantics, task freezing, and result adjudication are defined by their respective owner documents.</p>
     <div class="home-actions">
-      <a href={href('/components/sandbox/#benchmark-framework-en')}>Evaluation framework and CUT boundaries <span aria-hidden="true">→</span></a>
-      <a href={href('/components/ca-benchmarks/#benchmark-assets-en')}>Benchmark assets and Cases <span aria-hidden="true">→</span></a>
-      <a href={href('/components/ca-benchmark-engine/#evaluation-lifecycle-en')}>Execution lifecycle and result semantics <span aria-hidden="true">→</span></a>
+      <a href={href('/en/components/sandbox/#benchmark-framework-en')}>Evaluation framework and CUT boundaries <span aria-hidden="true">→</span></a>
+      <a href={href('/en/components/ca-benchmarks/#benchmark-assets-en')}>Benchmark assets and Cases <span aria-hidden="true">→</span></a>
+      <a href={href('/en/components/ca-benchmark-engine/#evaluation-lifecycle-en')}>Execution lifecycle and result semantics <span aria-hidden="true">→</span></a>
     </div>
   </section>
 
@@ -37,17 +37,17 @@ const flow = 'Benchmark assets: Package / Case / RunVariant\n' +
   <section class="home-section">
     <h2>Three questions, three authoritative definitions</h2>
     <div class="reading-list">
-      <a class="reading-item" href={href('/components/sandbox/#benchmark-framework-en')}>
+      <a class="reading-item" href={href('/en/components/sandbox/#benchmark-framework-en')}>
         <span class="reading-number">01</span>
         <span><strong>What are we trying to prove?</strong><small>The Sandbox-level evaluation framework describes claims, Component Under Test (CUT) boundaries, evaluation directions, and applicable modes.</small></span>
         <span class="reading-arrow" aria-hidden="true">↗</span>
       </a>
-      <a class="reading-item" href={href('/components/ca-benchmarks/#benchmark-assets-en')}>
+      <a class="reading-item" href={href('/en/components/ca-benchmarks/#benchmark-assets-en')}>
         <span class="reading-number">02</span>
         <span><strong>What exactly is evaluated?</strong><small>The Benchmark asset repository defines Packages, Cases, RunVariants, expected semantics, and Case-specific evidence. The owner repository is authoritative for the first 13 Cases and their status.</small></span>
         <span class="reading-arrow" aria-hidden="true">↗</span>
       </a>
-      <a class="reading-item" href={href('/components/ca-benchmark-engine/#evaluation-lifecycle-en')}>
+      <a class="reading-item" href={href('/en/components/ca-benchmark-engine/#evaluation-lifecycle-en')}>
         <span class="reading-number">03</span>
         <span><strong>How is it executed and judged?</strong><small>The Engine defines resolution and freezing, ExecutionAttempts, evidence validity, EvaluationResults, and reporting boundaries.</small></span>
         <span class="reading-arrow" aria-hidden="true">↗</span>
@@ -58,12 +58,12 @@ const flow = 'Benchmark assets: Package / Case / RunVariant\n' +
   <section class="home-section">
     <h2>Current focus: reliability</h2>
     <p>Current priorities include constraint adherence, authoritative outcome verification, handling unknown results, safe recovery, and evidence validity. These are evaluation directions, not a complete Case inventory; they do not imply that every Case, Mode, or Environment realization has passed live acceptance.</p>
-    <p><a href={href('/components/sandbox/#benchmark-framework-en')}>Read the owner-maintained evaluation directions and boundaries →</a></p>
+    <p><a href={href('/en/components/sandbox/#benchmark-framework-en')}>Read the owner-maintained evaluation directions and boundaries →</a></p>
   </section>
 
   <section class="home-section">
     <h2>A result is more than PASS / FAIL</h2>
     <p>An evaluation report must distinguish CUT behavior, authoritative Environment state, whether the evidence supports a judgment, and the final Benchmark Verdict. Environment or evaluation-infrastructure failures must not automatically be attributed to the CUT; the Engine and Case contracts define the specific rules.</p>
-    <p><a href={href('/runbooks/real-5gc/')}>Read the real 5GC runbook and acceptance evidence →</a></p>
+    <p><a href={href('/en/runbooks/real-5gc/')}>Read the real 5GC runbook and acceptance evidence →</a></p>
   </section>
 </SiteLayout>
