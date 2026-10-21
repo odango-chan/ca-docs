@@ -1,0 +1,62 @@
+name: Refresh source documentation snapshots
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: refresh-source-docs
+  cancel-in-progress: false
+
+jobs:
+  refresh-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Refresh from private source repositories
+        env:
+          CA_DOCS_SOURCE_TOKEN: ${{ secrets.CA_DOCS_SOURCE_TOKEN }}
+          CA_DOCS_SYNC_STRICT: '1'
+        run: npm run sync
+
+      - name: Verify snapshot provenance against live branch heads
+        env:
+          CA_DOCS_SOURCE_TOKEN: ${{ secrets.CA_DOCS_SOURCE_TOKEN }}
+        run: node scripts/verify-snapshot-provenance.mjs
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build static site from refreshed snapshots
+        run: npm run build
+
+      - name: Propose refreshed snapshots
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ github.token }}
+          branch: automation/refresh-source-docs
+          delete-branch: true
+          add-paths: |
+            data/generated/*.json
+          commit-message: 'docs: refresh source repository snapshots'
+          title: 'docs: refresh source repository snapshots'
+          body: |
+            Automated refresh of public documentation snapshots from owner repositories.
+
+            This PR is created only after strict source synchronization, immutable commit provenance verification, tests, and static site build all pass.
