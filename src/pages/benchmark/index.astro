@@ -1,0 +1,72 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+const flow = 'Benchmark definition\n' +
+  '  goals · scenario · constraints · expected outcome\n' +
+  '                 │\n' +
+  '                 ▼\n' +
+  'Declared system under test (CUT)\n' +
+  '  agent-only / runtime-only / end-to-end\n' +
+  '                 │\n' +
+  '                 ▼\n' +
+  'Trial orchestration + controlled environment\n' +
+  '                 │\n' +
+  '                 ▼\n' +
+  'Observations + evidence collection\n' +
+  '                 │\n' +
+  '                 ▼\n' +
+  'Oracle / adjudication rules\n' +
+  '                 │\n' +
+  '                 ▼\n' +
+  'Result + metrics + provenance';
+---
+<SiteLayout title="CA Benchmark 架构" lang="zh">
+  <section class="hero">
+    <span class="eyebrow">CA Docs / Benchmark</span>
+    <h1>Benchmark 架构与评估边界</h1>
+    <p class="lede">CA Benchmark 用可说明、可复现的实验评估 Agent 与执行系统。每个结果都必须明确被测对象、运行条件、判定规则和证据来源；不能把单次演示或工具返回的 PASS 当作通用可靠性结论。</p>
+  </section>
+
+  <section class="section">
+    <div class="grid">
+      <div class="card wide">
+        <h3>评估流水线</h3>
+        <pre><code>{flow}</code></pre>
+        <p class="muted">这是逻辑架构，不代表当前已有一个独立实现的 Benchmark Engine 或所有执行模式均已落地。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>每项评估必须声明什么</h2>
+    <div class="grid">
+      <div class="card"><h3>被测对象（CUT）</h3><p>明确评估 Agent、Runtime，还是包含工具与环境的端到端系统。不同边界的分数不可直接视为同一指标。</p></div>
+      <div class="card"><h3>场景与约束</h3><p>声明初始状态、用户目标、限制条件、可用工具、环境版本和预期终态。</p></div>
+      <div class="card"><h3>Oracle / 判定规则</h3><p>定义成功、失败、部分完成和无法确认的条件。判定应基于权威状态或明确的证据规则，而非模型自评。</p></div>
+      <div class="card"><h3>运行来源</h3><p>记录测试资产、Engine、Agent/模型配置、环境版本和关键依赖，保证结果可追溯。</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>可靠性评估重点</h2>
+    <div class="grid">
+      <div class="card"><h3>错误预防</h3><p>在前置条件不满足或操作违反约束时，系统是否能阻止危险或无效执行。</p></div>
+      <div class="card"><h3>结果真实性</h3><p>是否识别中间层的 false-positive，且只在权威状态支持时判定成功。</p></div>
+      <div class="card"><h3>失败与不确定性</h3><p>是否区分失败、超时、未知结果和证据不足，避免将未知状态伪装成成功。</p></div>
+      <div class="card"><h3>恢复与可审计性</h3><p>是否安全处理重复执行、状态不一致、恢复过程，并保留可复核证据。</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>不要混淆的结果</h2>
+    <div class="grid">
+      <div class="card"><h3>模拟环境通过</h3><p>证明指定模拟场景与测试规则下的行为，不自动证明真实网络行为。</p></div>
+      <div class="card"><h3>真实环境通过</h3><p>只对记录的真实环境、配置、初始状态和证据范围负责，不代表对所有环境普遍成立。</p></div>
+      <div class="card"><h3>组件测试通过</h3><p>只证明声明的组件边界，不自动证明完整 Agent-to-Outcome 闭环。</p></div>
+      <div class="card"><h3>端到端通过</h3><p>必须有端到端预期结果与足够证据，不能只累计各组件的局部 PASS。</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <p><strong>当前状态：</strong>本页定义 Benchmark 的公开架构和评估纪律，不宣称所有指标、运行模式或测试资产已经实现。后续接入具体 Benchmark 仓时，应从其权威定义和可复现运行记录生成详细页面。</p>
+  </section>
+</SiteLayout>
