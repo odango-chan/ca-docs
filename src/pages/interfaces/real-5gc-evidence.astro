@@ -1,0 +1,86 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+---
+<SiteLayout title="真实 5GC 接口与证据手册" lang="zh" description="真实 5GC 请求响应、关联键、事实权威与验收证据。">
+<section class="hero"><span class="eyebrow">Interfaces / Evidence</span><h1>真实 5GC 接口与证据手册</h1><p class="lede">说明每个接口能证明什么、如何关联请求与状态，以及形成 PASS 所需的证据。字段以 owner 仓的 schema 和代码为准；未冻结的接口明确标记，不猜测请求体。</p><p><a href="/runbooks/real-5gc/">真实 5GC 运行与验收手册 →</a></p></section>
+<section class="section"><h2>1. 四种事实不可混用</h2><table><thead><tr><th>类别</th><th>权威来源</th><th>可证明</th><th>不可单独证明</th></tr></thead><tbody>
+<tr><td>5GC 业务状态</td><td>Open5GS inspection，经 Provider 归一化</td><td>源端明确支持的 UE 注册与会话字段。</td><td>HTTP 200 或 <code>pdu_state=active</code> 不证明 session established、QoS 满足或用户面可达。</td></tr>
+<tr><td>协议/网络观察</td><td><code>env-fabric</code></td><td>边界请求/响应、协议事务、端点、方向和故障收据。</td><td>不能替代 Open5GS 当前状态，也不能由请求已观察推断远端已提交。</td></tr>
+<tr><td>执行事实与 Predicate</td><td><code>ca-runtime</code></td><td>Run/Invocation、admitted binding、证据及 PASS/FAIL/UNKNOWN。</td><td>不能凭 2xx 跳过 postcondition、Reconcile 或用户面验证。</td></tr>
+<tr><td>最终实验判定</td><td>Sandbox / Benchmark evaluator</td><td>基于冻结场景与独立证据生成可重放 verdict。</td><td>Agent 自报成功或测试夹具不是独立 Ground Truth。</td></tr>
+</tbody></table><p>Sandbox 组合环境与验收；各 owner 保留事实权威。Runtime 直接绑定真正的事实 owner，不要求所有事实先经过 Sandbox relay。最终实验由独立 Oracle 裁决。</p></section>
+<section class="section"><h2>2. 接口目录与成熟度</h2><table><thead><tr><th>调用</th><th>方法 / 契约</th><th>边界</th></tr></thead><tbody>
+<tr><td>AMF inspection</td><td><code>GET http://10.30.20.5:9090/ue-info?page=N&amp;page_size=100</code></td><td>Open5GS v2.8.0 现有只读面；分页与 HTTP 200 不代表原子快照。</td></tr>
+<tr><td>SMF inspection</td><td><code>GET http://10.30.20.4:9090/pdu-info</code></td><td><code>pdu_state=active</code> 不等于 canonical session-established。</td></tr>
+<tr><td>Provider Observation</td><td><code>POST /v1/observations/read</code>；<code>connectionagent.provider-observation/v1</code></td><td>已验收范围仅 UE registration v0.1，不代表 session/QoS/connectivity 已实现。</td></tr>
+<tr><td>Fabric Network Observation</td><td><code>POST /v1/observations/query</code>；<code>service-fabric.v1alpha1</code></td><td>查询网络/协议事件；PARTIAL_GAP 不算完整证据。</td></tr>
+<tr><td>读取 Fabric 事件</td><td><code>GET /v1/events/{fabricEventRef}</code></td><td>只使用查询结果返回的 event ref。</td></tr>
+<tr><td>R2-B 消费与执行</td><td>Owner lane；执行身份 <code>actionRef + expectedRevision</code></td><td>受治理路径，不是 R1 观察 API。本文不虚构未冻结的请求体或通用稳定路由。</td></tr>
+</tbody></table><p>参考 <a href="https://github.com/odango-chan/ca-provider-5gc/blob/main/docs/design/real-open5gs-provider-contract.md">Provider / Fact Contract</a> 与 <a href="https://github.com/odango-chan/env-fabric/blob/main/schemas/v1alpha1/service-fabric.openapi.yaml">Fabric OpenAPI</a>。</p></section>
+<section class="section"><h2>3. Open5GS 只读状态</h2><h3>AMF 注册事实</h3><p>Owner 为 Open5GS AMF，地址 <code>http://10.30.20.5:9090/ue-info</code>。Provider 按页读取并匹配明确 SUPI；原始 SUPI 与原始响应 body 不应进入公开日志或脱敏 manifest。</p><table><thead><tr><th>源条件</th><th>可接受语义</th><th>限制</th></tr></thead><tbody>
+<tr><td><code>mm_state=registered</code></td><td><code>registrationState=REGISTERED</code></td><td>基于 pinned Open5GS source enum 与已接受的注册事实契约。</td></tr><tr><td>明确的 source-defined deregistered 状态</td><td><code>DEREGISTERED</code></td><td>未知/瞬态 MM 状态不能映射为注销。</td></tr><tr><td>无匹配、分页缺口、重复身份、响应无效或超时</td><td>按 Provider resolution 处理；证据不足则 Runtime UNKNOWN。</td><td>空页不能自动提升为 KNOWN_NEGATIVE。</td></tr><tr><td><code>snapshotConsistency=NOT_PROVIDED</code></td><td>记录源端未提供快照一致性保证。</td><td>多页结果不得声称是原子快照。</td></tr>
+</tbody></table><h3>SMF 会话上下文</h3><p>Owner 为 Open5GS SMF，地址 <code>http://10.30.20.4:9090/pdu-info</code>。可见字段包含 SUPI、PDU Session ID、DNN、S-NSSAI、地址、QoS flow 和 N3 摘要，实际以 pinned source 为准。</p><p><strong>禁止推断：</strong> <code>pdu_state=active</code> 不等于 session established；QoS flow 存在不等于 QoS 满足；地址/TEID 存在不等于用户面可达。当前 inspection 不提供快照一致性或 PFCP subject correlation。</p></section>
+<section class="section"><h2>4. Provider Observation v1</h2><p>注册事实服务由部署配置绑定。示例监听 <code>10.30.20.1:8080</code>，AMF egress 为 <code>http://10.30.20.5:9090/ue-info</code>。监听必须为明确非 wildcard IP；egress URL 必须与 allowlist 完全一致。</p><h3>请求：<code>POST /v1/observations/read</code></h3><pre><code>{
+  "apiVersion": "connectionagent.io/v1alpha1",
+  "kind": "ProviderObservationReadRequest",
+  "contractVersion": "connectionagent.provider-observation/v1",
+  "spec": {
+    "observationRef": "ue.registration.snapshot",
+    "identities": { "5gc.supi": "001010000000001" },
+    "runtimeRunId": "run-reference",
+    "invocationId": "invocation-reference"
+  }
+}</code></pre><p>SUPI 仅为格式示例，不是当前真实 UE 身份。要求 canonical SUPI 为 15 位数字；身份缺失或非法时不得读取上游。</p><table><thead><tr><th>字段</th><th>语义</th></tr></thead><tbody><tr><td><code>apiVersion/kind/contractVersion</code></td><td>严格识别契约；未知字段和重复 JSON key 应拒绝。</td></tr><tr><td><code>observationRef</code></td><td>固定为 <code>ue.registration.snapshot</code>。</td></tr><tr><td><code>identities["5gc.supi"]</code></td><td>明确查询主体；episodeRef、昵称或模糊身份不能替代。</td></tr><tr><td><code>runtimeRunId/invocationId</code></td><td>关联 Runtime Run 与本次读取；响应必须原样回传。</td></tr></tbody></table>
+<h3>响应：<code>ProviderObservationReadResult</code></h3><pre><code>{
+  "apiVersion": "connectionagent.io/v1alpha1",
+  "kind": "ProviderObservationReadResult",
+  "contractVersion": "connectionagent.provider-observation/v1",
+  "spec": {
+    "observationRef": "ue.registration.snapshot",
+    "sourceRef": "env-5gc-real",
+    "runtimeRunId": "run-reference",
+    "invocationId": "invocation-reference",
+    "resolution": "FOUND",
+    "observation": {
+      "status": "OBSERVED",
+      "present": true,
+      "valid": true,
+      "value": { "registrationState": "REGISTERED" },
+      "evidence": ["open5gs-amf-page-count=1", "open5gs-amf-item-count=1", "open5gs-amf-snapshot-consistency=NOT_PROVIDED"],
+      "observedAt": "2026-10-21T05:28:27.348538481Z"
+    }
+  }
+}</code></pre><p>这是字段形状示例，不是固定响应。sourceRef、Run/Invocation ID、resolution 与 evidence 必须来自实际结果，不能硬编码 PASS。</p><table><thead><tr><th>resolution</th><th>处理方式</th></tr></thead><tbody><tr><td><code>FOUND</code></td><td>找到并归一化；Runtime 仍校验 source、binding、freshness 后才运行 Predicate。</td></tr><tr><td><code>KNOWN_NEGATIVE</code></td><td>仅用于契约允许且有权威依据的负事实；普通空页不够。</td></tr><tr><td><code>UNAVAILABLE</code></td><td>来源不可用/读取不完整/状态不明；通常导致 Predicate UNKNOWN。</td></tr><tr><td><code>INVALID_QUERY</code></td><td>身份或查询输入非法，不等于业务状态为否。</td></tr></tbody></table><p>当前已验收 wire fact 仅限 UE registration，不应宣传为已交付的 session/QoS/connectivity API。</p></section>
+<section class="section"><h2>5. Fabric Network Observation</h2><p>业务路由由 owner <a href="https://github.com/odango-chan/env-fabric/blob/main/schemas/v1alpha1/service-fabric.openapi.yaml">OpenAPI</a> 定义；管理 listener 使用独立 <code>/management/v1/*</code> 路由。</p><h3>查询：<code>POST /v1/observations/query</code></h3><pre><code>{
+  "apiVersion": "connectionagent.io/v1alpha1",
+  "kind": "NetworkObservationQuery",
+  "contractVersion": "service-fabric.v1alpha1",
+  "spec": {
+    "filter": {
+      "acquisitionMode": "REAL_INLINE",
+      "interface": "N4",
+      "protocol": "PFCP",
+      "messageKind": "PFCP_SESSION_ESTABLISHMENT_REQUEST",
+      "direction": "REQUEST"
+    },
+    "pageSize": 100
+  }
+}</code></pre><p>这是 PFCP 查询示例；真实验收必须按 profile 补齐所需 environment/generation/transaction 筛选，不能当成 R1 SBI 默认查询。</p><p><code>NetworkObservationResult</code> 包含 <code>queryRef</code>、<code>availability</code>（<code>COMPLETE</code>/<code>PARTIAL_GAP</code>/<code>UNAVAILABLE</code>）、owner-native <code>records[]</code>（<code>FabricEvent</code>）、可选 <code>nextCursor</code>、<code>gapReasonCode</code> 和 <code>sourceAuthority=env-fabric</code>。</p><table><thead><tr><th>FabricEvent 字段</th><th>关联用途</th><th>规则</th></tr></thead><tbody><tr><td><code>fabricEventRef/messageRef</code></td><td>事件/消息 owner identity。</td><td>保留原值；用 <code>GET /v1/events/{fabricEventRef}</code> 读取。</td></tr><tr><td><code>transactionRef</code></td><td>Fabric 事务关联。</td><td>不可合并不同事务的 request/response。</td></tr><tr><td><code>protocol/messageKind/direction</code></td><td>协议、消息类型与方向。</td><td>必须匹配场景；请求不是响应。</td></tr><tr><td><code>sourceEndpointRef/destinationEndpointRef</code></td><td>端点关系。</td><td>须与 owner endpoint identity 一致。</td></tr><tr><td><code>subjectRefs/correlationRefs</code></td><td>显式主体/跨记录关联。</td><td>缺失时不能靠时间接近或猜测补齐。</td></tr><tr><td><code>ownerSequence</code></td><td>owner 域单调序列。</td><td>不能与 SRF seqNo、Runtime invocation ID 或 NAS sequence 混用。</td></tr><tr><td><code>recordDigest/payloadAvailability</code></td><td>记录完整性与 payload 可用性。</td><td>digest 不证明业务动作成功。</td></tr></tbody></table><p>PFCP 要关联到 UE/PDU Session，必须有被接受的 SUPI+PSI 与 SMF/UPF F-SEID 关联证据。仅凭时间、端点或事件存在，不足以完成主体关联。</p></section>
+<section class="section"><h2>6. R2-B NetworkIntent 与精确动作</h2><p>R1 不发布 NetworkIntent、不 HOLD、不调用 Agent/Harness。R2-B 必须使用 <a href="https://github.com/odango-chan/connectionagent/blob/main/contracts/schemas/network-intent-v2.schema.yaml">canonical NetworkIntent v2</a>，不要从旧的 v1 设计文档复制字段。</p><table><thead><tr><th>字段</th><th>意义</th><th>验收条件</th></tr></thead><tbody><tr><td><code>intentRef</code></td><td>语义事件身份。</td><td>非空，当前 source context 中唯一。</td></tr><tr><td><code>actionRef + revision</code></td><td>Fabric held action 及版本。</td><td>状态 HELD，revision 精确匹配；不可重解析/替代动作。</td></tr><tr><td><code>episodeRef</code></td><td>流程关联。</td><td>只作 correlation，不是 Open5GS 状态 authority。</td></tr><tr><td><code>source.origin/source.boundary</code></td><td>协议来源；首条 lane 为 AMF/SBI。</td><td><code>sourceName=SRF</code> 不能代替 provenance。</td></tr><tr><td><code>sourceName/timestampUs/seqNo</code></td><td>SRF 标签、首次 ingress 时间、SRF 事件序号。</td><td>分别保留；timestamp 是 Unix epoch 微秒，seqNo 不是 NAS security sequence。</td></tr><tr><td><code>subjectRef/request.pduSessionId</code></td><td>逻辑主体与 PDU Session ID。</td><td>必须匹配同一 UE/session；未接受的 source locator 不是 canonical subject。</td></tr><tr><td><code>sourceRefs</code></td><td>Fabric 保留源材料引用。</td><td>不得复制 raw SBI/N1 成为第二份 authority。</td></tr><tr><td><code>deadline</code></td><td>动作有效期限。</td><td>准入和执行时均检查，过期 fail closed。</td></tr></tbody></table><p>首条 PDU Session lane 要求 <code>operation=PDU_SESSION/ESTABLISH</code>、<code>source.origin=AMF</code>、<code>source.boundary=SBI</code>、<code>messageType=193 (0xC1)</code>、<code>requestType=1 (INITIAL_REQUEST)</code>，并且 held state、revision、deadline、subject/session scope 全部精确匹配。</p><p>执行身份冻结为 <code>execute(actionRef, expectedRevision)</code>。实际 JSON body、HTTP route 和 receipt 字段必须来自当前 Fabric R2-B owner schema/host profile；材料缺失时不猜测，也不能用 R1 observations/query 路由代替。</p></section>
+<section class="section"><h2>7. Runtime：Observation 到 Predicate</h2><pre><code>Skill PredicateDefinition
+  -> Runtime resolves admitted binding
+  -> ObservationSource acquires from fact owner
+  -> normalized observation + provenance/evidence
+  -> Runtime validates source/binding/freshness
+  -> Predicate evaluator
+  -> PASS / FAIL / UNKNOWN
+  -> Runtime Outcome / Reconcile where applicable</code></pre><table><thead><tr><th>字段/输入</th><th>责任</th><th>规则</th></tr></thead><tbody><tr><td><code>sourceRef</code> 与 binding identity/digest</td><td>ObservationSource + Runtime binding resolution</td><td>必须匹配部署预期；缺失/不匹配时 fail closed。</td></tr><tr><td><code>observationRef</code>、normalized value</td><td>Provider 归一化，Runtime 校验契约。</td><td>未知 source enum 不得猜成 PASS/FAIL 值。</td></tr><tr><td><code>observedAt</code> / freshness</td><td>源时间戳 + Runtime freshness policy。</td><td>过期或缺失必需时间信息时重新 acquire 或 UNKNOWN。</td></tr><tr><td><code>evidence[]</code> / source refs</td><td>Owner 提供证据，Runtime 关联 Run/Invocation。</td><td>避免泄露 SUPI、密钥、token 和不必要敏感字段。</td></tr><tr><td>Provider knowledge / transport error</td><td>Provider 返回 knowledge/unavailability；Runtime 决定 Outcome。</td><td>副作用可能已发出但响应不明时，不盲目重发；保留 <code>OUTCOME_UNKNOWN</code> 并按策略 Reconcile。</td></tr></tbody></table><p>Agent 可见的 read-only ToolResult 是规划输入，不是 Predicate PASS。Provider 不产生 Predicate verdict，ObservationSource 不拥有底层真相，Agent 不直接调用 Provider 或写权威 Outcome。</p></section>
+<section class="section"><h2>8. 最小验收证据包</h2><table><thead><tr><th>断言</th><th>最低证据</th><th>缺失时</th></tr></thead><tbody><tr><td>UE 已注册</td><td>真实 UE 状态、AMF /ue-info 语义、Provider request/result、同一 Runtime invocation 的 normalized Observation 与 Predicate verdict。</td><td>UNKNOWN；gNB connected 或 SBI 流量不足。</td></tr><tr><td>PDU Session 已建立</td><td>AMF/SMF 的 owner-accepted 状态语义、关联的 CreateSMContext request/response、PFCP transaction、同一 UE/session 关联键。</td><td>不能仅凭 <code>pdu_state=active</code> 判 established。</td></tr><tr><td>受治理动作已执行</td><td>NetworkIntent v2、sourceRefs、actionRef/revision/deadline、准入结果、精确执行 receipt、关联响应。</td><td>缺少 exact receipt 或关联不唯一时不得 PASS。</td></tr><tr><td>用户面可达</td><td>active session/TUN-up 证据，明确源接口、目标、命令、退出码、发送/接收/丢包。</td><td>UPF gateway ping 不代表外网可达。</td></tr><tr><td>最终实验通过</td><td>冻结 scenario/run manifest、owner 证据、cleanup CLOSED、独立 evaluator verdict 与可重放输入。</td><td>证据不一致或窗口未闭合时为 unjudgeable/invalid，不自动 PASS/FAIL。</td></tr></tbody></table><p>Manifest 至少记录各仓/upstream commit 与 digest、profile/config digest、host/run identity、时间窗口、schema/contract 版本、Run/Invocation、sourceRef/binding digest、event/transaction/action refs、结果和清理状态。公开文档不放敏感原始 payload；保留 digest、字段/类型报告和受控存储引用。</p></section>
+<section class="section"><h2>9. 契约与实现</h2><ul>
+<li><a href="https://github.com/odango-chan/ca-provider-5gc/blob/main/docs/design/real-open5gs-provider-contract.md">Open5GS Provider / Fact Contract</a> · <a href="https://github.com/odango-chan/ca-provider-5gc/blob/main/schemas/provider-observation-read-request.schema.yaml">Provider request schema</a> · <a href="https://github.com/odango-chan/ca-provider-5gc/blob/main/schemas/provider-observation-read-result.schema.yaml">Provider result schema</a></li>
+<li><a href="https://github.com/odango-chan/env-fabric/blob/main/schemas/v1alpha1/service-fabric.openapi.yaml">Fabric business OpenAPI</a> · <a href="https://github.com/odango-chan/env-fabric/blob/main/schemas/v1alpha1/network-observation-query.schema.yaml">Network Observation query</a> · <a href="https://github.com/odango-chan/env-fabric/blob/main/schemas/v1alpha1/network-observation-result.schema.yaml">Network Observation result</a> · <a href="https://github.com/odango-chan/env-fabric/blob/main/schemas/v1alpha1/fabric-event.schema.yaml">FabricEvent</a></li>
+<li><a href="https://github.com/odango-chan/ca-runtime/blob/main/docs/design/observation-source-contract.md">Runtime ObservationSource contract</a> · <a href="https://github.com/odango-chan/ca-runtime/blob/main/docs/design/provider-boundary.md">Provider / Outcome / Reconcile boundary</a></li>
+<li><a href="https://github.com/odango-chan/connectionagent/blob/main/contracts/schemas/network-intent-v2.schema.yaml">NetworkIntent v2</a> · <a href="https://github.com/odango-chan/sandbox/blob/main/docs/design/r2b-joint-gap-audit.md">R2-B joint gap audit</a></li>
+<li><a href="https://github.com/odango-chan/env-open5gs/blob/main/artifacts/acceptance/20261021-current-local-inspection-registration-session/run-manifest.json">Open5GS inspection/session/gateway-probe manifest</a> · <a href="https://github.com/odango-chan/ca-provider-5gc/blob/main/artifacts/acceptance/20261021-open5gs-registration-runtime/run-manifest.json">Joined Provider/Runtime registration manifest</a></li>
+</ul></section>
+</SiteLayout>
