@@ -179,7 +179,7 @@ test('shared content rules keep only declarations that survive article overrides
   assert.match(css, /^\.hero \{\s*display: grid;\s*\}/m);
   assert.match(css, /^\.lede \{\s*margin: 0;\s*\}/m);
   assert.match(css, /^\.section-head p \{\s*max-width: 660px;\s*\}/m);
-  assert.match(css, /^\.api-heading \{\s*margin-bottom: 0\.9rem;\s*\}/m);
+  assert.match(css, /^\\.docs-article \\.api-heading \\{[^}]*margin-bottom: \\.9rem;/m);
   for (const selector of [
     /^\.page-tabs\s*\{/m,
     /^\.api-card\s*\{/m,
