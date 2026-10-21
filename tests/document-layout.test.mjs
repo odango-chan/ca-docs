@@ -99,7 +99,7 @@ test('shared primitive selectors have one canonical base definition', () => {
     '.language-switch a.active {',
     '.site-footer {',
   ];
-  const lines = css.split('\\n');
+  const lines = css.split(String.fromCharCode(10));
   for (const selector of selectors) {
     assert.equal(lines.filter((line) => line.startsWith(selector)).length, 1, 'expected one base definition for ' + selector);
   }
