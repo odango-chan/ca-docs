@@ -61,3 +61,53 @@ test('consolidated layout retains section hierarchy and mobile table overflow', 
   assert.match(css, /@media \(max-width: 700px\)\s*\{[\s\S]*?\.component-table \{ display: block; overflow-x: auto; \}/);
 });
 
+test('retired generic layout selectors do not leak into the shared site layout', () => {
+  assert.doesNotMatch(css, /^\.shell\s*\{/m);
+  assert.doesNotMatch(css, /^\.nav-row\s*\{/m);
+  assert.doesNotMatch(css, /^nav\s*\{/m);
+  assert.doesNotMatch(css, /^main\s*\{/m);
+  assert.doesNotMatch(css, /\.component-row/);
+  assert.doesNotMatch(css, /\.component-index/);
+  assert.doesNotMatch(css, /\.footer-row/);
+  assert.doesNotMatch(css, /\.muted-row/);
+  assert.doesNotMatch(css, /\.home-secondary/);
+  assert.doesNotMatch(css, /\.nav-api/);
+});
+
+test('the shared top navigation remains a single horizontal row', () => {
+  assert.match(css, /\.top-nav\s*\{[^}]*flex-wrap:\s*nowrap/);
+});
+
+test('homepage styling has one canonical definition with explicit mobile overrides', () => {
+  assert.doesNotMatch(css, /Home page: documentation index first, decoration second/);
+  assert.match(css, /\.home-hero h1\s*\{[^}]*max-width:\s*none/);
+  assert.match(css, /\.home-hero h1 br \{ display: none; \}/);
+  assert.match(css, /@media \(max-width: 700px\)\s*\{[\s\S]*?\.home-hero h1 \{ max-width: none;/);
+});
+
+test('shared primitive selectors have one canonical base definition', () => {
+  const selectors = [
+    'html {',
+    'body {',
+    'a {',
+    'a:hover {',
+    '.site-header {',
+    '.brand {',
+    '.brand:hover {',
+    '.brand-mark {',
+    '.language-switch {',
+    '.language-switch a {',
+    '.language-switch a.active {',
+    '.site-footer {',
+  ];
+  const lines = css.split(String.fromCharCode(10));
+  for (const selector of selectors) {
+    assert.equal(lines.filter((line) => line.startsWith(selector)).length, 1, 'expected one base definition for ' + selector);
+  }
+});
+
+
+test('homepage responsive rules share the canonical 700px breakpoint', () => {
+  assert.equal(css.split('@media (max-width: 700px)').length - 1, 1);
+  assert.doesNotMatch(css, /Homepage hero: editorial scale/);
+});
