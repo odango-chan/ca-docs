@@ -9,11 +9,17 @@ const registry = yaml.load(fs.readFileSync(path.join(root, 'data/components.yaml
 const components = new Map((registry.components || []).map((component) => [component.id, component]));
 
 const overviewPages = [
+  { path: 'src/pages/index.astro', locale: 'zh', kind: 'home' },
+  { path: 'src/pages/en/index.astro', locale: 'en', kind: 'home' },
   { path: 'src/pages/architecture/system.astro', locale: 'zh', kind: 'architecture' },
   { path: 'src/pages/en/architecture/system.astro', locale: 'en', kind: 'architecture' },
   { path: 'src/pages/benchmark/index.astro', locale: 'zh', kind: 'benchmark' },
   { path: 'src/pages/en/benchmark/index.astro', locale: 'en', kind: 'benchmark' },
 ];
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 function resolvePageRoute(target, locale) {
   const url = new URL(target, 'https://site.test');
@@ -28,8 +34,22 @@ function resolvePageRoute(target, locale) {
 
   const componentMatch = route.match(/^\/components\/([^/]+)\/?$/);
   if (componentMatch) {
-    const component = components.get(componentMatch[1]);
-    const snapshotPath = path.join(root, 'data', 'generated', `${componentMatch[1]}.json`);
+    const componentId = componentMatch[1];
+    const explicitPage = path.join(root, 'src', 'pages', locale === 'en' ? 'en' : '', 'components', componentId, 'index.astro');
+    if (fs.existsSync(explicitPage)) {
+      if (url.hash) {
+        const source = fs.readFileSync(explicitPage, 'utf8');
+        const anchor = decodeURIComponent(url.hash.slice(1));
+        const anchorPattern = new RegExp(`\\bid=["']${escapeRegExp(anchor)}["']`);
+        if (!anchorPattern.test(source)) {
+          return { exists: false, reason: `no id="${anchor}" anchor in ${path.relative(root, explicitPage)}` };
+        }
+      }
+      return { exists: true };
+    }
+
+    const component = components.get(componentId);
+    const snapshotPath = path.join(root, 'data', 'generated', `${componentId}.json`);
     if (!component || component.status !== 'active' || component.sync !== 'manifest' || !fs.existsSync(snapshotPath)) {
       return { exists: false, reason: 'component detail route is not generated' };
     }
@@ -49,13 +69,22 @@ function resolvePageRoute(target, locale) {
   const candidates = relative
     ? [path.join(pageRoot, relative, 'index.astro'), path.join(pageRoot, `${relative}.astro`)]
     : [path.join(pageRoot, 'index.astro')];
+  const pageFile = candidates.find((candidate) => fs.existsSync(candidate));
+  if (!pageFile) return { exists: false, reason: 'no static page matches this route' };
 
-  return candidates.some((candidate) => fs.existsSync(candidate))
-    ? { exists: true }
-    : { exists: false, reason: 'no static page matches this route' };
+  if (url.hash) {
+    const source = fs.readFileSync(pageFile, 'utf8');
+    const anchor = decodeURIComponent(url.hash.slice(1));
+    const anchorPattern = new RegExp(`\\bid=["']${escapeRegExp(anchor)}["']`);
+    if (!anchorPattern.test(source)) {
+      return { exists: false, reason: `no id="${anchor}" anchor in ${path.relative(root, pageFile)}` };
+    }
+  }
+
+  return { exists: true };
 }
 
-test('architecture and Benchmark overview links resolve in their own locale', () => {
+test('home, architecture, and Benchmark links resolve in their own locale', () => {
   for (const page of overviewPages) {
     const source = fs.readFileSync(path.join(root, page.path), 'utf8');
     const links = [...source.matchAll(/href=\{href\('([^']+)'\)\}/g)].map((match) => match[1]);
@@ -74,11 +103,14 @@ test('overview pages link to owner sections instead of duplicating long-form det
     if (page.kind === 'architecture') {
       assert.match(source, /components\/sandbox\/#platform-architecture/);
       assert.doesNotMatch(source, /M5 live governed-action|CreateSMContext|<h3>R2-B/);
-    } else {
+    } else if (page.kind === 'benchmark') {
       assert.match(source, /components\/sandbox\/#benchmark-framework/);
       assert.match(source, /components\/ca-benchmarks\/#benchmark-assets/);
       assert.match(source, /components\/ca-benchmark-engine\/#evaluation-lifecycle/);
       assert.doesNotMatch(source, /G03|G04\s*\/\s*G05|E00:/);
+    } else {
+      assert.match(source, /components\/sandbox\/#platform-architecture/);
+      assert.doesNotMatch(source, /architecture\/system\/#real-5gc-workflow/);
     }
   }
 });
