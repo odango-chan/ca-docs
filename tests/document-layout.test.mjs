@@ -85,8 +85,21 @@ test('homepage styling has one canonical definition with explicit mobile overrid
 });
 
 test('shared primitive selectors have one canonical base definition', () => {
-  const selectors = ['html {', 'body {', 'a {', 'a:hover {', '.site-header {', '.brand {', '.brand:hover {', '.brand-mark {', '.language-switch {', '.language-switch a {', '.language-switch a.active {', '.site-footer {'];
+  const selectors = [
+    /^html\\s*\\{/gm,
+    /^body\\s*\\{/gm,
+    /^a\\s*\\{/gm,
+    /^a:hover\\s*\\{/gm,
+    /^\\.site-header\\s*\\{/gm,
+    /^\\.brand\\s*\\{/gm,
+    /^\\.brand:hover\\s*\\{/gm,
+    /^\\.brand-mark\\s*\\{/gm,
+    /^\\.language-switch\\s*\\{/gm,
+    /^\\.language-switch a\\s*\\{/gm,
+    /^\\.language-switch a\\.active\\s*\\{/gm,
+    /^\\.site-footer\\s*\\{/gm,
+  ];
   for (const selector of selectors) {
-    assert.equal(css.split(selector).length - 1, 1, 'expected one base definition for ' + selector);
+    assert.equal([...css.matchAll(selector)].length, 1, 'expected one base definition for ' + selector);
   }
 });
