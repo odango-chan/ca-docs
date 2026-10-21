@@ -12,28 +12,37 @@ const base = import.meta.env.BASE_URL;
 const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\/+/, '')}`;
 const basePath = base.endsWith('/') ? base.slice(0, -1) : base;
 const currentPath = Astro.url.pathname.startsWith(basePath) ? (Astro.url.pathname.slice(basePath.length) || '/') : Astro.url.pathname;
+const isEnglish = lang === 'en';
 const zhPath = currentPath.startsWith('/en') ? (currentPath.slice(3) || '/') : currentPath;
 const enPath = currentPath.startsWith('/en') ? currentPath : `/en${currentPath === '/' ? '/' : currentPath}`;
 const isHome = currentPath === '/' || currentPath === '/en' || currentPath === '/en/';
 const pathFor = (zh: string) => lang === 'zh' ? href(zh) : href(`/en${zh === '/' ? '/' : zh}`);
 const labels = lang === 'zh'
   ? {
-      nav: '主导航', language: '语言', home: '文档首页', overview: '概览',
-      architecture: '架构', system: 'CA 系统架构', governance: '文档治理',
-      evaluation: '评估', benchmark: 'Benchmark 架构', components: '组件参考',
-      simulator: '5GC 模拟器', common: '公共工具契约', api: 'API 参考',
-      source: '源仓库', github: 'GitHub 源码', footer: '解释与导航由 CA Docs 维护；机器契约与实现以各所属仓库为准。',
-      sidebarTitle: '文档目录', architectureGroup: '系统设计', referenceGroup: '组件与接口',
+      nav: '主导航', language: '语言', home: '文档首页', architecture: '系统架构',
+      governance: '文档来源与治理', benchmark: 'Benchmark 架构', api: 'API 总览',
+      components: '组件参考', simulator: '5GC 模拟器', simulatorApi: 'HTTP API',
+      facts: 'Facts', operations: 'Operations', standalone: '独立运行',
+      common: '公共工具契约', commonApi: 'HTTP API', subject: 'Subject Identity',
+      boundaries: '职责边界', source: '文档与契约来源',
+      footer: 'CA Docs 负责跨仓解释与导航；机器契约、实现行为和权威事实以各所属仓库为准。',
+      systemGroup: '系统设计', benchmarkGroup: '评估方法', componentGroup: '组件参考',
+      simulatorGroup: '5GC 模拟器', commonGroup: '公共工具', github: '查看源码',
     }
   : {
-      nav: 'Main navigation', language: 'Language', home: 'Documentation home', overview: 'Overview',
-      architecture: 'Architecture', system: 'CA system architecture', governance: 'Docs governance',
-      evaluation: 'Evaluation', benchmark: 'Benchmark architecture', components: 'Component reference',
-      simulator: '5GC simulator', common: 'Shared tool contracts', api: 'API reference',
-      source: 'Source repositories', github: 'GitHub source', footer: 'CA Docs owns explanations and navigation; machine contracts and implementations remain in their owner repositories.',
-      sidebarTitle: 'Documentation', architectureGroup: 'System design', referenceGroup: 'Components & APIs',
+      nav: 'Main navigation', language: 'Language', home: 'Documentation home',
+      architecture: 'System architecture', governance: 'Sources & governance',
+      benchmark: 'Benchmark architecture', api: 'API overview', components: 'Components',
+      simulator: '5GC simulator', simulatorApi: 'HTTP API', facts: 'Facts',
+      operations: 'Operations', standalone: 'Standalone',
+      common: 'Shared tool contracts', commonApi: 'HTTP API', subject: 'Subject Identity',
+      boundaries: 'Responsibility boundaries', source: 'Docs & contract ownership',
+      footer: 'CA Docs owns cross-repository explanations and navigation; machine contracts, implementation behavior, and authoritative facts remain in their owner repositories.',
+      systemGroup: 'System design', benchmarkGroup: 'Evaluation', componentGroup: 'Component reference',
+      simulatorGroup: '5GC simulator', commonGroup: 'Shared tools', github: 'View source',
     };
 const isActive = (path: string) => currentPath.replace(/\/$/, '') === path.replace(/\/$/, '');
+const isWithin = (path: string) => currentPath.replace(/\/$/, '') === path.replace(/\/$/, '') || currentPath.startsWith(path.replace(/\/$/, '') + '/');
 ---
 <!doctype html>
 <html lang={lang === 'zh' ? 'zh-CN' : 'en'}>
@@ -49,6 +58,7 @@ const isActive = (path: string) => currentPath.replace(/\/$/, '') === path.repla
     <title>{title} · CA Docs</title>
   </head>
   <body>
+    <a class="skip-link" href="#main-content">{lang === 'zh' ? '跳到正文' : 'Skip to content'}</a>
     <header class="site-header">
       <div class="header-inner">
         <a class="brand" href={lang === 'zh' ? href('/') : href('/en/')} aria-label="CA Docs home">
@@ -56,35 +66,51 @@ const isActive = (path: string) => currentPath.replace(/\/$/, '') === path.repla
         </a>
         <nav class="top-nav" aria-label={labels.nav}>
           <a class:list={{ 'top-link-active': currentPath.includes('/architecture') }} href={pathFor('/architecture/system/')}>{labels.architecture}</a>
-          <a class:list={{ 'top-link-active': currentPath.includes('/benchmark') }} href={pathFor('/benchmark/')}>{labels.evaluation}</a>
+          <a class:list={{ 'top-link-active': currentPath.includes('/benchmark') }} href={pathFor('/benchmark/')}>{labels.benchmark}</a>
           <a class:list={{ 'top-link-active': currentPath.includes('/components') }} href={pathFor('/components/ca-5gc-sim/')}>{labels.components}</a>
-          <a class="top-api" href={pathFor('/api/')}>{labels.api}</a>
+          <a class:list={{ 'top-link-active': currentPath.includes('/api') }} href={pathFor('/api/')}>{labels.api}</a>
         </nav>
         <div class="header-tools">
           <span class="language-switch" aria-label={labels.language}>
-            <a class:list={{ active: lang === 'zh' }} href={href(zhPath)}>中</a><span aria-hidden="true">/</span><a class:list={{ active: lang === 'en' }} href={href(enPath)}>EN</a>
+            <a class:list={{ active: lang === 'zh' }} href={href(zhPath)} lang="zh-CN">中</a><span aria-hidden="true">/</span><a class:list={{ active: lang === 'en' }} href={href(enPath)} lang="en">EN</a>
           </span>
           <a class="source-link" href="https://github.com/odango-chan/ca-docs" aria-label={labels.github}>GitHub <span aria-hidden="true">↗</span></a>
         </div>
       </div>
     </header>
     {isHome ? (
-      <main class="home-main"><slot /></main>
+      <main id="main-content" class="home-main"><slot /></main>
     ) : (
       <div class="docs-frame">
-        <aside class="docs-sidebar" aria-label={labels.sidebarTitle}>
-          <a class="sidebar-home" href={lang === 'zh' ? href('/') : href('/en/')}><span aria-hidden="true">⌂</span>{labels.home}</a>
+        <aside class="docs-sidebar" aria-label={labels.components}>
+          <a class:list={{ 'sidebar-home': true, active: isHome }} href={lang === 'zh' ? href('/') : href('/en/')}><span aria-hidden="true">⌂</span>{labels.home}</a>
           <div class="sidebar-group">
-            <p>{labels.architectureGroup}</p>
-            <a class:list={{ active: isActive(lang === 'zh' ? '/architecture/system' : '/en/architecture/system') }} href={pathFor('/architecture/system/')}>{labels.system}</a>
+            <p>{labels.systemGroup}</p>
+            <a class:list={{ active: isActive(lang === 'zh' ? '/architecture/system' : '/en/architecture/system') }} href={pathFor('/architecture/system/')}>{labels.architecture}</a>
             <a class:list={{ active: isActive(lang === 'zh' ? '/architecture' : '/en/architecture') }} href={pathFor('/architecture/')}>{labels.governance}</a>
+          </div>
+          <div class="sidebar-group">
+            <p>{labels.benchmarkGroup}</p>
             <a class:list={{ active: isActive(lang === 'zh' ? '/benchmark' : '/en/benchmark') }} href={pathFor('/benchmark/')}>{labels.benchmark}</a>
           </div>
           <div class="sidebar-group">
-            <p>{labels.referenceGroup}</p>
-            <a class:list={{ active: currentPath.includes('/components/ca-5gc-sim') }} href={pathFor('/components/ca-5gc-sim/')}>{labels.simulator}</a>
-            <a class:list={{ active: currentPath.includes('/components/tool-common') }} href={pathFor('/components/tool-common/')}>{labels.common}</a>
-            <a class:list={{ active: currentPath.includes('/api') }} href={pathFor('/api/')}>{labels.api}</a>
+            <p>{labels.componentGroup}</p>
+            <a class:list={{ active: isActive(lang === 'zh' ? '/api' : '/en/api') }} href={pathFor('/api/')}>{labels.api}</a>
+          </div>
+          <div class="sidebar-group">
+            <p>{labels.simulatorGroup}</p>
+            <a class:list={{ active: isActive('/components/ca-5gc-sim') && !currentPath.includes('/api') && !currentPath.includes('/facts') && !currentPath.includes('/operations') && !currentPath.includes('/standalone') }} href={pathFor('/components/ca-5gc-sim/')}>{labels.simulator}</a>
+            <a class:list={{ active: currentPath.includes('/components/ca-5gc-sim/api') }} href={pathFor('/components/ca-5gc-sim/api/')}>{labels.simulatorApi}</a>
+            <a class:list={{ active: currentPath.includes('/components/ca-5gc-sim/facts') }} href={pathFor('/components/ca-5gc-sim/facts/')}>{labels.facts}</a>
+            <a class:list={{ active: currentPath.includes('/components/ca-5gc-sim/operations') }} href={pathFor('/components/ca-5gc-sim/operations/')}>{labels.operations}</a>
+            <a class:list={{ active: currentPath.includes('/components/ca-5gc-sim/standalone') }} href={pathFor('/components/ca-5gc-sim/standalone/')}>{labels.standalone}</a>
+          </div>
+          <div class="sidebar-group">
+            <p>{labels.commonGroup}</p>
+            <a class:list={{ active: isActive(lang === 'zh' ? '/components/tool-common' : '/en/components/tool-common') }} href={pathFor('/components/tool-common/')}>{labels.common}</a>
+            <a class:list={{ active: currentPath.includes('/components/tool-common/api') }} href={pathFor('/components/tool-common/api/')}>{labels.commonApi}</a>
+            <a class:list={{ active: currentPath.includes('/components/tool-common/subject-identity') }} href={pathFor('/components/tool-common/subject-identity/')}>{labels.subject}</a>
+            <a class:list={{ active: currentPath.includes('/components/tool-common/boundaries') }} href={pathFor('/components/tool-common/boundaries/')}>{labels.boundaries}</a>
           </div>
           <div class="sidebar-note">
             <span class="sidebar-note-label">{labels.source}</span>
@@ -92,7 +118,7 @@ const isActive = (path: string) => currentPath.replace(/\/$/, '') === path.repla
             <a href="https://github.com/odango-chan/ca-docs">{labels.github} ↗</a>
           </div>
         </aside>
-        <main class="docs-content"><div class="docs-article"><slot /></div></main>
+        <main id="main-content" class="docs-content"><div class="docs-article"><slot /></div></main>
       </div>
     )}
     <footer class="site-footer">
