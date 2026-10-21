@@ -15,7 +15,7 @@ test('renders selected Markdown as long-form HTML and extracts its leading title
     context,
   );
   assert.equal(rendered.title, 'Sandbox architecture');
-  assert.match(rendered.html, /<p>A short introduction<\/p>/);
+  assert.match(rendered.html, /<p>A short introduction\.<\/p>/);
   assert.match(rendered.html, /<h2>Responsibilities<\/h2>/);
   assert.match(rendered.html, /<li>Agent<\/li>/);
 });
