@@ -123,3 +123,26 @@ test('root typography and design tokens share one canonical root block', () => {
   assert.match(css, /:root \{[^}]*font-family:[^}]*font-synthesis:\s*none/);
   assert.match(css, /:root \{[^}]*--page:\s*#f8f8f5/);
 });
+
+test('generic grid and card rules fully overridden by the article layout stay removed', () => {
+  for (const selector of [
+    /^\\.section\\s*\\{/m,
+    /^\\.section-head\\s*\\{/m,
+    /^\\.grid\\s*\\{/m,
+    /^\\.card\\s*\\{/m,
+    /^\\.card\\.wide\\s*\\{/m,
+    /^\\.card p\\s*\\{/m,
+    /^\\.stats\\s*\\{/m,
+    /\\.docs-article \\.grid\\s*\\{/,
+  ]) {
+    assert.doesNotMatch(css, selector, 'overridden generic selector should not return: ' + selector);
+  }
+});
+
+test('760px responsive overrides are consolidated after their base styles', () => {
+  assert.equal(css.split('@media (max-width: 760px)').length - 1, 1);
+  const responsive = css.slice(css.indexOf('@media (max-width: 760px)'));
+  assert.match(responsive, /\.cap-item \{ grid-template-columns: 1fr; gap: 0\.45rem; \}/);
+  assert.match(responsive, /\.source-status \{ align-items: flex-start; flex-direction: column; \}/);
+  assert.match(responsive, /\.doc-row \{ align-items: flex-start; \}/);
+});
