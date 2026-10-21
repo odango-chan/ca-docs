@@ -1,40 +1,66 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import data from '../../../data/generated/ca-5gc-sim.json';
-
 const base = import.meta.env.BASE_URL;
 const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\/+/, '')}`;
 ---
-<SiteLayout title="ConnectionAgent docs" lang="en">
+<SiteLayout title="ConnectionAgent documentation" lang="en" description="ConnectionAgent system architecture, reliability evaluation, and public component documentation.">
   <section class="home-hero">
-    <h1>CA Docs</h1>
-    <p>Explore the ConnectionAgent system architecture, Benchmark evaluation model, and public component APIs and contracts.</p>
-  </section>
-
-  <section class="home-section">
-    <h2>Architecture and evaluation</h2>
-    <div class="doc-index">
-      <a class="doc-row primary" href={href('/en/architecture/system/')}><div><strong>CA system architecture</strong><span>Agent, Runtime, Provider, environment, and repository boundaries</span></div><span aria-hidden="true">→</span></a>
-      <a class="doc-row primary" href={href('/en/benchmark/')}><div><strong>Benchmark architecture</strong><span>Assets, frozen tasks, attempts, evidence, and adjudication</span></div><span aria-hidden="true">→</span></a>
-      <a class="doc-row" href={href('/en/architecture/')}><div><strong>Documentation governance</strong><span>Public sources, snapshot synchronization, and component docs ownership</span></div><span aria-hidden="true">→</span></a>
+    <div class="home-kicker">ConnectionAgent · Documentation</div>
+    <h1>Understand the system.<br />Evaluate reliability.</h1>
+    <p>Explore the architecture of ConnectionAgent, how its reliability is evaluated, and the public interfaces and contracts owned by individual components. Start with the system view, then dive into component references.</p>
+    <div class="home-actions">
+      <a href={href('/en/architecture/system/')}>Read the system architecture <span aria-hidden="true">→</span></a>
+      <a href={href('/en/benchmark/')}>Explore Benchmark <span aria-hidden="true">→</span></a>
     </div>
   </section>
 
   <section class="home-section">
-    <h2>Component documentation</h2>
-    <div class="doc-index">
-      <a class="doc-row" href={href('/en/api/')}><div><strong>API</strong><span>Browse public APIs for integrated components</span></div><span aria-hidden="true">→</span></a>
-      <a class="doc-row" href={href('/en/components/ca-5gc-sim/facts/')}><div><strong>Facts</strong><span>{data.counts.facts} readable states</span></div><span aria-hidden="true">→</span></a>
-      <a class="doc-row" href={href('/en/components/ca-5gc-sim/operations/')}><div><strong>Operations</strong><span>{data.counts.operations} executable operations</span></div><span aria-hidden="true">→</span></a>
-      <a class="doc-row" href={href('/en/components/ca-5gc-sim/standalone/')}><div><strong>ca-5gc-sim Standalone</strong><span>Run it independently</span></div><span aria-hidden="true">→</span></a>
+    <h2>Start here</h2>
+    <p>New to CA? These documents provide a guided path through the system.</p>
+    <div class="reading-list">
+      <a class="reading-item" href={href('/en/architecture/system/')}>
+        <span class="reading-number">01</span>
+        <span><strong>System architecture and responsibility boundaries</strong><small>See how Agent Hosts, Runtime, Providers, environments, and Lab work together—and who owns authoritative state.</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="reading-item" href={href('/en/benchmark/')}>
+        <span class="reading-number">02</span>
+        <span><strong>Benchmark evaluation model</strong><small>Understand evaluation assets, frozen tasks, execution attempts, evidence validity, and final adjudication.</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="reading-item" href={href('/en/architecture/')}>
+        <span class="reading-number">03</span>
+        <span><strong>Documentation sources and governance</strong><small>Learn why components own their public source declarations and how ca-docs synchronizes and publishes them.</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
+      </a>
     </div>
   </section>
 
   <section class="home-section">
-    <h2>Integrated components</h2>
-    <div class="component-index">
-      <a class="component-row" href={href('/en/components/ca-5gc-sim/')}><div><strong>ca-5gc-sim</strong><span>5GC simulator · {data.counts.documentedRoutes} OpenAPI endpoints · {data.counts.implementationRoutes} implementation routes</span></div><span aria-hidden="true">→</span></a>
-      <a class="component-row" href={href('/en/components/tool-common/')}><div><strong>tool-common</strong><span>Subject Identity · Provider API + Trusted Control API</span></div><span aria-hidden="true">→</span></a>
-    </div>
+    <h2>Component reference</h2>
+    <p>Global documents explain how the system fits together; component references describe public interfaces, readable state, and operations.</p>
+    <table class="component-table">
+      <thead><tr><th>Component</th><th>Responsibility</th><th>Public reference</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><a href={href('/en/components/ca-5gc-sim/')}>ca-5gc-sim</a></td>
+          <td>5GC simulation environment and related capabilities</td>
+          <td><a href={href('/en/api/')}>API</a> · <a href={href('/en/components/ca-5gc-sim/facts/')}>Facts ({data.counts.facts})</a> · <a href={href('/en/components/ca-5gc-sim/operations/')}>Operations ({data.counts.operations})</a></td>
+        </tr>
+        <tr>
+          <td><a href={href('/en/components/tool-common/')}>tool-common</a></td>
+          <td>Subject Identity and shared tool contracts</td>
+          <td><a href={href('/en/components/tool-common/')}>Component overview</a></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="home-footnote">The component index grows as owner repositories publish their public documentation manifests. Not every repository or capability is integrated yet.</p>
+  </section>
+
+  <section class="home-section">
+    <h2>About this documentation</h2>
+    <p>CA Docs owns cross-repository explanations, navigation, and public snapshots. Machine contracts, implementation behavior, and domain facts remain authoritative in their owner repositories. Each snapshot records its source revision for traceability.</p>
+    <p><a href={href('/en/architecture/')}>Read about documentation governance and source synchronization →</a></p>
   </section>
 </SiteLayout>
