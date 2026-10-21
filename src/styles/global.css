@@ -748,7 +748,7 @@ a:hover { color: #1e3926; }
 .docs-article { width: min(100%, 940px); }
 .docs-article .hero { gap: .8rem; padding-bottom: 2rem; }
 .docs-article .eyebrow { color: var(--accent); font-size: .7rem; letter-spacing: .12em; }
-.docs-article h1 { max-width: 22ch; margin-bottom: .25rem; font-size: clamp(2.15rem,4vw,3.25rem); line-height: 1.12; letter-spacing: -.045em; }
+.docs-article h1 { max-width: 100%; margin-bottom: .25rem; font-size: clamp(2.15rem,4vw,3.25rem); line-height: 1.12; letter-spacing: -.045em; }
 .docs-article .lede { max-width: var(--reading-width); color: #59635a; font-size: 1.08rem; line-height: 1.8; }
 .docs-article .section { padding-block: 2rem; }
 .docs-article .section h2 { margin-bottom: 1rem; font-size: 1.5rem; letter-spacing: -.025em; }
@@ -810,7 +810,7 @@ a:hover { color: #1e3926; }
   .header-inner { grid-template-columns: 1fr auto; gap: .6rem 1rem; padding: .7rem 0; }
   .top-nav { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; overflow-x: auto; padding: .2rem 0; }
   .header-tools { grid-column: 2; grid-row: 1; }
-  .docs-frame { width: min(100% - 2rem, 900px); grid-template-columns: 185px minmax(0,1fr); gap: 1.6rem; }
+  .docs-frame { width: calc(100% - 2rem); grid-template-columns: 185px minmax(0,1fr); gap: 1.6rem; }
   .docs-sidebar { font-size: .8rem; }
 }
 @media (max-width: 700px) {
@@ -892,7 +892,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 .docs-article { width: min(100%, 940px); }
 .docs-article > .hero { gap: .75rem; padding-bottom: 1.8rem; }
 .docs-article .eyebrow { color: var(--accent); font-size: .68rem; letter-spacing: .12em; }
-.docs-article h1 { max-width: 24ch; margin-bottom: .25rem; font-size: clamp(2.05rem,3.8vw,3.15rem); line-height: 1.13; letter-spacing: -.045em; text-wrap: balance; }
+.docs-article h1 { max-width: 100%; margin-bottom: .25rem; font-size: clamp(2.05rem,3.8vw,3.15rem); line-height: 1.13; letter-spacing: -.045em; text-wrap: balance; }
 .docs-article h2 { margin: 0 0 1rem; font-size: clamp(1.35rem,2.4vw,1.7rem); line-height: 1.25; letter-spacing: -.03em; text-wrap: balance; }
 .docs-article h3 { font-size: 1rem; line-height: 1.35; letter-spacing: -.01em; }
 .docs-article .lede { max-width: var(--reading-width); color: #59635a; font-size: 1.07rem; line-height: 1.82; }
@@ -930,7 +930,8 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 .docs-article .page-tabs a:hover { background: #eff0eb; }
 .docs-article .page-tabs a.primary-tab { border-bottom: 2px solid var(--accent); color: var(--accent-strong); font-weight: 750; }
 .docs-article .source-note { color: var(--muted); font-size: .78rem; }
-.docs-article .prose { max-width: var(--reading-width); }
+/* Let structural Markdown blocks use the article width; constrain only prose line length below. */
+.docs-article .prose { width: 100%; max-width: none; min-width: 0; }
 .docs-article .prose > :first-child { margin-top: 0; }
 .docs-article .prose h1, .docs-article .prose h2, .docs-article .prose h3, .docs-article .prose h4 { margin: 2rem 0 .7rem; }
 .docs-article .prose h2 { padding-top: .55rem; border-top: 1px solid var(--line); }
@@ -986,7 +987,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   .header-inner { grid-template-columns: minmax(180px,1fr) auto; gap: .6rem 1rem; }
   .top-nav { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; overflow-x: auto; padding: .25rem 0 .5rem; }
   .header-tools { grid-column: 2; grid-row: 1; }
-  .docs-frame { width: min(100% - 2rem, 900px); grid-template-columns: 200px minmax(0,1fr); gap: 1.5rem; }
+  .docs-frame { width: calc(100% - 2rem); grid-template-columns: 200px minmax(0,1fr); gap: 1.5rem; }
 }
 @media (max-width: 700px) {
   .header-inner, .footer-inner { width: calc(100% - 2rem); }
@@ -1034,7 +1035,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 @media (max-width: 700px) {
   .home-main { padding-top: 2rem; padding-bottom: 3rem; }
   .home-hero { padding-bottom: 1.65rem; }
-  .home-hero h1 { max-width: 18ch; font-size: clamp(1.85rem, 7vw, 2.35rem); line-height: 1.25; }
+  .home-hero h1 { max-width: none; font-size: clamp(1.85rem, 7vw, 2.35rem); line-height: 1.25; }
   .home-hero p { margin-top: .8rem; font-size: .98rem; }
   .home-section { padding-block: 1.2rem; }
 }
