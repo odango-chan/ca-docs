@@ -3,25 +3,25 @@
   "source": {
     "repository": "odango-chan/tool-common",
     "ref": "main",
-    "commit": "b43e7241f188f9ce83cb6ba53df7a94c83d869ff",
-    "commitDate": "2026-10-13T08:47:44Z",
+    "commit": "c153a5235ef0e4b2ec2b0afa291c4573efefffae",
+    "commitDate": "2026-10-21T04:00:48Z",
     "private": true,
     "publicDocsManifest": "docs/public-docs.yaml"
   },
   "counts": {
-    "providerRoutes": 4,
-    "controlRoutes": 5
+    "providerRoutes": 3,
+    "controlRoutes": 9
   },
   "pages": {
     "zh": {
-      "overview": "# tool-common\n\n`tool-common` 负责跨领域、环境无关的 Tool Plane 业务能力；这些能力不自然归属于某个具体网络领域 owner。首项准入能力是 `subject.identity.lookup@v1`，用于把用户看到的名字或别名解析成逻辑 subject 和当前环境里的执行身份。\n\n最常见的例子：\n\n```text\n\"UE-B\"\n  ↓\nsubjectRef = receiver-b\n5gc.supi   = 001010000000002\n```\n\n它不负责 UE 注册、PDU Session、QoS、PFCP 等 5GC 状态；这些仍由 `ca-5gc-sim` 或真实 5GC Provider 负责。\n\nRuntime 只访问 Provider listener 的只读接口。配置和 reset 走单独的 Control listener，不会暴露成 Agent Tool。\n",
+      "overview": "# tool-common\n\n`tool-common` 负责跨领域、环境无关的 Tool Plane 业务能力；这些能力不自然归属于某个具体网络领域 owner。首项准入能力是 `subject.identity.lookup@v1`，用于把用户看到的名字或别名解析成逻辑 subject 和当前环境里的执行身份。\n\n最常见的例子：\n\n```text\n\"UE-B\"\n  ↓\nsubjectRef = receiver-b\n5gc.supi   = 001010000000002\n```\n\n它不负责 UE 注册、PDU Session、QoS、PFCP 等 5GC 状态；这些仍由 `env-5gc-sim` 或真实 5GC Provider 负责。\n\nRuntime 只访问 Provider listener 的只读接口。配置和 reset 走单独的 Control listener，不会暴露成 Agent Tool。\n",
       "subjectIdentity": "# Subject Identity\n\n## 查什么\n\n`subject.identity.lookup@v1` 接收一个用户可见的 name / alias，例如 `UE-B`，返回：\n\n- `subjectRef`：逻辑 subject；\n- `identities`：当前环境下的执行身份；\n- `mappingRevision`：这次结果来自哪一版映射；\n- `provenance`：配置摘要和 entry 数量。\n\nv1 当前要求 `5gc.supi`，`5gc.imsi` 可选，但如果存在必须和 SUPI 一致。\n\n## 结果\n\nLookup 本身成功执行时 HTTP 都返回 200，业务结果看 `status`：\n\n- `RESOLVED`：唯一匹配；\n- `NOT_FOUND`：没有匹配；\n- `AMBIGUOUS`：匹配到多个 subject，需要上层澄清。\n\n`NOT_FOUND` 和 `AMBIGUOUS` 不是 HTTP 错误。\n\n## 匹配规则\n\n匹配是确定性的：\n\n- 输入先 TrimSpace；\n- 之后按大小写敏感的精确匹配；\n- 不做模糊匹配、前缀匹配或 first-match；\n- 多个 subject 命中同一个 name / alias 时返回 `AMBIGUOUS`。\n\n## Revision\n\n映射修改必须推进 `mappingRevision`。调用者可以带 `expectedRevision` 做 fence，旧 revision 会 fail closed。\n",
-      "boundaries": "# 职责边界\n\n| 事情 | 谁负责 |\n| --- | --- |\n| 用户名 / alias → logical subject / execution identity | `tool-common` |\n| 模拟 5GC 注册、PDU Session、QoS、PFCP | `ca-5gc-sim` |\n| 真实 5GC 接入 | `ca-provider-5gc` |\n| ProviderBinding、Outcome、Reconcile | `ca-runtime` |\n| Agent-facing MCP Tool | `ca-mcp` |\n| 环境启动、配置、reset 编排 | `ca-lab` |\n\n两个 HTTP surface 也要分开：\n\n- **Provider listener**：Runtime/Host 使用，只读 lookup；\n- **Control listener**：可信 Lab / deployment control 使用，configure / reset。\n\n不要把 Control route 放进 Runtime Toolset，也不要把 `tool-common` 当成 5GC 状态 owner。\n\n## Managed Node 管理面\n\n`tool-common` 还实现由控制面拥有的通用 Managed Node contract：\n\n```text\nProvider listener:\n  GET /management/v1/identity\n  GET /management/v1/healthz\n  GET /management/v1/readyz\n\nControl listener:\n  GET  /management/v1/identity\n  GET  /management/v1/healthz\n  GET  /management/v1/readyz\n  POST /management/v1/drain\n  GET  /management/v1/operations/{operationId}\n```\n\n这组 contract 的语义 owner 是未来的 `control`（当前实现仓 `ca-lab`），不是\n`tool-common`。因此本仓的 Provider/Control OpenAPI 只发布 owner-native\nsubject-identity API，不复制 Managed Node schema；本仓 gate 单独校验\nManaged Node route registration 与 `contract-info` 一致。\n\nDrain 只在可信 Control listener 暴露。Provider listener 可以观察\nliveness/readiness，但不能发起 drain。\n"
+      "boundaries": "# 职责边界\n\n| 事情 | Owner |\n| --- | --- |\n| 用户名 / alias → logical subject / execution identity | `tool-common` |\n| 模拟 5GC 注册、PDU Session、QoS、PFCP | `env-5gc-sim` |\n| 真实 5GC 接入 | `env-5gc-real` |\n| ProviderBinding、Outcome、Reconcile | `ca-runtime` |\n| Agent-facing MCP Tool | `tool-mcp-gw` |\n| 环境生命周期与可信 provisioning | `ca-lab` |\n\n两个 listener 职责互斥：\n\n- **Provider**：`POST /v1/subject-identities/lookup`，以及本 listener 的 `/openapi.yaml` 和 `/docs/`。\n- **Control**：Managed Node 操作、受信任的 identity configure/reset，以及本 listener 的 `/openapi.yaml` 和 `/docs/`。\n\nProviderBinding 是 capability-binding authority。Control route 不进入 Runtime Toolset。Managed Node drain 保留在 Control，并等待已准入工作完成后再报告成功。\n"
     },
     "en": {
-      "overview": "# tool-common\n\n`tool-common` owns cross-domain / environment-neutral Tool Plane business capabilities that do not naturally belong to one concrete network-domain owner. Its first admitted capability is `subject.identity.lookup@v1`: resolving a user-visible name or alias into a logical subject and the execution identities for the current environment.\n\nExample:\n\n```text\n\"UE-B\"\n  ↓\nsubjectRef = receiver-b\n5gc.supi   = 001010000000002\n```\n\nIt does not own 5GC registration, PDU sessions, QoS, PFCP, or other network-domain state. Those remain with `ca-5gc-sim` or the real 5GC Provider.\n\nRuntime uses the read-only Provider listener. Provisioning and reset use a separate trusted Control listener and are not Agent tools.\n",
+      "overview": "# tool-common\n\n`tool-common` owns cross-domain / environment-neutral Tool Plane business capabilities that do not naturally belong to one concrete network-domain owner. Its first admitted capability is `subject.identity.lookup@v1`: resolving a user-visible name or alias into a logical subject and the execution identities for the current environment.\n\nExample:\n\n```text\n\"UE-B\"\n  ↓\nsubjectRef = receiver-b\n5gc.supi   = 001010000000002\n```\n\nIt does not own 5GC registration, PDU sessions, QoS, PFCP, or other network-domain state. Those remain with `env-5gc-sim` or the real 5GC Provider.\n\nRuntime uses the read-only Provider listener. Provisioning and reset use a separate trusted Control listener and are not Agent tools.\n",
       "subjectIdentity": "# Subject Identity\n\n## Lookup\n\n`subject.identity.lookup@v1` accepts a user-visible name or alias such as `UE-B` and returns:\n\n- `subjectRef`: the logical subject;\n- `identities`: execution identities for the current environment;\n- `mappingRevision`: the mapping revision used for the result;\n- `provenance`: configuration digest and entry count.\n\nv1 requires `5gc.supi`. `5gc.imsi` is optional, but must be equal to SUPI when present.\n\n## Results\n\nA successfully executed lookup returns HTTP 200. The semantic result is in `status`:\n\n- `RESOLVED`: exactly one match;\n- `NOT_FOUND`: no match;\n- `AMBIGUOUS`: multiple subjects match and the caller must clarify.\n\n`NOT_FOUND` and `AMBIGUOUS` are not HTTP errors.\n\n## Matching\n\nMatching is deterministic:\n\n- trim the input first;\n- exact case-sensitive match afterwards;\n- no fuzzy, prefix, or first-match behavior;\n- a shared name/alias across subjects returns `AMBIGUOUS`.\n\n## Revision\n\nMapping changes must advance `mappingRevision`. Trusted callers can use `expectedRevision` as a fence; stale revisions fail closed.\n",
-      "boundaries": "# Boundaries\n\n| Concern | Owner |\n| --- | --- |\n| user-visible name / alias → logical subject / execution identity | `tool-common` |\n| simulated 5GC registration, PDU sessions, QoS, PFCP | `ca-5gc-sim` |\n| real 5GC integration | `ca-provider-5gc` |\n| ProviderBinding, Outcome, Reconcile | `ca-runtime` |\n| Agent-facing MCP tools | `ca-mcp` |\n| environment lifecycle and trusted reset/provisioning | `ca-lab` |\n\nThe two HTTP surfaces stay separate:\n\n- **Provider listener**: Runtime/Host, read-only lookup;\n- **Control listener**: trusted Lab/deployment control, configure/reset.\n\nControl routes must not enter the Runtime Toolset, and `tool-common` must not become a 5GC domain-state owner.\n\n## Managed Node management surface\n\n`tool-common` also implements the generic Managed Node contract owned by the\ncontrol plane:\n\n```text\nProvider listener:\n  GET /management/v1/identity\n  GET /management/v1/healthz\n  GET /management/v1/readyz\n\nControl listener:\n  GET  /management/v1/identity\n  GET  /management/v1/healthz\n  GET  /management/v1/readyz\n  POST /management/v1/drain\n  GET  /management/v1/operations/{operationId}\n```\n\nThe semantic owner of this contract is the future `control` repository\n(current implementation repository: `ca-lab`), not `tool-common`.\nTherefore the tool-common Provider/Control OpenAPI files publish only the\nowner-native subject-identity API instead of duplicating Managed Node schemas.\nThe repository gate checks the Managed Node route registration and\n`contract-info` separately.\n\nDrain is exposed only on the trusted Control listener. The Provider listener\nmay expose liveness/readiness observations but cannot initiate drain.\n"
+      "boundaries": "# Boundaries\n\n| Concern | Owner |\n| --- | --- |\n| user-visible name / alias → logical subject / execution identity | `tool-common` |\n| simulated 5GC registration, PDU sessions, QoS, PFCP | `env-5gc-sim` |\n| real 5GC integration | `env-5gc-real` |\n| ProviderBinding, Outcome, Reconcile | `ca-runtime` |\n| Agent-facing MCP tools | `tool-mcp-gw` |\n| environment lifecycle and trusted provisioning | `ca-lab` |\n\nThe listeners have disjoint responsibilities:\n\n- **Provider**: `POST /v1/subject-identities/lookup`, plus its own `/openapi.yaml` and `/docs/`.\n- **Control**: Managed Node operations, trusted identity configure/reset, and its own `/openapi.yaml` and `/docs/`.\n\nProviderBinding is capability-binding authority. Control routes do not enter the Runtime Toolset. Managed Node drain remains on Control and drains already admitted work before reporting success.\n"
     }
   },
   "api": {
@@ -29,56 +29,6 @@
       "title": "tool-common Provider API",
       "description": "Runtime/Host-facing read-only tool-common API.",
       "routes": [
-        {
-          "method": "GET",
-          "path": "/identity",
-          "operationId": "getProviderIdentity",
-          "summary": "Process and surface identity",
-          "description": "",
-          "request": null,
-          "responses": [
-            {
-              "status": "200",
-              "description": "Provider surface identity and advertised capabilities.",
-              "schema": "CommonProviderIdentity"
-            }
-          ]
-        },
-        {
-          "method": "GET",
-          "path": "/healthz",
-          "operationId": "getProviderHealth",
-          "summary": "Process liveness",
-          "description": "",
-          "request": null,
-          "responses": [
-            {
-              "status": "200",
-              "description": "Process is alive.",
-              "schema": "Health"
-            }
-          ]
-        },
-        {
-          "method": "GET",
-          "path": "/readyz",
-          "operationId": "getProviderReadiness",
-          "summary": "Provider readiness and current mapping revision",
-          "description": "",
-          "request": null,
-          "responses": [
-            {
-              "status": "200",
-              "description": "Provider surface is ready.",
-              "schema": "Readiness"
-            },
-            {
-              "status": "503",
-              "description": "Owner-process or request error.",
-              "schema": "ProcessError"
-            }
-          ]
-        },
         {
           "method": "POST",
           "path": "/v1/subject-identities/lookup",
@@ -108,123 +58,49 @@
               "schema": "ProcessError"
             },
             {
+              "status": "500",
+              "description": "Owner-process or request error.",
+              "schema": "ProcessError"
+            },
+            {
               "status": "503",
               "description": "Owner-process or request error.",
               "schema": "ProcessError"
             }
           ]
+        },
+        {
+          "method": "GET",
+          "path": "/openapi.yaml",
+          "operationId": "getCanonicalOpenAPI",
+          "summary": "Read this listener canonical OpenAPI contract",
+          "description": "",
+          "request": null,
+          "responses": [
+            {
+              "status": "200",
+              "description": "Canonical checked-in OpenAPI bytes",
+              "schema": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/docs/",
+          "operationId": "getInteractiveAPIDocs",
+          "summary": "Open interactive API docs for this listener",
+          "description": "",
+          "request": null,
+          "responses": [
+            {
+              "status": "200",
+              "description": "Swagger UI configured with this listener OpenAPI",
+              "schema": null
+            }
+          ]
         }
       ],
       "schemas": {
-        "CommonProviderIdentity": {
-          "title": "CommonProviderIdentity",
-          "description": null,
-          "fields": [
-            {
-              "path": "apiVersion",
-              "required": true,
-              "type": "const",
-              "description": null,
-              "ref": null,
-              "const": "connectionagent.io/v1alpha1"
-            },
-            {
-              "path": "kind",
-              "required": true,
-              "type": "const",
-              "description": null,
-              "ref": null,
-              "const": "CommonProviderIdentity"
-            },
-            {
-              "path": "contractVersion",
-              "required": true,
-              "type": "const",
-              "description": null,
-              "ref": null,
-              "const": "v1"
-            },
-            {
-              "path": "spec",
-              "required": true,
-              "type": "object",
-              "description": null,
-              "ref": null
-            },
-            {
-              "path": "spec.service",
-              "required": true,
-              "type": "const",
-              "description": null,
-              "ref": null,
-              "const": "tool-common"
-            },
-            {
-              "path": "spec.surface",
-              "required": true,
-              "type": "const",
-              "description": null,
-              "ref": null,
-              "const": "provider"
-            },
-            {
-              "path": "spec.capabilities",
-              "required": true,
-              "type": "array",
-              "description": null,
-              "ref": null
-            }
-          ]
-        },
-        "Health": {
-          "title": "Health",
-          "description": null,
-          "fields": [
-            {
-              "path": "status",
-              "required": true,
-              "type": "const",
-              "description": null,
-              "ref": null,
-              "const": "ok"
-            }
-          ]
-        },
-        "Readiness": {
-          "title": "Readiness",
-          "description": null,
-          "fields": [
-            {
-              "path": "ready",
-              "required": true,
-              "type": "boolean",
-              "description": null,
-              "ref": null
-            },
-            {
-              "path": "revision",
-              "required": true,
-              "type": "string",
-              "description": null,
-              "ref": null
-            },
-            {
-              "path": "entryCount",
-              "required": true,
-              "type": "integer",
-              "description": null,
-              "ref": null
-            },
-            {
-              "path": "contractVersion",
-              "required": true,
-              "type": "const",
-              "description": null,
-              "ref": null,
-              "const": "v1"
-            }
-          ]
-        },
         "LookupRequest": {
           "title": "LookupRequest",
           "description": null,
@@ -395,65 +271,15 @@
       "description": "Trusted provisioning and reset API. This surface is not Runtime/Agent-visible.",
       "routes": [
         {
-          "method": "GET",
-          "path": "/identity",
-          "operationId": "getControlIdentity",
-          "summary": "Process and surface identity",
-          "description": "",
-          "request": null,
-          "responses": [
-            {
-              "status": "200",
-              "description": "Control surface identity.",
-              "schema": "CommonProviderIdentity"
-            }
-          ]
-        },
-        {
-          "method": "GET",
-          "path": "/healthz",
-          "operationId": "getControlHealth",
-          "summary": "Process liveness",
-          "description": "",
-          "request": null,
-          "responses": [
-            {
-              "status": "200",
-              "description": "Process is alive.",
-              "schema": "Health"
-            }
-          ]
-        },
-        {
-          "method": "GET",
-          "path": "/readyz",
-          "operationId": "getControlReadiness",
-          "summary": "Control readiness and current mapping revision",
-          "description": "",
-          "request": null,
-          "responses": [
-            {
-              "status": "200",
-              "description": "Control surface is ready.",
-              "schema": "Readiness"
-            },
-            {
-              "status": "503",
-              "description": "Owner-process or request error.",
-              "schema": "ProcessError"
-            }
-          ]
-        },
-        {
           "method": "POST",
           "path": "/internal/v1/subject-identities/configure",
           "operationId": "configureSubjectIdentities",
-          "summary": "Replace the complete identity mapping",
+          "summary": "Trusted mutation: replace the complete identity mapping",
           "description": "",
           "request": {
             "schema": "ConfigureRequest",
             "example": {
-              "expectedRevision": "identity-empty",
+              "expectedRevision": "local-topology-v1",
               "mappingRevision": "identity-demo-1",
               "entries": [
                 {
@@ -491,6 +317,11 @@
               "schema": "ProcessError"
             },
             {
+              "status": "500",
+              "description": "Owner-process or request error.",
+              "schema": "ProcessError"
+            },
+            {
               "status": "503",
               "description": "Owner-process or request error.",
               "schema": "ProcessError"
@@ -501,7 +332,7 @@
           "method": "POST",
           "path": "/internal/v1/subject-identities/reset",
           "operationId": "resetSubjectIdentities",
-          "summary": "Clear the mapping and advance its revision",
+          "summary": "Trusted mutation: clear the mapping and advance its revision",
           "description": "",
           "request": {
             "schema": "ResetRequest",
@@ -532,123 +363,165 @@
               "schema": "ProcessError"
             },
             {
+              "status": "500",
+              "description": "Owner-process or request error.",
+              "schema": "ProcessError"
+            },
+            {
               "status": "503",
               "description": "Owner-process or request error.",
               "schema": "ProcessError"
             }
           ]
+        },
+        {
+          "method": "GET",
+          "path": "/management/v1/identity",
+          "operationId": "getManagedNodeIdentity",
+          "summary": "Managed Node process identity",
+          "description": "",
+          "request": null,
+          "responses": [
+            {
+              "status": "200",
+              "description": "Control surface identity.",
+              "schema": "ManagedNodeIdentity"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/management/v1/healthz",
+          "operationId": "getManagedNodeHealth",
+          "summary": "Managed Node process liveness",
+          "description": "",
+          "request": null,
+          "responses": [
+            {
+              "status": "200",
+              "description": "Process is alive.",
+              "schema": "ManagedNodeHealth"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/management/v1/readyz",
+          "operationId": "getManagedNodeReadiness",
+          "summary": "Managed Node process readiness",
+          "description": "",
+          "request": null,
+          "responses": [
+            {
+              "status": "200",
+              "description": "Control surface is ready.",
+              "schema": "ManagedNodeReadiness"
+            },
+            {
+              "status": "503",
+              "description": "Process is not ready",
+              "schema": "ManagedNodeReadiness"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/management/v1/drain",
+          "operationId": "drainManagedNode",
+          "summary": "Close admission and drain in-flight work",
+          "description": "",
+          "request": {
+            "schema": "ManagedNodeDrainRequest",
+            "example": {
+              "apiVersion": "sandbox.control/v1alpha1",
+              "kind": "ManagedNodeDrainRequest",
+              "contractVersion": "managed-node.drain/v1",
+              "spec": {
+                "operationId": "drain-001",
+                "expectedProcessInstanceRef": "process-from-management-identity"
+              }
+            }
+          },
+          "responses": [
+            {
+              "status": "202",
+              "description": "Drain operation accepted",
+              "schema": "ManagedNodeOperation"
+            },
+            {
+              "status": "400",
+              "description": "Managed Node request or fence conflict",
+              "schema": "ManagedNodeError"
+            },
+            {
+              "status": "409",
+              "description": "Managed Node request or fence conflict",
+              "schema": "ManagedNodeError"
+            },
+            {
+              "status": "413",
+              "description": "Request body exceeds 1 MiB",
+              "schema": "ManagedNodeError"
+            },
+            {
+              "status": "500",
+              "description": "Owner-process or request error.",
+              "schema": "ProcessError"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/management/v1/operations/{operationId}",
+          "operationId": "getDrainOperation",
+          "summary": "Read a drain operation",
+          "description": "",
+          "request": null,
+          "responses": [
+            {
+              "status": "200",
+              "description": "Drain operation state",
+              "schema": "ManagedNodeOperation"
+            },
+            {
+              "status": "404",
+              "description": "Operation not found",
+              "schema": "ManagedNodeError"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/openapi.yaml",
+          "operationId": "getCanonicalOpenAPI",
+          "summary": "Read this listener canonical OpenAPI contract",
+          "description": "",
+          "request": null,
+          "responses": [
+            {
+              "status": "200",
+              "description": "Canonical checked-in OpenAPI bytes",
+              "schema": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/docs/",
+          "operationId": "getInteractiveAPIDocs",
+          "summary": "Open interactive API docs for this listener",
+          "description": "",
+          "request": null,
+          "responses": [
+            {
+              "status": "200",
+              "description": "Swagger UI configured with this listener OpenAPI",
+              "schema": null
+            }
+          ]
         }
       ],
       "schemas": {
-        "CommonProviderIdentity": {
-          "title": "CommonProviderIdentity",
-          "description": null,
-          "fields": [
-            {
-              "path": "apiVersion",
-              "required": true,
-              "type": "const",
-              "description": null,
-              "ref": null,
-              "const": "connectionagent.io/v1alpha1"
-            },
-            {
-              "path": "kind",
-              "required": true,
-              "type": "const",
-              "description": null,
-              "ref": null,
-              "const": "CommonProviderIdentity"
-            },
-            {
-              "path": "contractVersion",
-              "required": true,
-              "type": "const",
-              "description": null,
-              "ref": null,
-              "const": "v1"
-            },
-            {
-              "path": "spec",
-              "required": true,
-              "type": "object",
-              "description": null,
-              "ref": null
-            },
-            {
-              "path": "spec.service",
-              "required": true,
-              "type": "const",
-              "description": null,
-              "ref": null,
-              "const": "tool-common"
-            },
-            {
-              "path": "spec.surface",
-              "required": true,
-              "type": "const",
-              "description": null,
-              "ref": null,
-              "const": "control"
-            },
-            {
-              "path": "spec.capabilities",
-              "required": true,
-              "type": "array",
-              "description": null,
-              "ref": null
-            }
-          ]
-        },
-        "Health": {
-          "title": "Health",
-          "description": null,
-          "fields": [
-            {
-              "path": "status",
-              "required": true,
-              "type": "const",
-              "description": null,
-              "ref": null,
-              "const": "ok"
-            }
-          ]
-        },
-        "Readiness": {
-          "title": "Readiness",
-          "description": null,
-          "fields": [
-            {
-              "path": "ready",
-              "required": true,
-              "type": "boolean",
-              "description": null,
-              "ref": null
-            },
-            {
-              "path": "revision",
-              "required": true,
-              "type": "string",
-              "description": null,
-              "ref": null
-            },
-            {
-              "path": "entryCount",
-              "required": true,
-              "type": "integer",
-              "description": null,
-              "ref": null
-            },
-            {
-              "path": "contractVersion",
-              "required": true,
-              "type": "const",
-              "description": null,
-              "ref": null,
-              "const": "v1"
-            }
-          ]
-        },
         "IdentityEntry": {
           "title": "IdentityEntry",
           "description": null,
@@ -816,6 +689,376 @@
             {
               "path": "spec.summary",
               "required": true,
+              "type": "string",
+              "description": null,
+              "ref": null
+            }
+          ]
+        },
+        "ManagedNodeIdentity": {
+          "title": "ManagedNodeIdentity",
+          "description": null,
+          "fields": [
+            {
+              "path": "apiVersion",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "sandbox.control/v1alpha1"
+            },
+            {
+              "path": "kind",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "ManagedNodeIdentity"
+            },
+            {
+              "path": "contractVersion",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "managed-node.v1"
+            },
+            {
+              "path": "spec",
+              "required": true,
+              "type": "object",
+              "description": null,
+              "ref": null
+            },
+            {
+              "path": "spec.componentRef",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "tool-common"
+            },
+            {
+              "path": "spec.processInstanceRef",
+              "required": true,
+              "type": "string",
+              "description": null,
+              "ref": null
+            },
+            {
+              "path": "spec.extensions",
+              "required": true,
+              "type": "array",
+              "description": null,
+              "ref": null
+            }
+          ]
+        },
+        "ManagedNodeHealth": {
+          "title": "ManagedNodeHealth",
+          "description": null,
+          "fields": [
+            {
+              "path": "apiVersion",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "sandbox.control/v1alpha1"
+            },
+            {
+              "path": "kind",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "ManagedNodeHealth"
+            },
+            {
+              "path": "contractVersion",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "managed-node.v1"
+            },
+            {
+              "path": "spec",
+              "required": true,
+              "type": "object",
+              "description": null,
+              "ref": null
+            },
+            {
+              "path": "spec.componentRef",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "tool-common"
+            },
+            {
+              "path": "spec.processInstanceRef",
+              "required": true,
+              "type": "string",
+              "description": null,
+              "ref": null
+            },
+            {
+              "path": "spec.alive",
+              "required": true,
+              "type": "boolean",
+              "description": null,
+              "ref": null
+            }
+          ]
+        },
+        "ManagedNodeReadiness": {
+          "title": "ManagedNodeReadiness",
+          "description": null,
+          "fields": [
+            {
+              "path": "apiVersion",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "sandbox.control/v1alpha1"
+            },
+            {
+              "path": "kind",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "ManagedNodeReadiness"
+            },
+            {
+              "path": "contractVersion",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "managed-node.v1"
+            },
+            {
+              "path": "spec",
+              "required": true,
+              "type": "object",
+              "description": null,
+              "ref": null
+            },
+            {
+              "path": "spec.componentRef",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "tool-common"
+            },
+            {
+              "path": "spec.processInstanceRef",
+              "required": true,
+              "type": "string",
+              "description": null,
+              "ref": null
+            },
+            {
+              "path": "spec.ready",
+              "required": true,
+              "type": "boolean",
+              "description": null,
+              "ref": null
+            },
+            {
+              "path": "spec.reasonCode",
+              "required": false,
+              "type": "string",
+              "description": null,
+              "ref": null
+            },
+            {
+              "path": "spec.checks",
+              "required": true,
+              "type": "array",
+              "description": null,
+              "ref": null
+            }
+          ]
+        },
+        "ManagedNodeDrainRequest": {
+          "title": "ManagedNodeDrainRequest",
+          "description": null,
+          "fields": [
+            {
+              "path": "apiVersion",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "sandbox.control/v1alpha1"
+            },
+            {
+              "path": "kind",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "ManagedNodeDrainRequest"
+            },
+            {
+              "path": "contractVersion",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "managed-node.drain/v1"
+            },
+            {
+              "path": "spec",
+              "required": true,
+              "type": "object",
+              "description": null,
+              "ref": null
+            },
+            {
+              "path": "spec.operationId",
+              "required": true,
+              "type": "string",
+              "description": null,
+              "ref": null
+            },
+            {
+              "path": "spec.expectedProcessInstanceRef",
+              "required": true,
+              "type": "string",
+              "description": null,
+              "ref": null
+            }
+          ]
+        },
+        "ManagedNodeOperation": {
+          "title": "ManagedNodeOperation",
+          "description": null,
+          "fields": [
+            {
+              "path": "apiVersion",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "sandbox.control/v1alpha1"
+            },
+            {
+              "path": "kind",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "ManagedNodeOperation"
+            },
+            {
+              "path": "contractVersion",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "managed-node.drain/v1"
+            },
+            {
+              "path": "spec",
+              "required": true,
+              "type": "object",
+              "description": null,
+              "ref": null
+            },
+            {
+              "path": "spec.operationId",
+              "required": true,
+              "type": "string",
+              "description": null,
+              "ref": null
+            },
+            {
+              "path": "spec.operationKind",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "DRAIN"
+            },
+            {
+              "path": "spec.state",
+              "required": true,
+              "type": "enum",
+              "description": null,
+              "ref": null,
+              "enum": [
+                "RUNNING",
+                "SUCCEEDED"
+              ]
+            },
+            {
+              "path": "spec.processInstanceRef",
+              "required": true,
+              "type": "string",
+              "description": null,
+              "ref": null
+            },
+            {
+              "path": "spec.reasonCode",
+              "required": false,
+              "type": "string",
+              "description": null,
+              "ref": null
+            }
+          ]
+        },
+        "ManagedNodeError": {
+          "title": "ManagedNodeError",
+          "description": null,
+          "fields": [
+            {
+              "path": "apiVersion",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "sandbox.control/v1alpha1"
+            },
+            {
+              "path": "kind",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "ManagedNodeError"
+            },
+            {
+              "path": "contractVersion",
+              "required": true,
+              "type": "const",
+              "description": null,
+              "ref": null,
+              "const": "managed-node.drain/v1"
+            },
+            {
+              "path": "spec",
+              "required": true,
+              "type": "object",
+              "description": null,
+              "ref": null
+            },
+            {
+              "path": "spec.code",
+              "required": true,
+              "type": "string",
+              "description": null,
+              "ref": null
+            },
+            {
+              "path": "spec.summary",
+              "required": false,
               "type": "string",
               "description": null,
               "ref": null
