@@ -104,3 +104,9 @@ test('shared primitive selectors have one canonical base definition', () => {
     assert.equal(lines.filter((line) => line.startsWith(selector)).length, 1, 'expected one base definition for ' + selector);
   }
 });
+
+
+test('homepage responsive rules share the canonical 700px breakpoint', () => {
+  assert.equal((css.match(/@media \\(max-width: 700px\\)/g) || []).length, 1);
+  assert.doesNotMatch(css, /Homepage hero: editorial scale/);
+});
