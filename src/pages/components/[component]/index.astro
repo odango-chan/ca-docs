@@ -31,17 +31,22 @@ const base = import.meta.env.BASE_URL;
 const href = (value) => `${base.replace(/\/?$/, '/')}${value.replace(/^\/+/, '')}`;
 ---
 
-<SiteLayout title={`${title} API / Contracts`} lang="zh">
+<SiteLayout title={`${title} 文档与接口`} lang="zh">
   <section class="hero">
     <span class="eyebrow">组件 / {data.component}</span>
     <h1>{title}</h1>
-    <div class="page-tabs"><a class="primary-tab" href={href(`/components/${data.component}/`)}>API 与契约</a></div>
+    <div class="page-tabs"><a class="primary-tab" href={href(`/components/${data.component}/`)}>文档、API 与契约</a></div>
+  </section>
+
+  <section class="source-status owner-provenance" aria-label="来源与状态">
+    <div><strong>源仓授权发布 · 固定版本</strong><span>{data.source.repository} · {data.source.commit || data.source.ref}{data.source.commitDate ? ` · ${data.source.commitDate.slice(0, 10)}` : ""}</span></div>
+    <p>本站展示经 owner 明确授权的文档正文与契约摘要。实现状态以源仓文档和对应验收证据为准；同步或构建成功本身不代表功能已实现或验收通过。</p>
   </section>
 
   {publicDocs.map(({ source, title: documentTitle, html }) => <section class="section" id={source.role}>
-    <div class="section-head"><div><span class="eyebrow">Owner documentation</span><h2>{documentTitle}</h2></div></div>
+    <div class="section-head"><div><span class="eyebrow">源仓文档 / Owner documentation</span><h2>{documentTitle}</h2></div></div>
     <div class="prose owner-document" set:html={html}></div>
-    <p class="source-note">来源快照：<code>{data.source.repository}@{data.source.commit?.slice(0, 8) || data.source.ref}</code> · <code>{source.path}</code></p>
+    <p class="source-note">来源文件：<code>{source.path}</code> · 固定版本：<code>{data.source.commit?.slice(0, 12) || data.source.ref}</code></p>
   </section>)}
 
   {apiSources.length > 0 && <section class="section">

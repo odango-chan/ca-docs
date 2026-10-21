@@ -31,17 +31,22 @@ const base = import.meta.env.BASE_URL;
 const href = (value) => `${base.replace(/\/?$/, '/')}${value.replace(/^\/+/, '')}`;
 ---
 
-<SiteLayout title={`${title} API / Contracts`} lang="en">
+<SiteLayout title={`${title} Docs & APIs`} lang="en">
   <section class="hero">
     <span class="eyebrow">Component / {data.component}</span>
     <h1>{title}</h1>
-    <div class="page-tabs"><a class="primary-tab" href={href(`/en/components/${data.component}/`)}>APIs &amp; contracts</a></div>
+    <div class="page-tabs"><a class="primary-tab" href={href(`/en/components/${data.component}/`)}>Docs, APIs &amp; contracts</a></div>
+  </section>
+
+  <section class="source-status owner-provenance" aria-label="Source and status">
+    <div><strong>Owner-approved publication · Pinned revision</strong><span>{data.source.repository} · {data.source.commit || data.source.ref}{data.source.commitDate ? ` · ${data.source.commitDate.slice(0, 10)}` : ""}</span></div>
+    <p>This page renders documentation and contract summaries explicitly approved by the owner repository. Implementation status follows owner documentation and associated acceptance evidence; successful synchronization or build does not by itself mean a feature is implemented or accepted.</p>
   </section>
 
   {publicDocs.map(({ source, title: documentTitle, html }) => <section class="section" id={source.role}>
     <div class="section-head"><div><span class="eyebrow">Owner documentation</span><h2>{documentTitle}</h2></div></div>
     <div class="prose owner-document" set:html={html}></div>
-    <p class="source-note">Source snapshot: <code>{data.source.repository}@{data.source.commit?.slice(0, 8) || data.source.ref}</code> · <code>{source.path}</code></p>
+    <p class="source-note">Source file: <code>{source.path}</code> · Pinned revision: <code>{data.source.commit?.slice(0, 12) || data.source.ref}</code></p>
   </section>)}
 
   {apiSources.length > 0 && <section class="section">
