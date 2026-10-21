@@ -55,7 +55,7 @@ const isActive = (path: string) => normalizedPath.replace(/\/$/, '') === path.re
     <link rel="alternate" hreflang="zh-CN" href={new URL(href(zhPath), Astro.url.origin)} />
     <link rel="alternate" hreflang="en" href={new URL(href(enPath), Astro.url.origin)} />
     <link rel="alternate" hreflang="x-default" href={new URL(href(zhPath), Astro.url.origin)} />
-    <title>{title} · CA Docs</title>
+    <title>{title} · Sandbox Docs</title>
   </head>
   <body>
     <a class="skip-link" href="#main-content">{lang === 'zh' ? '跳到正文' : 'Skip to content'}</a>
