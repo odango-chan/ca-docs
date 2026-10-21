@@ -510,33 +510,6 @@ html[lang="zh-CN"] body{letter-spacing:.005em}
 }
 
 
-/* Home page: documentation index first, decoration second. */
-.home-hero {
-  padding: 0 0 2rem;
-}
-
-.home-hero h1 {
-  margin: 0;
-  font-size: clamp(2rem, 5vw, 3.2rem);
-}
-
-.home-hero p {
-  margin: 0.5rem 0 0;
-  color: var(--muted);
-  font-size: 1rem;
-}
-
-.home-section {
-  padding: 1.75rem 0;
-  border-top: 1px solid var(--line);
-}
-
-.home-section h2 {
-  margin-bottom: 0.9rem;
-  font-size: 1.3rem;
-  letter-spacing: -0.02em;
-}
-
 .doc-index {
   border: 1px solid var(--line);
   border-radius: 0.65rem;
