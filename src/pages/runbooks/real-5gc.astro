@@ -2,7 +2,7 @@
 import SiteLayout from '../../layouts/SiteLayout.astro';
 ---
 <SiteLayout title="真实 5GC 运行与验收手册" lang="zh" description="Open5GS、UERANSIM、env-fabric 的启动顺序、接口语义、验收证据与故障定位。">
-<section class="hero"><span class="eyebrow">Runbook / Real 5GC</span><h1>真实 5GC 运行与验收手册</h1><p class="lede">从指定 WSL2 主机上的 Open5GS + UERANSIM 基线开始，逐步验证 R0、R1，再识别 R2-B Agent 治理链路。只使用各 owner 仓已记录的稳定 CLI；不修改 Open5GS/UERANSIM 上游源码，不用 mock 冒充真实验收。</p></section>
+<section class="hero"><span class="eyebrow">Runbook / Real 5GC</span><p><a href="/interfaces/real-5gc-evidence/">接口与证据手册：请求字段、关联键、事实权威和验收产物 →</a></p><h1>真实 5GC 运行与验收手册</h1><p class="lede">从指定 WSL2 主机上的 Open5GS + UERANSIM 基线开始，逐步验证 R0、R1，再识别 R2-B Agent 治理链路。只使用各 owner 仓已记录的稳定 CLI；不修改 Open5GS/UERANSIM 上游源码，不用 mock 冒充真实验收。</p></section>
 <section class="section"><h2>0. 先判断验收路径</h2>
 <table><thead><tr><th>阶段</th><th>要证明的事实</th><th>状态</th></tr></thead><tbody>
 <tr><td>R0 · local baseline</td><td>Open5GS full-5gc + 原生 N2；注册、会话、PFCP、TUN 和用户面可用。</td><td>先独立通过，作为对照基线。</td></tr>
