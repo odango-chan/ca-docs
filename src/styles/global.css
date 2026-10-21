@@ -69,51 +69,10 @@ h3 {
   font-size: clamp(1.05rem, 2vw, 1.28rem);
 }
 
-.section {
-  padding-block: 2.4rem;
-  border-top: 1px solid var(--line);
-}
-
-.section-head {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.2rem;
-}
-
 .section-head p {
   max-width: 660px;
   margin: 0;
   color: var(--muted);
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.card {
-  grid-column: span 6;
-  padding: 1.35rem;
-  border: 1px solid var(--line);
-  border-radius: 1rem;
-  background: var(--panel);
-  box-shadow: 0 8px 28px rgba(23, 32, 51, 0.045);
-}
-
-.card.wide { grid-column: span 12; }
-
-.card p {
-  margin: 0;
-  color: var(--muted);
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.8rem;
 }
 
 .stat {
@@ -249,13 +208,6 @@ td { font-size: 0.9rem; }
   font-size: 0.84rem;
 }
 
-@media (max-width: 760px) {
-  .card { grid-column: span 12; }
-  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .cap-item { grid-template-columns: 1fr; gap: 0.45rem; }
-  .section-head { align-items: flex-start; flex-direction: column; }
-}
-
 html[lang="zh-CN"] body{letter-spacing:.005em}
 
 .source-status{
@@ -274,7 +226,6 @@ html[lang="zh-CN"] body{letter-spacing:.005em}
 .source-status span{color:var(--muted);font-size:.82rem}
 .source-status.live{border-color:#b7dfd0;background:#effaf5}
 .source-status.snapshot{border-color:#efd7ad;background:#fff9ee}
-@media (max-width:760px){.source-status{align-items:flex-start;flex-direction:column}}
 
 
 .api-list {
@@ -472,9 +423,9 @@ html[lang="zh-CN"] body{letter-spacing:.005em}
 }
 
 @media (max-width: 760px) {
-  .doc-row {
-    align-items: flex-start;
-  }
+  .cap-item { grid-template-columns: 1fr; gap: 0.45rem; }
+  .source-status { align-items: flex-start; flex-direction: column; }
+  .doc-row { align-items: flex-start; }
 }
 
 .prose {
@@ -580,7 +531,6 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 .docs-article .section p { line-height: 1.78; }
 .docs-article .section > p { margin-block: 1rem; }
 .docs-article .section p + p { margin-top: .9rem; }
-.docs-article .grid { display: block; }
 .docs-article .card, .docs-article .api-card {
   display: block; width: 100%; margin: 0; padding: 1.05rem 0; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none;
 }
