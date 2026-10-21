@@ -34,8 +34,22 @@ function resolvePageRoute(target, locale) {
 
   const componentMatch = route.match(/^\/components\/([^/]+)\/?$/);
   if (componentMatch) {
-    const component = components.get(componentMatch[1]);
-    const snapshotPath = path.join(root, 'data', 'generated', `${componentMatch[1]}.json`);
+    const componentId = componentMatch[1];
+    const explicitPage = path.join(root, 'src', 'pages', locale === 'en' ? 'en' : '', 'components', componentId, 'index.astro');
+    if (fs.existsSync(explicitPage)) {
+      if (url.hash) {
+        const source = fs.readFileSync(explicitPage, 'utf8');
+        const anchor = decodeURIComponent(url.hash.slice(1));
+        const anchorPattern = new RegExp(`\\\\bid=["']${escapeRegExp(anchor)}["']`);
+        if (!anchorPattern.test(source)) {
+          return { exists: false, reason: `no id="${anchor}" anchor in ${path.relative(root, explicitPage)}` };
+        }
+      }
+      return { exists: true };
+    }
+
+    const component = components.get(componentId);
+    const snapshotPath = path.join(root, 'data', 'generated', `${componentId}.json`);
     if (!component || component.status !== 'active' || component.sync !== 'manifest' || !fs.existsSync(snapshotPath)) {
       return { exists: false, reason: 'component detail route is not generated' };
     }
