@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import yaml from 'js-yaml';
+import { pinSourceContext } from './source-revision.mjs';
 import Ajv2020 from 'ajv/dist/2020.js';
 
 const token = process.env.CA_DOCS_SOURCE_TOKEN || '';
@@ -239,11 +240,10 @@ export async function syncManifest(component) {
   }
   try {
     const rev = await sourceRevision(context);
-    if (!rev.commit) throw new Error(`source ref ${context.ref} did not resolve to an immutable commit SHA`);
     // Resolve the moving ref once, then read the manifest and every declared file
     // from that exact commit. This prevents a moving branch from producing a
     // snapshot whose provenance points at a different revision than its content.
-    const pinnedContext = { ...context, ref: rev.commit, sourceRef: context.ref };
+    const pinnedContext = pinSourceContext(context, rev);
     const manifestText = await fetchText(pinnedContext, component.manifest || 'docs/public-docs.yaml');
     const snapshot = await buildSnapshot(
       component,
