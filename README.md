@@ -1,114 +1,60 @@
-# CA Docs
+# Sandbox Docs
 
-ConnectionAgent（`ca-*`）生态的公开文档门户。默认中文，同时提供英文页面。
+Sandbox 平台的公开文档门户，提供平台架构、组件职责、可靠性评估、运行手册与公开接口参考。中文为默认语言，同时提供英文页面。
 
 - 中文站：<https://odango-chan.github.io/ca-docs/>
 - English: <https://odango-chan.github.io/ca-docs/en/>
 
-CA Docs 是一个**跨仓视图**，不是第二份机器契约事实源。OpenAPI、JSON Schema 与实现仍由各组件所属仓库维护；本仓只发布文档需要的安全派生信息。
+## 文档边界
 
-## 当前接入
+Sandbox Docs 是跨仓文档视图，不是实现或机器契约的第二份事实源。
 
-### ca-5gc-sim
+- Sandbox 治理仓维护平台架构、组件关系、迁移状态与跨仓约束。
+- 各组件 owner 仓维护实现、OpenAPI、JSON Schema 和领域事实。
+- 本站发布经过校验的公开派生数据，并补充平台级解释、运行流程和导航。
+- 公开声明与实现不一致时，记录差异并交由 owner 修正；同步成功不等于端到端验收通过。
 
-当前 active 组件之一。现在从 private `odango-chan/ca-5gc-sim` 提取：
+## 从哪里开始
 
-- Fact semantic 清单
-- Operation semantic 清单
-- OpenAPI 路由
-- Server 实际注册路由
-- OpenAPI / 实现漂移
-- 对应上游 commit
+- **[Sandbox 总体架构](https://odango-chan.github.io/ca-docs/architecture/system/)**：平台分层、组件职责、事实权威，以及真实 5GC 请求的跨组件路径。
+- **[Benchmark 与可靠性评估](https://odango-chan.github.io/ca-docs/benchmark/)**：被测对象、冻结任务、执行尝试、证据有效性和 Verdict 的边界。
+- **[真实 5GC 运行手册](https://odango-chan.github.io/ca-docs/runbooks/real-5gc/)**：启动前检查、运行步骤、故障定位与验收流程。
+- **[真实 5GC 接口与证据手册](https://odango-chan.github.io/ca-docs/interfaces/real-5gc-evidence/)**：接口契约、关联键、事实来源和 PASS 判定要求。
+- **[组件接口总览](https://odango-chan.github.io/ca-docs/api/)**：按组件查阅公开接口。
 
-公开仓不会复制 private 源码正文。
+## 公开内容如何接入
 
-### tool-common
+组件通过自身仓库中的 `docs/public-docs.yaml` 声明允许公开的 OpenAPI、JSON Schema、Markdown 或实现检查结果。Sandbox Docs 校验声明并生成带来源版本的快照，不会自动公开 private 仓库中的整个 `docs/` 目录或复制私有源码正文。
 
-源注册表、页面 slug 和公开 snapshot 使用 private `odango-chan/tool-common`。该来源已启用严格同步；workflow 使用 `CA_DOCS_SOURCE_TOKEN` 读取 owner manifest、OpenAPI 和公开文档，并在 snapshot 更新时提交派生数据。它拥有跨领域、环境无关的 Tool Plane capability；当前 capability 为 `subject.identity.lookup@v1`。
+过渡期的组件注册表位于 `data/components.yaml`；manifest 契约见 [docs/public-doc-contract.md](docs/public-doc-contract.md)。
 
-## 组件接入
+## 同步与发布
 
-`data/components.yaml` 是当前组件注册表。新的 `ca-*` 仓库不需要照抄 ca-5gc-sim 的页面或同步脚本。
+private 上游同步与 GitHub Pages 部署是分离的：
 
-统一目标是让每个源仓提供：
+1. Sync workflow 使用 `CA_DOCS_SOURCE_TOKEN` 读取已接入仓库中明确声明的公开来源。
+2. 校验后的派生数据写入 `data/generated/`，并记录来源版本。
+3. 只有快照变化时才提交更新。
+4. Pages 从 public 仓库内已提交的快照构建，不需要 private token。
 
-```
-docs/public-docs.yaml
-```
-
-由源仓自己声明哪些 OpenAPI、JSON Schema、公开 Markdown 或实现检查允许进入公共文档。规范见 `docs/public-doc-contract.md`。
-
-## 同步与发布模型
-
-private token 只用于独立的 **Sync Upstream Contracts** workflow，不交给 GitHub Pages 构建任务。
-
-```text
-private component repositories
-        │  CA_DOCS_SOURCE_TOKEN (Contents: Read-only)
-        ▼
-Sync Upstream Contracts
-        │
-        ├─ 读取组件 public-docs manifest
-        ├─ 提取 / 校验安全派生数据
-        ▼
-data/generated/*
-        │  提交到 public ca-docs
-        ▼
-Deploy CA Docs
-        │  不需要 private token
-        ▼
-GitHub Pages
-```
-
-同步 workflow 每 6 小时运行一次。只有派生 snapshot 发生变化时才提交；该提交会自动触发 Pages 部署。
-
-这样可以保证：
-
-- Pages 构建不接触 private token。
-- public 仓始终保留最近一次成功同步的数据，可复现构建。
-- private 上游暂时不可用时，站点仍可从已发布 snapshot 正常构建。
-- 上游变化在 public snapshot 中有明确 commit 轨迹。
-
-## Token
-
-仓库 Secret：`CA_DOCS_SOURCE_TOKEN`
-
-推荐 Fine-grained personal access token：
-
-- Repository access：只选择已经接入 CA Docs 的 private 仓库，包括 `tool-common`
-- Repository permissions：`Contents: Read-only`
+同步失败时，严格模式必须失败，不能静默使用旧数据伪装成最新结果；站点仍可从最近一次已发布快照重建。
 
 ## 本地开发
 
 ```bash
 npm install
 npm run dev
+npm test
+npm run build
 ```
 
-没有 token 时使用 checked-in published snapshot。
+默认使用仓库内已提交的公开快照。需要刷新 private 上游时，按项目配置提供 `CA_DOCS_SOURCE_TOKEN`；不要将 token 写入文件、提交或交给 Pages 构建任务。
 
-需要直接刷新 private 上游时：
+## 事实来源原则
 
-```bash
-CA_DOCS_SOURCE_TOKEN=... npm run dev
-```
+- 平台架构与跨仓治理：`odango-chan/sandbox`。
+- 组件接口、Schema 与实现行为：相应组件 owner 仓。
+- 评估资产和判定语义：Benchmark 资产仓与 Engine 契约。
+- 真实环境状态：对应环境的事实 owner；文档门户不替代独立验收证据。
 
-严格同步（上游读取失败即失败，不允许 fallback）：
-
-```bash
-CA_DOCS_SOURCE_TOKEN=... CA_DOCS_SYNC_STRICT=1 npm run sync
-```
-
-## Source-of-truth 原则
-
-- OpenAPI / JSON Schema / 实现事实保留在能力所属仓库。
-- CA Docs 只保存面向文档的安全派生 snapshot。
-- 手写内容解释意图、职责边界与使用方式，不重新定义 wire contract。
-- 实现与发布契约发生漂移时，门户展示差异，而不是自动隐藏差异。
-
-## 部署
-
-- `.github/workflows/sync-upstream.yml`：每 6 小时或手动同步 private 上游，并在 snapshot 变化时提交。
-- `.github/workflows/pages.yml`：push 到 `main` 或手动触发时，仅从 public snapshot 构建并部署 Pages。
-
-中文位于根路径，英文位于 `/en/`，两种语言共享同一份机器生成能力数据。
+仓库名称仍为 `ca-docs`，但公开站的产品定位是 **Sandbox Docs**。
