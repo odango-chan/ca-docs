@@ -3,8 +3,8 @@
   "source": {
     "repository": "odango-chan/env-5gc-sim",
     "ref": "main",
-    "commit": "b10561eff8ef2911b187503d27e0442afd54b991",
-    "commitDate": "2026-10-21T03:27:45Z",
+    "commit": "ef9ea076fe559d6826913c8beb7ba5829c640b1b",
+    "commitDate": "2026-10-21T04:22:07Z",
     "private": true,
     "publicDocsManifest": "docs/public-docs.yaml",
     "openApi": "schemas/v1alpha1/provider.openapi.yaml",
