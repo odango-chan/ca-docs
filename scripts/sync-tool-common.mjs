@@ -151,7 +151,11 @@ export async function syncToolCommon(component) {
   }
 
   try {
-    const [manifestText, rev] = await Promise.all([fetchText(ctx, manifestPath), revision(ctx)]);
+    const rev = await revision(ctx);
+    if (!rev.commit) throw new Error(`source ref ${ctx.ref} did not resolve to an immutable commit SHA`);
+    // Read the manifest and all declared files from the same immutable revision.
+    const pinnedCtx = { ...ctx, ref: rev.commit, sourceRef: ctx.ref };
+    const manifestText = await fetchText(pinnedCtx, manifestPath);
     const manifest = yaml.load(manifestText);
     if (!manifest || manifest.kind !== 'PublicDocsManifest' || manifest.component !== component.id) {
       throw new Error(`invalid PublicDocsManifest at ${manifestPath}`);
@@ -179,9 +183,9 @@ export async function syncToolCommon(component) {
       markdownRoles.en.overview, markdownRoles.en.subjectIdentity, markdownRoles.en.boundaries,
     ];
     const [providerText, controlText, ...markdownTexts] = await Promise.all([
-      fetchText(ctx, provider.path),
-      fetchText(ctx, control.path),
-      ...allMarkdown.map((source) => fetchText(ctx, source.path)),
+      fetchText(pinnedCtx, provider.path),
+      fetchText(pinnedCtx, control.path),
+      ...allMarkdown.map((source) => fetchText(pinnedCtx, source.path)),
     ]);
     const providerDoc = yaml.load(providerText);
     const controlDoc = yaml.load(controlText);
@@ -190,7 +194,7 @@ export async function syncToolCommon(component) {
       component: component.id,
       source: {
         repository: component.repository,
-        ref: ctx.ref,
+        ref: ctx.sourceRef || ctx.ref,
         commit: rev.commit,
         commitDate: rev.commitDate,
         private: true,
