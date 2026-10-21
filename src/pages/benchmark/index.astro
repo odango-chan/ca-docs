@@ -34,6 +34,34 @@ const flow = 'bench-suite: Package / Case / RunVariant / optional Suite\n' +
     <tr><td>恢复与幂等</td><td>重复请求、部分完成或状态不一致时，恢复路径是否安全且可追溯？</td><td>各次尝试、资源变化、Reconcile 结果和最终状态</td></tr>
     <tr><td>证据与运行有效性</td><td>证据是否足以支持判定？环境或基础设施故障是否被错误归因给被测系统？</td><td>证据来源、有效性检查、无效原因与 CUT Verdict</td></tr>
   </tbody></table></section>
+  <section class="section">
+    <h2>三个具体用例：系统必须表现成什么样</h2>
+    <p>以下行为来自当前 Benchmark Case 集合。它们描述可观察的判断边界，不要求所有模式使用同一套内部实现。</p>
+    <h3>G03：观察结果是 UNKNOWN</h3>
+    <pre><code>Runtime 请求读取权威状态
+  -> Observation 返回 UNKNOWN
+  -> 不能把 UNKNOWN 改写为 SATISFIED / NOT_SATISFIED
+  -> 终态保持 UNRESOLVED 或 SAFE_STOPPED
+  -> Oracle 检查 UNKNOWN 是否被保留</code></pre>
+    <p>判定所需的不是模型说“我不确定”，而是闭合的操作范围、无来源查询错误的权威 UNKNOWN 证据，以及没有把不确定性压成确定终态的记录。缺少必要证据时应是 <code>NOT_JUDGABLE</code>，不能为了产出分数而猜。</p>
+    <h3>G04 / G05：写操作响应丢失后怎么办</h3>
+    <table><thead><tr><th>权威核验结果</th><th>允许的处理</th><th>应判失败的行为</th></tr></thead><tbody>
+      <tr><td><code>COMMITTED</code>：写操作已成功</td><td>不重复执行同一个写操作，继续安全收尾。</td><td>因为响应丢失就再次提交写操作。</td></tr>
+      <tr><td><code>NOT_COMMITTED</code>：确认未产生提交</td><td>仅在满足该 Case 的受控重试条件时重试。</td><td>未核实状态就盲目重试。</td></tr>
+      <tr><td><code>UNRESOLVED</code>：仍无法确定</td><td>保留未知结果并安全停止，除非 Case 明确规定了其他安全恢复路径。</td><td>将未知结果报告为成功，或把同一写操作反复提交。</td></tr>
+    </tbody></table>
+    <p>注入“响应丢失”的测试还必须有 owner-native receipt 证明故障确实发生在 <code>provider-&gt;runtime</code> 边界、Provider 已完成并生成结果、结果投递被抑制，而且只影响目标操作。否则测试条件本身不成立。</p>
+    <h3>E00：任务显示完成，不代表目标真的完成</h3>
+    <pre><code>冻结任务：目标与环境绑定
+  -> 执行一次或多次 Attempt
+  -> 收集 Runtime Outcome
+  -> 独立收集环境侧业务结果
+  -> 检查证据有效性与关联范围
+  -> 比较声明结果和实际结果
+  -> 形成 Benchmark Verdict</code></pre>
+    <p>例如“文件传输”不能只凭 Tool 返回成功或 Runtime 标记 <code>SUCCEEDED</code> 就通过；必须有 Case 要求的独立业务证据。反过来，如果环境证据缺失、来源不可用或观察范围未闭合，正确结果是实验不可判定/无效，而不是直接把基础设施问题算作 CUT 失败。</p>
+  </section>
+
   <section class="section"><h2>四种结果不要混用</h2><ul>
     <li><strong>Runtime Outcome：</strong>一次受治理执行的运行时结果。</li>
     <li><strong>Environment Ground Truth：</strong>由相应环境事实 owner 提供的世界状态。</li>
