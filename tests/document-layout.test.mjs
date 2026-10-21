@@ -83,3 +83,10 @@ test('homepage styling has one canonical definition with explicit mobile overrid
   assert.match(css, /\.home-hero h1\s*\{[^}]*max-width:\s*none/);
   assert.match(css, /@media \(max-width: 700px\)\s*\{[\s\S]*?\.home-hero h1 \{ max-width: none;/);
 });
+
+test('shared primitive selectors have one canonical base definition', () => {
+  const selectors = ['html {', 'body {', 'a {', 'a:hover {', '.site-header {', '.brand {', '.brand:hover {', '.brand-mark {', '.language-switch {', '.language-switch a {', '.language-switch a.active {', '.site-footer {'];
+  for (const selector of selectors) {
+    assert.equal(css.split(selector).length - 1, 1, 'expected one base definition for ' + selector);
+  }
+});
