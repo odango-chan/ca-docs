@@ -40,7 +40,7 @@ function resolvePageRoute(target, locale) {
       if (url.hash) {
         const source = fs.readFileSync(explicitPage, 'utf8');
         const anchor = decodeURIComponent(url.hash.slice(1));
-        const anchorPattern = new RegExp(`\\\\bid=["']${escapeRegExp(anchor)}["']`);
+        const anchorPattern = new RegExp(`\\bid=["']${escapeRegExp(anchor)}["']`);
         if (!anchorPattern.test(source)) {
           return { exists: false, reason: `no id="${anchor}" anchor in ${path.relative(root, explicitPage)}` };
         }
