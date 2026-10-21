@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import yaml from 'js-yaml';
+import { pinSourceContext } from './source-revision.mjs';
 
 const token = process.env.CA_DOCS_SOURCE_TOKEN || '';
 const strict = process.env.CA_DOCS_SYNC_STRICT === '1';
@@ -308,9 +309,8 @@ export async function syncCa5gcSim(component) {
 
   try {
     const revision = await sourceRevision(ctx);
-    if (!revision.commit) throw new Error(`source ref ${ctx.ref} did not resolve to an immutable commit SHA`);
     // Resolve the moving ref once and pin every source read to that commit.
-    const pinnedCtx = { ...ctx, ref: revision.commit, sourceRef: ctx.ref };
+    const pinnedCtx = pinSourceContext(ctx, revision);
     const manifestText = await fetchRepoText(pinnedCtx, manifestPath);
     const manifest = yaml.load(manifestText);
 
