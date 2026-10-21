@@ -102,3 +102,31 @@ test('manifest loader supports markdown only when the manifest explicitly permit
   const snapshot = await buildSnapshot(component, yaml.dump(manifest), { ref: 'main' }, { commit: 'abc123' }, async () => '# Public overview\n');
   assert.equal(snapshot.sources[0].body, '# Public overview\n');
 });
+
+
+test('snapshot records the human-facing source ref while pinning provenance to an immutable commit', async () => {
+  const manifest = {
+    apiVersion: 'connectionagent.io/v1alpha1',
+    kind: 'PublicDocsManifest',
+    component: 'env-fabric',
+    sources: [{ kind: 'implementation-check', path: 'internal/httpapi/server.go', role: 'routes', publish: ['metadata', 'implementation-summary'] }],
+  };
+  const privateSource = 'package httpapi; // MUST_NOT_LEAK_PRIVATE_SOURCE';
+  const snapshot = await buildSnapshot(
+    component,
+    yaml.dump(manifest),
+    { ref: 'd4696c2bbcba3a0c78371102bc934dc051036b5c', sourceRef: 'main' },
+    { commit: 'd4696c2bbcba3a0c78371102bc934dc051036b5c', commitDate: '2026-10-14T06:46:55Z' },
+    async () => privateSource,
+  );
+  assert.equal(snapshot.source.ref, 'main');
+  assert.equal(snapshot.source.commit, 'd4696c2bbcba3a0c78371102bc934dc051036b5c');
+  assert.match(snapshot.sources[0].implementationSummary, /pinned source revision/);
+  assert.equal(JSON.stringify(snapshot).includes('MUST_NOT_LEAK_PRIVATE_SOURCE'), false);
+});
+
+test('manifest loader rejects Windows separators and dot segments in declared paths', async () => {
+  for (const sourcePath of ['..\\private.md', 'docs//public.md', './public.md']) {
+    assert.throws(() => validateSourcePath(sourcePath), /invalid public-doc source path/);
+  }
+});
