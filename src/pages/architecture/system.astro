@@ -1,0 +1,76 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+const flow = 'User Intent and Constraints\n' +
+  '          │\n' +
+  '          ▼\n' +
+  'Agent: understand · plan · select skills/tools\n' +
+  '          │\n' +
+  '          ▼\n' +
+  'Execution boundary / Runtime\n' +
+  '  enforce constraints · track state · coordinate execution\n' +
+  '          │\n' +
+  '          ▼\n' +
+  'Tool contracts and environment adapters\n' +
+  '          │\n' +
+  '          ▼\n' +
+  'Simulated / sandboxed / real external systems\n' +
+  '          │\n' +
+  '          ▼\n' +
+  'Authoritative external state + evidence\n' +
+  '          │\n' +
+  '          └──── verify outcome; recover or report uncertainty';
+---
+<SiteLayout title="CA 系统架构" lang="zh">
+  <section class="hero">
+    <span class="eyebrow">CA Docs / Architecture</span>
+    <h1>ConnectionAgent 系统架构</h1>
+    <p class="lede">CA 面向有约束的外部系统操作。它不把“模型生成了一个计划”或“工具调用返回成功”直接等同于目标完成，而是把决策、执行、外部状态和结果证据区分开来。</p>
+  </section>
+
+  <section class="section">
+    <div class="grid">
+      <div class="card wide">
+        <h3>端到端概念模型</h3>
+        <pre><code>{flow}</code></pre>
+        <p class="muted">这是跨仓概念图，用于解释责任边界，不是每个部署都必须采用的进程拓扑。具体接口和实现以所属组件仓库的公开契约为准。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>职责边界</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Agent / Planner</h3>
+        <p>理解用户目标和约束，制定步骤，选择技能与工具。模型输出本身不是外部系统状态的权威证明。</p>
+      </div>
+      <div class="card">
+        <h3>Runtime / Execution</h3>
+        <p>在明确的执行边界内管理步骤、约束、状态和结果。需要区分已完成、失败和无法确认的结果。</p>
+      </div>
+      <div class="card">
+        <h3>Tools / Providers</h3>
+        <p>提供有明确契约的操作和观察能力。工具调用成功只说明该调用的结果，不能自动证明更高层的用户目标已满足。</p>
+      </div>
+      <div class="card">
+        <h3>Environment / External system</h3>
+        <p>模拟环境、沙箱和真实系统提供不同的验证条件。最终状态应尽可能从权威系统观察，并保留可审计证据。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>可靠性原则</h2>
+    <div class="grid">
+      <div class="card"><h3>Fail closed</h3><p>关键前置条件、目标身份或必要证据无法确认时，不应把不确定结果报告为成功。</p></div>
+      <div class="card"><h3>外部状态优先</h3><p>以权威系统状态核验目标是否实现，而不是只依赖 Agent 文本或中间层的乐观状态。</p></div>
+      <div class="card"><h3>可追溯</h3><p>将意图、计划、工具调用、环境状态和最终判定关联起来，便于复盘。</p></div>
+      <div class="card"><h3>环境边界明确</h3><p>模拟通过、沙箱通过和真实系统通过应分别报告，不应互相替代。</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <p>组件级接口、配置与当前实现状态请从 <a href="../../architecture/">文档架构与来源治理</a> 进入，再查看对应组件的权威文档。本文描述跨组件的概念边界，不重新定义组件契约。</p>
+    <p><strong>状态说明：</strong>本文为架构概览。具体组件连线、部署拓扑和能力成熟度，应以对应组件仓的契约与可复现验证记录为准。</p>
+  </section>
+</SiteLayout>
