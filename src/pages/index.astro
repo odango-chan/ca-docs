@@ -1,46 +1,66 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
 import data from '../../data/generated/ca-5gc-sim.json';
-
 const base = import.meta.env.BASE_URL;
 const href = (value: string) => `${base.replace(/\/?$/, '/')}${value.replace(/^\/+/, '')}`;
 ---
-<SiteLayout title="ConnectionAgent 文档" lang="zh">
+<SiteLayout title="ConnectionAgent 文档" lang="zh" description="ConnectionAgent 的系统架构、可靠性评估与组件公开文档。">
   <section class="home-hero">
-    <h1>CA Docs</h1>
-    <p>了解 ConnectionAgent 的整体架构、Benchmark 评估体系，以及各组件公开接口与契约。</p>
+    <div class="home-kicker">ConnectionAgent · Documentation</div>
+    <h1>理解系统。<br />验证可靠性。</h1>
+    <p>这里介绍 ConnectionAgent 的整体设计、可靠性评估方法，以及各组件公开的接口与契约。先从全局理解，再按需深入具体组件。</p>
+    <div class="home-actions">
+      <a href={href('/architecture/system/')}>阅读系统架构 <span aria-hidden="true">→</span></a>
+      <a href={href('/benchmark/')}>了解 Benchmark <span aria-hidden="true">→</span></a>
+    </div>
   </section>
 
   <section class="home-section">
-    <h2>整体架构与评估</h2>
-    <div class="doc-index">
-      <a class="doc-row primary" href={href('/architecture/system/')}>
-        <div><strong>CA 系统架构</strong><span>Agent、Runtime、Provider、环境与多仓职责边界</span></div><span aria-hidden="true">→</span>
+    <h2>从这里开始</h2>
+    <p>如果你第一次了解 CA，建议按以下顺序阅读。</p>
+    <div class="reading-list">
+      <a class="reading-item" href={href('/architecture/system/')}>
+        <span class="reading-number">01</span>
+        <span><strong>系统架构与职责边界</strong><small>理解 Agent Host、Runtime、Provider、环境与 Lab 如何协作，以及哪些组件拥有权威状态。</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
       </a>
-      <a class="doc-row primary" href={href('/benchmark/')}>
-        <div><strong>Benchmark 架构</strong><span>评估资产、冻结任务、执行尝试、证据与结果判定</span></div><span aria-hidden="true">→</span>
+      <a class="reading-item" href={href('/benchmark/')}>
+        <span class="reading-number">02</span>
+        <span><strong>Benchmark 评估模型</strong><small>理解评估资产、冻结任务、执行尝试、证据有效性与最终判定之间的关系。</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
       </a>
-      <a class="doc-row" href={href('/architecture/')}>
-        <div><strong>文档治理</strong><span>公开来源、快照同步与组件文档职责</span></div><span aria-hidden="true">→</span>
+      <a class="reading-item" href={href('/architecture/')}>
+        <span class="reading-number">03</span>
+        <span><strong>文档来源与治理</strong><small>了解为什么各组件维护自己的公开来源，以及 ca-docs 如何同步和发布这些内容。</small></span>
+        <span class="reading-arrow" aria-hidden="true">↗</span>
       </a>
     </div>
   </section>
 
   <section class="home-section">
-    <h2>组件文档</h2>
-    <div class="doc-index">
-      <a class="doc-row" href={href('/api/')}><div><strong>API</strong><span>查看已接入组件的公开接口</span></div><span aria-hidden="true">→</span></a>
-      <a class="doc-row" href={href('/components/ca-5gc-sim/facts/')}><div><strong>Facts</strong><span>{data.counts.facts} 个可读取的状态</span></div><span aria-hidden="true">→</span></a>
-      <a class="doc-row" href={href('/components/ca-5gc-sim/operations/')}><div><strong>Operations</strong><span>{data.counts.operations} 个可执行操作</span></div><span aria-hidden="true">→</span></a>
-      <a class="doc-row" href={href('/components/ca-5gc-sim/standalone/')}><div><strong>ca-5gc-sim Standalone</strong><span>独立启动和调用方式</span></div><span aria-hidden="true">→</span></a>
-    </div>
+    <h2>组件参考</h2>
+    <p>全局文档解释系统关系；组件参考提供更具体的公开接口、状态与操作说明。</p>
+    <table class="component-table">
+      <thead><tr><th>组件</th><th>职责</th><th>公开参考</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><a href={href('/components/ca-5gc-sim/')}>ca-5gc-sim</a></td>
+          <td>5GC 模拟环境与相关能力</td>
+          <td><a href={href('/api/')}>API</a> · <a href={href('/components/ca-5gc-sim/facts/')}>Facts（{data.counts.facts}）</a> · <a href={href('/components/ca-5gc-sim/operations/')}>Operations（{data.counts.operations}）</a></td>
+        </tr>
+        <tr>
+          <td><a href={href('/components/tool-common/')}>tool-common</a></td>
+          <td>Subject Identity 与公共工具契约</td>
+          <td><a href={href('/components/tool-common/')}>组件概览</a></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="home-footnote">组件清单会随着各所属仓库发布公开文档清单而扩展。并非所有仓库或能力都已接入。</p>
   </section>
 
   <section class="home-section">
-    <h2>当前已接入组件</h2>
-    <div class="component-index">
-      <a class="component-row" href={href('/components/ca-5gc-sim/')}><div><strong>ca-5gc-sim</strong><span>5GC 模拟器 · {data.counts.documentedRoutes} 个 OpenAPI 接口 · {data.counts.implementationRoutes} 条实现路由</span></div><span aria-hidden="true">→</span></a>
-      <a class="component-row" href={href('/components/tool-common/')}><div><strong>tool-common</strong><span>Subject Identity · Provider API + Trusted Control API</span></div><span aria-hidden="true">→</span></a>
-    </div>
+    <h2>关于这些文档</h2>
+    <p>CA Docs 负责跨仓库的解释、导航与公开快照。机器契约、实现行为和业务事实仍以各组件所属仓库为准；快照记录来源版本，便于追溯与复核。</p>
+    <p><a href={href('/architecture/')}>了解文档治理与来源同步 →</a></p>
   </section>
 </SiteLayout>
