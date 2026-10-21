@@ -114,7 +114,7 @@ test('homepage responsive rules share the canonical 700px breakpoint', () => {
 
 test('retired component and navigation primitives stay removed', () => {
   for (const selector of ['.component-card', '.component-link', '.pills', '.private-source', '.top-api']) {
-    assert.doesNotMatch(css, new RegExp('\\\\' + selector.replace(/[.*+?^$\\{\\}()|[\\]\\\\]/g, '\\\\$&')), 'retired selector should not return: ' + selector);
+    assert.equal(css.includes(selector), false, 'retired selector should not return: ' + selector);
   }
 });
 
