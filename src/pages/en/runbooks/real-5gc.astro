@@ -2,7 +2,7 @@
 import SiteLayout from '../../../layouts/SiteLayout.astro';
 ---
 <SiteLayout title="Real 5GC Runbook and Acceptance" lang="en" description="Reproducible Open5GS, UERANSIM and env-fabric startup, interface semantics, acceptance evidence and troubleshooting.">
-<section class="hero"><span class="eyebrow">Runbook / Real 5GC</span><h1>Real 5GC runbook and acceptance</h1><p class="lede">Start with the Open5GS + UERANSIM baseline on the designated WSL2 host, validate R0 and R1, then identify the R2-B Agent-governed path. Use owner-documented stable CLIs; do not modify upstream source or use mocks as proof of live acceptance.</p></section>
+<section class="hero"><span class="eyebrow">Runbook / Real 5GC</span><p><a href="/en/interfaces/real-5gc-evidence/">Interface and evidence handbook: fields, correlation, authority and artifacts →</a></p><h1>Real 5GC runbook and acceptance</h1><p class="lede">Start with the Open5GS + UERANSIM baseline on the designated WSL2 host, validate R0 and R1, then identify the R2-B Agent-governed path. Use owner-documented stable CLIs; do not modify upstream source or use mocks as proof of live acceptance.</p></section>
 <section class="section"><h2>0. Choose the path</h2><table><thead><tr><th>Stage</th><th>What must be proven</th><th>Status</th></tr></thead><tbody>
 <tr><td>R0 · local baseline</td><td>Open5GS full-5gc + native N2; registration, session, PFCP, TUN and user-plane connectivity.</td><td>Pass independently as the control baseline.</td></tr>
 <tr><td>R1 · SBI observe-only</td><td>N2 remains direct gNB → AMF; SBI traverses env-fabric → mandatory SCP; registration, session and user-plane regression pass.</td><td>Real WSL2 integration PASS recorded.</td></tr>
