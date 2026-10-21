@@ -224,10 +224,6 @@ html[lang="zh-CN"] body{letter-spacing:.005em}
   color: var(--muted);
 }
 
-.api-heading {
-  margin-bottom: 0.9rem;
-}
-
 .method-badge {
   display: inline-flex;
   align-items: center;
@@ -255,15 +251,6 @@ html[lang="zh-CN"] body{letter-spacing:.005em}
   font-weight: 750;
 }
 
-.api-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin-top: 0.9rem;
-  color: var(--muted);
-  font-size: 0.84rem;
-}
-
 .api-block {
   margin-top: 1rem;
   padding-top: 1rem;
@@ -280,31 +267,13 @@ html[lang="zh-CN"] body{letter-spacing:.005em}
   gap: 0.4rem;
 }
 
-.response-row {
-  display: grid;
-  grid-template-columns: minmax(4rem, auto) 1fr;
-  gap: 0.75rem;
-  align-items: start;
-  padding: 0.45rem 0;
-}
-
 .status-code {
   font-weight: 800;
   text-align: center;
 }
 
-.api-example {
-  margin: 0.9rem 0;
-}
-
 .api-example summary {
-  cursor: pointer;
   color: var(--accent);
-  font-weight: 700;
-}
-
-.api-example pre {
-  margin-bottom: 0;
 }
 
 
@@ -336,10 +305,6 @@ html[lang="zh-CN"] body{letter-spacing:.005em}
   color: var(--accent);
   font-size: 0.86rem;
   font-weight: 700;
-}
-
-.response-contract table {
-  margin-top: 0.6rem;
 }
 
 
@@ -520,13 +485,12 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
 .docs-article .prose blockquote { margin: 1.3rem 0; padding: .2rem 0 .2rem 1rem; border-left: 3px solid #c4d0c0; color: #586358; }
 .docs-article .prose img { max-width: 100%; height: auto; }
 .docs-article .api-list { border-top: 1px solid var(--line); }
-.docs-article .api-heading { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
+.docs-article .api-heading { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; margin-bottom: .9rem; }
 .docs-article .api-path { font-size: .86rem; }
-.docs-article .api-meta { display: flex; flex-wrap: wrap; gap: .5rem; margin: .5rem 0; color: var(--muted); font-size: .78rem; }
-.docs-article .api-block { margin-top: 1rem; }
+.docs-article .api-meta { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; margin: .5rem 0; color: var(--muted); font-size: .78rem; }
 .docs-article .response-list { margin-top: .5rem; }
 .docs-article .response-row { display: flex; align-items: baseline; gap: .75rem; padding: .55rem 0; border-bottom: 1px solid var(--line); font-size: .86rem; }
-.docs-article .status-code { flex: 0 0 auto; font-weight: 800; }
+.docs-article .status-code { flex: 0 0 auto; }
 .docs-article details.api-example { margin: .7rem 0; border: 1px solid var(--line); border-radius: .4rem; }
 .docs-article details.api-example summary { padding: .65rem .8rem; cursor: pointer; font-weight: 700; }
 .docs-article details.api-example pre { margin: 0; border-radius: 0 0 .4rem .4rem; }

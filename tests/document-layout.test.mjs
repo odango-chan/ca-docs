@@ -6,6 +6,34 @@ import test from 'node:test';
 const root = process.cwd();
 const css = fs.readFileSync(path.join(root, 'src/styles/global.css'), 'utf8');
 
+function listCssRulesByContext(source) {
+  const withoutComments = source.replace(/\/\*[\s\S]*?\*\//g, '');
+  const rules = [];
+  const frames = [];
+  const contexts = [];
+  let start = 0;
+
+  for (let i = 0; i < withoutComments.length; i += 1) {
+    if (withoutComments[i] === '{') {
+      const prelude = withoutComments.slice(start, i).trim().replace(/\s+/g, ' ');
+      if (prelude.startsWith('@')) {
+        frames.push({ kind: 'at-rule' });
+        contexts.push(prelude);
+      } else {
+        rules.push({ selector: prelude, context: contexts.join(' > ') });
+        frames.push({ kind: 'rule' });
+      }
+      start = i + 1;
+    } else if (withoutComments[i] === '}') {
+      const frame = frames.pop();
+      if (frame?.kind === 'at-rule') contexts.pop();
+      start = i + 1;
+    }
+  }
+
+  return rules;
+}
+
 test('owner-published Markdown uses the article width for structural blocks', () => {
   assert.match(
     css,
@@ -151,7 +179,7 @@ test('shared content rules keep only declarations that survive article overrides
   assert.match(css, /^\.hero \{\s*display: grid;\s*\}/m);
   assert.match(css, /^\.lede \{\s*margin: 0;\s*\}/m);
   assert.match(css, /^\.section-head p \{\s*max-width: 660px;\s*\}/m);
-  assert.match(css, /^\.api-heading \{\s*margin-bottom: 0\.9rem;\s*\}/m);
+  assert.match(css, /^\.docs-article \.api-heading \{[^}]*margin-bottom: \.9rem;/m);
   for (const selector of [
     /^\.page-tabs\s*\{/m,
     /^\.api-card\s*\{/m,
@@ -162,5 +190,28 @@ test('shared content rules keep only declarations that survive article overrides
     /^\.prose table\s*\{/m,
   ]) {
     assert.doesNotMatch(css, selector, 'shadowed base selector should not return: ' + selector);
+  }
+});
+
+test('API presentation keeps active styles in the shared article layer', () => {
+  assert.match(css, /^\.docs-article \.api-heading \{[^}]*margin-bottom: \.9rem;/m);
+  assert.match(css, /^\.docs-article \.api-meta \{[^}]*align-items: center;/m);
+  assert.match(css, /^\.api-example summary \{\s*color: var\(--accent\);\s*\}/m);
+  assert.doesNotMatch(css, /^\.api-heading\s*\{/m);
+  assert.doesNotMatch(css, /^\.api-meta\s*\{/m);
+  assert.doesNotMatch(css, /^\.response-row\s*\{/m);
+  assert.doesNotMatch(css, /^\.api-example\s*\{/m);
+  assert.doesNotMatch(css, /^\.api-example pre\s*\{/m);
+  assert.doesNotMatch(css, /^\.response-contract table\s*\{/m);
+  assert.doesNotMatch(css, /^\.docs-article \.api-block \{/m);
+});
+
+
+test('CSS selectors are not duplicated within the same cascade context', () => {
+  const seen = new Set();
+  for (const { selector, context } of listCssRulesByContext(css)) {
+    const key = context + String.fromCharCode(0) + selector;
+    assert.equal(seen.has(key), false, 'duplicate selector "' + selector + '" in ' + (context || 'base stylesheet'));
+    seen.add(key);
   }
 });
