@@ -2,6 +2,13 @@ name: Refresh source documentation snapshots
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/refresh-source-docs.yml'
+      - 'scripts/**'
+      - 'data/components.yaml'
+      - 'schemas/**'
 
 permissions:
   contents: write
