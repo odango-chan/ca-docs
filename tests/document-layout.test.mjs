@@ -225,6 +225,7 @@ test('CSS selectors are not duplicated within the same cascade context', () => {
 test('architecture and evaluation overview pages use the available content width', () => {
   assert.match(layout, /'docs-article-wide': wide/);
   assert.match(css, /\.docs-article\.docs-article-wide \{\s*width: 100%;\s*max-width: none;\s*\}/);
+  assert.match(css, /\.docs-article\.docs-article-wide \.home-hero p \{\s*max-width: none;\s*\}/, 'wide overview hero copy must not retain the narrow 63ch cap');
   for (const [name, source] of [
     ['Chinese architecture overview', architecturePage],
     ['English architecture overview', architecturePageEn],
