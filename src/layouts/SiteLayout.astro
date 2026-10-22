@@ -1,10 +1,9 @@
 ---
 import '../styles/global.css';
-interface Props { title: string; description?: string; lang?: 'zh' | 'en'; wide?: boolean; }
+interface Props { title: string; description?: string; lang?: 'zh' | 'en'; }
 const {
   title,
   lang = 'zh',
-  wide = false,
   description = lang === 'zh'
     ? 'Sandbox 平台架构、组件职责、可靠性评估与公开接口文档。'
     : 'Sandbox platform architecture, component ownership, reliability evaluation, and public interface documentation.',
@@ -122,7 +121,7 @@ const isActive = (path: string) => normalizedPath.replace(/\/$/, '') === path.re
             <a href="https://github.com/odango-chan/ca-docs">{labels.github} ↗</a>
           </div>
         </aside>
-        <main id="main-content" class="docs-content"><div class:list={{ 'docs-article': true, 'docs-article-wide': wide }}><slot /></div></main>
+        <main id="main-content" class="docs-content"><div class="docs-article"><slot /></div></main>
       </div>
     )}
     <footer class="site-footer">
