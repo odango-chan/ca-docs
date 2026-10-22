@@ -35,7 +35,8 @@ This is a repeatable **manual visual check** for the published site. It compleme
 ## Checklist at each relevant page and viewport
 
 - [ ] Page title is not artificially narrowed by a Latin `ch` width cap; Chinese and English headings wrap naturally.
-- [ ] Main article uses the available content column. The paragraph/list line length remains comfortable without narrowing the entire Markdown wrapper.
+- [ ] All pages use the shared outer gutter and main-column rules; a page does not become narrower because it uses a different template or has a special `wide` flag.
+- [ ] Structural blocks (tables, diagrams, code blocks, reading lists) use the available content column. Long-form paragraph/list measures are controlled separately and account for Chinese versus English typography.
 - [ ] Tables and code blocks can scroll horizontally when their intrinsic width exceeds the viewport; the whole page does not gain unintended horizontal overflow.
 - [ ] Markdown headings, lists, blockquotes, links, and source/version notes have clear spacing and hierarchy.
 - [ ] Desktop navigation and sidebar do not collide with the article. At narrow widths, navigation remains usable and the sidebar changes to the compact layout.
