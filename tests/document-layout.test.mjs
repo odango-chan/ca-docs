@@ -5,6 +5,11 @@ import test from 'node:test';
 
 const root = process.cwd();
 const css = fs.readFileSync(path.join(root, 'src/styles/global.css'), 'utf8');
+const layout = fs.readFileSync(path.join(root, 'src/layouts/SiteLayout.astro'), 'utf8');
+const architecturePage = fs.readFileSync(path.join(root, 'src/pages/architecture/system.astro'), 'utf8');
+const architecturePageEn = fs.readFileSync(path.join(root, 'src/pages/en/architecture/system.astro'), 'utf8');
+const benchmarkPage = fs.readFileSync(path.join(root, 'src/pages/benchmark/index.astro'), 'utf8');
+const benchmarkPageEn = fs.readFileSync(path.join(root, 'src/pages/en/benchmark/index.astro'), 'utf8');
 
 function listCssRulesByContext(source) {
   const withoutComments = source.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -213,5 +218,19 @@ test('CSS selectors are not duplicated within the same cascade context', () => {
     const key = context + String.fromCharCode(0) + selector;
     assert.equal(seen.has(key), false, 'duplicate selector "' + selector + '" in ' + (context || 'base stylesheet'));
     seen.add(key);
+  }
+});
+
+
+test('architecture and evaluation overview pages use the available content width', () => {
+  assert.match(layout, /'docs-article-wide': wide/);
+  assert.match(css, /\.docs-article\.docs-article-wide \{\s*width: 100%;\s*max-width: none;\s*\}/);
+  for (const [name, source] of [
+    ['Chinese architecture overview', architecturePage],
+    ['English architecture overview', architecturePageEn],
+    ['Chinese Benchmark overview', benchmarkPage],
+    ['English Benchmark overview', benchmarkPageEn],
+  ]) {
+    assert.match(source, /<SiteLayout[^>]*wide=\{true\}/s, name + ' must opt into the wide article layout');
   }
 });

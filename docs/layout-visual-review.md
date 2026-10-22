@@ -14,8 +14,9 @@ This is a repeatable **manual visual check** for the published site. It compleme
 | Page | What it covers |
 | --- | --- |
 | `/` and `/en/` | Chinese and English homepage headings, reading list, component index table |
+| `/architecture/system/` and `/en/architecture/system/` | Wide architecture overview, layer diagram, reading paths, and available content-column width |
 | `/components/sandbox/` and `/en/components/sandbox/` | Long owner-published Markdown, Chinese/English headings, prose, lists, tables, and code blocks |
-| `/benchmark/` and `/en/benchmark/` | Benchmark overview, flow diagram/code block, reading links |
+| `/benchmark/` and `/en/benchmark/` | Wide Benchmark overview, flow diagram/code block, reading links |
 | `/components/ca-benchmarks/` and `/en/components/ca-benchmarks/` | Owner Markdown and asset semantics |
 | `/components/ca-benchmark-engine/` and `/en/components/ca-benchmark-engine/` | Execution lifecycle, result semantics, longer technical sections |
 | `/api/` and `/en/api/` | API overview and document index |
