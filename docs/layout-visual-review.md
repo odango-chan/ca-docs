@@ -38,6 +38,8 @@ This is a repeatable **manual visual check** for the published site. It compleme
 - [ ] All pages use the shared outer gutter and main-column rules; a page does not become narrower because it uses a different template or has a special `wide` flag.
 - [ ] Structural blocks (tables, diagrams, code blocks, reading lists) use the available content column. Long-form paragraph/list measures are controlled separately and account for Chinese versus English typography.
 - [ ] Tables and code blocks can scroll horizontally when their intrinsic width exceeds the viewport; the whole page does not gain unintended horizontal overflow.
+- [ ] Homepage and documentation titles share the same responsive type scale; section headings and vertical rhythm remain consistent across page families.
+- [ ] Inline code, fenced code blocks, and tables use the same neutral-green visual treatment on overview and reference pages.
 - [ ] Markdown headings, lists, blockquotes, links, and source/version notes have clear spacing and hierarchy.
 - [ ] Desktop navigation and sidebar do not collide with the article. At narrow widths, navigation remains usable and the sidebar changes to the compact layout.
 - [ ] The header does not wrap navigation into an accidental second row; at medium widths, horizontal scrolling behaves intentionally.
