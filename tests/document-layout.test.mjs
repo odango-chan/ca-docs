@@ -222,16 +222,30 @@ test('CSS selectors are not duplicated within the same cascade context', () => {
 });
 
 
-test('architecture and evaluation overview pages use the available content width', () => {
-  assert.match(layout, /'docs-article-wide': wide/);
-  assert.match(css, /\.docs-article\.docs-article-wide \{\s*width: 100%;\s*max-width: none;\s*\}/);
-  assert.match(css, /\.docs-article\.docs-article-wide \.home-hero p \{\s*max-width: none;\s*\}/, 'wide overview hero copy must not retain the narrow 63ch cap');
+test('all documentation pages share one content-column width system', () => {
+  assert.match(layout, /class="docs-article"/);
+  assert.doesNotMatch(layout, /wide\??:\s*boolean|docs-article-wide/);
+  assert.match(css, /\.docs-article \{ width: 100%; min-width: 0; \}/);
+  assert.match(css, /\.docs-frame \{ width: min\(var\(--site-max-width\), calc\(100% - var\(--page-gutter\) - var\(--page-gutter\)\)\);[^}]*grid-template-columns: var\(--sidebar-width\) minmax\(0,1fr\);[^}]*gap: var\(--layout-gap\); \}/);
+  assert.match(css, /\.home-main \{ width: min\(var\(--content-max-width\), calc\(100% - var\(--page-gutter\) - var\(--page-gutter\)\)\)/);
+  assert.match(css, /\.header-inner \{ width: min\(var\(--site-max-width\), calc\(100% - var\(--page-gutter\) - var\(--page-gutter\)\)\)/);
+  assert.match(css, /\.footer-inner \{ width: min\(var\(--site-max-width\), calc\(100% - var\(--page-gutter\) - var\(--page-gutter\)\)\)/);
+  assert.doesNotMatch(css, /\.docs-article\s*\{\s*width:\s*min\(100%,\s*940px\)/);
   for (const [name, source] of [
     ['Chinese architecture overview', architecturePage],
     ['English architecture overview', architecturePageEn],
     ['Chinese Benchmark overview', benchmarkPage],
     ['English Benchmark overview', benchmarkPageEn],
   ]) {
-    assert.match(source, /<SiteLayout[^>]*wide=\{true\}/s, name + ' must opt into the wide article layout');
+    assert.doesNotMatch(source, /wide=\{true\}/, name + ' must not need a page-specific width exception');
   }
+});
+
+test('overview copy uses the full shared content measure while long-form prose remains readable', () => {
+  assert.match(css, /\.home-hero p \{ max-width: none;/);
+  assert.match(css, /\.home-section > p \{ max-width: none;/);
+  assert.match(css, /--reading-width: 72ch;/);
+  assert.match(css, /html\[lang="zh-CN"\] \{ --reading-width: 44em; \}/);
+  assert.match(css, /\.docs-article \.prose p, \.docs-article \.prose li \{ max-width: var\(--reading-width\); \}/);
+  assert.match(css, /\.docs-article \.section p, \.docs-article \.section li \{ max-width: var\(--reading-width\); \}/);
 });
