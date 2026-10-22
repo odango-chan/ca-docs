@@ -249,3 +249,21 @@ test('overview copy uses the full shared content measure while long-form prose r
   assert.match(css, /\.docs-article \.prose p, \.docs-article \.prose li \{ max-width: var\(--reading-width\); \}/);
   assert.match(css, /\.docs-article \.section p, \.docs-article \.section li \{ max-width: var\(--reading-width\); \}/);
 });
+
+
+test('homepage and documentation headings share a typography scale', () => {
+  assert.match(css, /--page-title-size: clamp\(2rem, 3\.8vw, 3\.15rem\);/);
+  assert.match(css, /--section-title-size: clamp\(1\.35rem, 2\.4vw, 1\.7rem\);/);
+  assert.match(css, /\.docs-article h1 \{[^}]*font-size: var\(--page-title-size\)/);
+  assert.match(css, /\.home-hero h1 \{[^}]*font-size: var\(--page-title-size\)/);
+  assert.match(css, /\.docs-article h2 \{[^}]*font-size: var\(--section-title-size\)/);
+  assert.match(css, /\.home-section h2 \{[^}]*font-size: var\(--section-title-size\)/);
+  assert.match(css, /html \{ --page-title-size: clamp\(1\.85rem, 7vw, 2\.35rem\);[^}]*--section-space: 1\.2rem;/);
+});
+
+test('code blocks and component tables use the shared document treatment', () => {
+  assert.match(css, /pre \{[\s\S]*?border: 1px solid #343c35;[\s\S]*?border-radius: var\(--radius-md\);[\s\S]*?background: #202722;/);
+  assert.match(css, /\.component-table \{[^}]*border: 0; border-top: 1px solid var\(--line\); background: transparent;/);
+  assert.match(css, /\.component-table th \{ color: #5b655b; background: #eff0eb; font-size: \.69rem; letter-spacing: \.05em; font-weight: 750; \}/);
+  assert.match(css, /\.docs-article th \{ background: #eff0eb; color: #5b655b; font-size: \.69rem; letter-spacing: \.05em; font-weight: 750; \}/);
+});
