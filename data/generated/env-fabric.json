@@ -7,8 +7,8 @@
   "source": {
     "repository": "odango-chan/env-fabric",
     "ref": "main",
-    "commit": "a1aa5d23c7a7f69ba839c1cb0ec0a0b6fb564e01",
-    "commitDate": "2026-10-27T08:30:43Z",
+    "commit": "cb3b884197221c8534d6d518ffcdff16a929fca6",
+    "commitDate": "2026-10-29T03:48:27Z",
     "private": true,
     "publicDocsManifest": "docs/public-docs.yaml"
   },
