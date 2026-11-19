@@ -1,19 +1,12 @@
 ---
-import fs from 'node:fs';
-import path from 'node:path';
-import yaml from 'js-yaml';
 import SiteLayout from '../../../../layouts/SiteLayout.astro';
+import { getOpenApiSources, loadPublicCatalog } from '../../../../lib/public-catalog';
 
 export function getStaticPaths() {
-  const registry = yaml.load(fs.readFileSync('data/components.yaml', 'utf8'));
   const paths = [];
-  for (const component of registry.components || []) {
-    if (component.status !== 'active') continue;
-    const snapshotPath = path.resolve('data/generated', component.id + '.json');
-    if (!fs.existsSync(snapshotPath)) continue;
-    const snapshot = JSON.parse(fs.readFileSync(snapshotPath, 'utf8'));
-    for (const source of snapshot.sources || []) {
-      if (source.kind !== 'openapi' || !source.rawPublicPath) continue;
+  for (const { component, snapshot } of loadPublicCatalog()) {
+    for (const source of getOpenApiSources(snapshot)) {
+      if (!source.rawPublicPath) continue;
       paths.push({
         params: { component: component.id, api: source.role },
         props: { component, source, snapshot },
@@ -44,7 +37,7 @@ const ownerTitle = component.title?.en || component.id;
   <section class="section">
     <div class="source-note">
       Owner: <code>{component.repository}</code> · Role: <code>{source.role}</code> ·
-      Commit: <code>{snapshot.source.commit}</code> · SHA-256: <code>{source.sha256}</code>
+      Commit: <code>{source.releaseId ? source.releaseId : snapshot.source.commit}</code> · SHA-256: <code>{source.sha256}</code>
     </div>
   </section>
   <section class="section scalar-shell">
