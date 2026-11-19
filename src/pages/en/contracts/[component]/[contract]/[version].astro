@@ -59,7 +59,11 @@ const releaseRecordUrl = base + release.releaseRecord.publicPath.replace(/^\/+/,
             <strong>{artifact.sourcePath}</strong>
             <span>{artifact.kind} · {artifact.mediaType} · SHA-256 {artifact.sha256}</span>
           </div>
-          <span>Download →</span>
+          <span>
+            {artifact.summaryRole && artifact.kind === 'json-schema' && <a href={href('/en/schemas/' + component.id + '/' + artifact.summaryRole + '/')}>Schema Explorer</a>}
+            {artifact.summaryRole && artifact.kind === 'openapi' && <a href={href('/en/api/' + component.id + '/' + artifact.summaryRole + '/')}>Scalar Reference</a>}
+            <a href={base + artifact.publicPath.replace(/^\/+/, '')}>Download →</a>
+          </span>
         </a>
       ))}
     </div>
