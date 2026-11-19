@@ -21,9 +21,7 @@ function splitRepository(value) {
 
 async function branchHead(component) {
   const { owner, repo } = splitRepository(component.repository);
-  const ref = component.id === 'ca-5gc-sim'
-    ? (process.env.CA_5GC_SIM_REF || component.ref || 'main')
-    : (component.ref || 'main');
+  const ref = component.ref || 'main';
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/branches/${encodeURIComponent(ref)}`,
     { headers },
@@ -42,6 +40,12 @@ for (const component of (registry.components || []).filter((item) => item.status
   const snapshotPath = `data/generated/${component.id}.json`;
   const snapshot = JSON.parse(await fs.readFile(snapshotPath, 'utf8'));
   const head = await branchHead(component);
+  if (snapshot.schemaVersion !== 'connectionagent.io/ca-docs-snapshot/v2') {
+    throw new Error(`${component.id}: snapshot is not CA Docs v2`);
+  }
+  if (snapshot.component !== component.id) {
+    throw new Error(`${component.id}: snapshot component identity does not match registry`);
+  }
   if (snapshot.source?.repository !== component.repository) {
     throw new Error(
       `${component.id}: snapshot repository ${snapshot.source?.repository || '(missing)'} ` +
