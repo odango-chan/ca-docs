@@ -7,6 +7,7 @@ Sandbox 平台的公开文档门户，提供平台架构、组件职责、Benchm
 
 ## 从哪里开始
 
+- **[CA Docs 2.0 架构设计与仓库改造计划](docs/ca-docs-2.0-architecture.zh-CN.md)**：CA 生态统一文档与契约门户的目标架构、版本模型、OpenAPI / Schema 可视化和分阶段迁移计划。
 - **[Sandbox 总体架构](https://odango-chan.github.io/ca-docs/architecture/system/)**：平台分层、组件职责、事实权威，以及真实 5GC 请求的跨组件路径。
 - **[Sandbox 源仓架构详解](https://odango-chan.github.io/ca-docs/components/sandbox/)**：由 Sandbox 治理仓维护的完整架构与 Benchmark 框架说明。
 - **[Benchmark 与可靠性评估](https://odango-chan.github.io/ca-docs/benchmark/)**：CUT、冻结任务、执行尝试、证据有效性和 Verdict 的边界。
