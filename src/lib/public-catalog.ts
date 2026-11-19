@@ -14,3 +14,36 @@ export function loadPublicCatalog() {
   }
   return entries;
 }
+
+function getPublishedSources(snapshot, kind) {
+  const living = (snapshot.sources || [])
+    .filter((source) => source.kind === kind)
+    .map((source) => ({ ...source, schemaGroup: 'living' }));
+  const released = [];
+  for (const release of snapshot.releases || []) {
+    for (const contract of release.contracts || []) {
+      for (const artifact of contract.artifacts || []) {
+        if (artifact.kind !== kind || !artifact.summary) continue;
+        released.push({
+          ...artifact.summary,
+          rawPublicPath: artifact.publicPath,
+          sha256: artifact.sha256,
+          releaseId: release.releaseId,
+          contractId: contract.contractId,
+          contractVersion: contract.version,
+          lifecycleStatus: contract.lifecycleStatus,
+          schemaGroup: contract.contractId + '@' + contract.version,
+        });
+      }
+    }
+  }
+  return [...living, ...released];
+}
+
+export function getOpenApiSources(snapshot) {
+  return getPublishedSources(snapshot, 'openapi');
+}
+
+export function getJsonSchemaSources(snapshot) {
+  return getPublishedSources(snapshot, 'json-schema');
+}
