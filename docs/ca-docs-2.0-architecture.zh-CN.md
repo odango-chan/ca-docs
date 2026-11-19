@@ -263,7 +263,7 @@ CA Docs 的 manifest 解决“允许公开什么、在哪里、属于哪个契�
 
 ### 6.1 技术方案
 
-在现有 Astro 5 站点集成官方 Astro 组件 `@scalar/astro`。
+在现有 Astro 5 站点使用 Scalar 官方 standalone ESM 集成：固定 `@scalar/api-reference@1.79.0`，由静态页面加载，不增加运行时 API 服务或额外 npm 依赖。该方案使用 Scalar 官方 `createApiReference`，OpenAPI 文件从 CA Docs 同源静态快照读取。
 
 Scalar 只负责 OpenAPI / Swagger 描述的 HTTP API。MCP、Provider 进程协议、NDJSON、Go SDK 和其他非 OpenAPI 契约必须使用对应的协议契约页面与 Schema 展示，不能为了统一 UI 而伪造 OpenAPI。3GPP SBI OpenAPI 只有在 Owner 明确授权公开、且版本来源和规范版权边界清楚时才进入 API Reference。
 
@@ -305,7 +305,9 @@ API 页面包含：
 
 ### 6.3 API 文档安全规则
 
-- 默认只展示，不默认启用 Try It；
+- 默认隐藏 Test Request、Client、Developer Tools；禁用 Scalar Agent、Telemetry 和认证状态持久化；
+- 默认只展示，不启用 Try It；
+- 当前 Scalar ESM 从固定版本 CDN 加载；后续可将同一版本的静态资源 vendoring 到站点以消除运行时 CDN 依赖；
 - 不把内网、localhost、真实生产 NF 地址作为公开调用目标；
 - 只有明确配置公共测试环境、CORS 和允许的 server URL 后，才启用 Try It；
 - 不代理用户的 API 请求，不在 CA Docs 存储业务凭据；
@@ -324,7 +326,7 @@ API 页面包含：
 
 ### 7.1 Schema Explorer
 
-保留每个发布版本的 JSON Schema 原文，并提供只读结构化视图：
+保留每个发布版本的 JSON Schema 原文，并提供只读结构化视图。当前页面按 Owner / source role 生成字段目录，并支持同一 Owner 发布闭包内的相对文件引用跳转；
 
 - 字段路径、类型和描述；
 - required / optional；
@@ -477,14 +479,14 @@ ca-docs/
 
 ### Phase 3 — API 与 Schema 可视化
 
-- [ ] 集成固定版本的 `@scalar/astro`
-- [ ] 按 API Contract ID / Version 生成 API 页面
-- [ ] Scalar 加载 CA Docs 本地发布的 OpenAPI 文件
-- [ ] OpenAPI 3.0/3.1 校验和错误定位
-- [ ] 默认关闭 Try It，提供明确的公共测试环境 allowlist
-- [ ] 实现 JSON Schema Explorer
-- [ ] 实现原始文件下载、版本切换和 provenance 展示
-- [ ] 验证 GitHub Pages base path、深链接和移动端布局
+- [x] 集成固定版本的 Scalar standalone ESM（`@scalar/api-reference@1.79.0`）
+- [x] 按 Owner / source role 生成 Scalar API 页面
+- [x] Scalar 加载 CA Docs 同源、按 commit 固定的 OpenAPI 原文
+- [ ] OpenAPI 3.0/3.1 严格校验和错误定位
+- [x] 默认关闭 Test Request、Client、Developer Tools 和 Agent
+- [x] 实现 JSON Schema Explorer 与 Owner 内相对引用跳转
+- [x] 实现原始文件下载、版本 provenance 展示
+- [ ] 使用真实 Owner v1alpha2 快照验收 GitHub Pages base path、深链接和移动端布局
 
 ### Phase 4 — 首批 Owner 接入
 
@@ -498,6 +500,8 @@ ca-docs/
 8. `ca-agent-demo`、`env-openamsm`：只承载经授权的示例、集成说明和协议参考，不取代共享契约 Owner。
 
 ### Phase 5 — 生态关系与完善
+
+Contract Catalog、Owner Releases 和 Schema Explorer 的基础只读页面已在 CA Docs 2.0 初始实现中建立；本阶段继续完善显式契约关系、版本差异和治理信息。
 
 - [ ] Capability / Callable / Owner / API / Schema 关联导航
 - [ ] 跨版本差异摘要
