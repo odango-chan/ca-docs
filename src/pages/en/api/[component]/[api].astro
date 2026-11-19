@@ -37,7 +37,7 @@ const ownerTitle = component.title?.en || component.id;
   <section class="section">
     <div class="source-note">
       Owner: <code>{component.repository}</code> · Role: <code>{source.role}</code> ·
-      Commit: <code>{source.releaseId ? source.releaseId : snapshot.source.commit}</code> · SHA-256: <code>{source.sha256}</code>
+      Commit: <code>{source.sourceCommit || snapshot.source.commit}</code> · SHA-256: <code>{source.sha256}</code>
     </div>
   </section>
   <section class="section scalar-shell">
