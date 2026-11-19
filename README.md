@@ -87,4 +87,4 @@ npm run build
 CA_DOCS_SOURCE_TOKEN=... CA_DOCS_SYNC_STRICT=1 npm run sync
 ```
 
-仓库名称仍为 `ca-docs`，但公开站的产品定位是 **Sandbox Docs**。
+当前公开站仍以 **Sandbox Docs** 定位运行；CA Docs 2.0 品牌切换将在架构评审通过后实施。
