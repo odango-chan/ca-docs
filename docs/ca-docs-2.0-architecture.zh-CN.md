@@ -215,15 +215,16 @@ sources:
     publish: [metadata, body]
 
 releases:
-  - releaseId: ca-sl-v1alpha5
+  - releaseId: ca-skills-release-record-v1alpha5
     releaseRecord:
       path: docs/releases/ca-sl-v1alpha5.md
-    source:
-      ref: 0abfd0e1ab99f481a4ae01f3f47efc54783dd5e5
+      ref: <release-record-commit>
     contracts:
       - contractId: ca-sl
         version: v1alpha5
         lifecycleStatus: FROZEN
+        source:
+          ref: 0abfd0e1ab99f481a4ae01f3f47efc54783dd5e5
         artifacts:
           - kind: specification
             path: docs/skill-language-spec.v1alpha5.zh-CN.md
@@ -236,8 +237,9 @@ releases:
 - `releaseId` 是 Owner 发布记录的唯一标识，不等同于 Contract ID；
 - `contractId + version` 标识机器契约或规范的版本身份；
 - 一个 Owner Release 可以包含多个独立版本的契约；
+- 每个 Contract Version 分别固定自己的 `source.ref`，因此同一个 Owner Release 可以引用不同的历史 commit；
+- `releaseRecord.ref` 和每个 `source.ref` 都必须解析为完整 commit SHA；
 - 一个契约版本可以由多个文件组成；
-- `source.ref` 必须解析为完整 commit SHA；
 - `releaseRecord` 是 Owner 的人类可读发布记录；
 - `lifecycleStatus` 与 `qualificationStatus` 分开；
 - `publish` 是公开授权白名单，不是“自动公开全部字段”。
