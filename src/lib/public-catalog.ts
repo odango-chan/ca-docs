@@ -32,6 +32,7 @@ function getPublishedSources(snapshot, kind) {
           contractId: contract.contractId,
           contractVersion: contract.version,
           lifecycleStatus: contract.lifecycleStatus,
+          sourceCommit: contract.sourceCommit,
           schemaGroup: contract.contractId + '@' + contract.version,
         });
       }
