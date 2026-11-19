@@ -68,4 +68,17 @@ const releaseRecordUrl = base + release.releaseRecord.publicPath.replace(/^\/+/,
       ))}
     </div>
   </section>
+
+  {contract.artifacts.filter((artifact: any) => artifact.summary?.kind === 'specification').map((artifact: any) => (
+    <section class="section">
+      <div class="section-head"><div><span class="eyebrow">Normative specification</span><h2>{artifact.summary.title}</h2></div></div>
+      <article class="markdown-body" set:html={artifact.summary.html}></article>
+    </section>
+  ))}
+  {contract.artifacts.filter((artifact: any) => artifact.summary?.kind === 'other').map((artifact: any) => (
+    <section class="section">
+      <div class="section-head"><div><span class="eyebrow">Published JSON artifact</span><h2>{artifact.summary.title}</h2></div></div>
+      <pre><code>{artifact.summary.text}</code></pre>
+    </section>
+  ))}
 </SiteLayout>
