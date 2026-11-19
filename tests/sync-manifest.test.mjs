@@ -226,6 +226,10 @@ test('released contract artifacts are pinned, hashed and append-only public file
     async (sourcePath, sourceRef) => files.get(sourcePath + '@' + sourceRef),
   );
   assert.equal(result.snapshot.releases[0].contracts[0].contractId, 'network-observation');
+  const releasedSchema = result.snapshot.releases[0].contracts[0].artifacts[0];
+  assert.equal(releasedSchema.summary.kind, 'json-schema');
+  assert.equal(releasedSchema.summary.rawPublicPath, releasedSchema.publicPath);
+  assert.ok(releasedSchema.summaryRole);
   assert.equal(result.publicFiles.length, 3);
   assert.ok(result.publicFiles.some((file) => file.path.endsWith('/provenance.json')));
   assert.ok(result.publicFiles.some((file) => file.path.endsWith('/network-observation.schema.yaml')));
