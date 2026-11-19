@@ -54,7 +54,7 @@ const releaseRecordUrl = base + release.releaseRecord.publicPath.replace(/^\/+/,
     <div class="section-head"><div><span class="eyebrow">Immutable artifacts</span><h2>Contract files</h2></div></div>
     <div class="doc-index">
       {contract.artifacts.map((artifact: any) => (
-        <a class="doc-row" href={base + artifact.publicPath.replace(/^\/+/, '')}>
+        <div class="doc-row">
           <div>
             <strong>{artifact.sourcePath}</strong>
             <span>{artifact.kind} · {artifact.mediaType} · SHA-256 {artifact.sha256}</span>
@@ -64,7 +64,7 @@ const releaseRecordUrl = base + release.releaseRecord.publicPath.replace(/^\/+/,
             {artifact.summaryRole && artifact.kind === 'openapi' && <a href={href('/en/api/' + component.id + '/' + artifact.summaryRole + '/')}>Scalar Reference</a>}
             <a href={base + artifact.publicPath.replace(/^\/+/, '')}>Download →</a>
           </span>
-        </a>
+        </div>
       ))}
     </div>
   </section>
