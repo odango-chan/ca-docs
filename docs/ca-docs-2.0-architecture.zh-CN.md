@@ -196,6 +196,8 @@ Living Documentation 的输出仍可写入 `data/generated/<component>.json`，�
 
 不实现 v1alpha1 解析器、双版本分支或旧格式 fallback。所有已接入 Owner 必须在启用新同步管线前一次性迁移到 v1alpha2；缺少或不符合 v1alpha2 的 manifest 直接阻止该 Owner 的同步。迁移期间不允许旧格式数据被当作新格式输入，也不允许把缺失的 `releases` 推断为“全部公开”。
 
+这里的 v1alpha1 / v1alpha2 指 **CA Docs 的 PublicDocsManifest 格式版本**，不影响 Owner 自己发布的契约版本。例如 `IngressCatalog v1alpha1` 仍是一个独立、有效的正式契约版本，不能因为 Manifest 不再兼容 v1alpha1 而删除或改写。
+
 ### 5.2 发布声明示意
 
 以下是目标结构示意，不是对现有 Owner 文件的直接复制：
