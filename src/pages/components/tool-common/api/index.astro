@@ -8,11 +8,12 @@ const fieldDetail=(f:any)=>{
  return f.description || `类型：${f.type}`;
 };
 const surfaces=[['provider',data.api.provider],['control',data.api.control]] as const;
+const scalarSources=((data as any).sources ?? []).filter((source:any)=>source.kind==='openapi' && source.rawPublicPath);
 ---
 <SiteLayout title="tool-common HTTP API" lang="zh">
 <section class="hero"><span class="eyebrow">tool-common / HTTP API</span><h1>HTTP API</h1>
 <p class="lede">Provider 是 Runtime/Host 的只读接口；Control 是可信配置/reset 接口。两者监听地址和路由都分开。</p>
-<div class="page-tabs"><a class="primary-tab" href={href('/components/tool-common/api/')}>HTTP API</a><a href={href('/components/tool-common/subject-identity/')}>Subject Identity</a><a href={href('/components/tool-common/boundaries/')}>职责边界</a><a href={href('/components/tool-common/')}>概览</a></div></section>
+<div class="page-tabs"><a class="primary-tab" href={href('/components/tool-common/api/')}>HTTP API</a><a href={href('/components/tool-common/subject-identity/')}>Subject Identity</a><a href={href('/components/tool-common/boundaries/')}>职责边界</a><a href={href('/components/tool-common/')}>概览</a>{scalarSources.map((source:any)=><a href={href('/api/tool-common/'+source.role+'/')}>Scalar · {source.role}</a>)}</div></section>
 {surfaces.map(([key,surface])=><section class="section" id={key}><div class="section-head"><div><span class="eyebrow">{key === 'provider' ? 'Provider listener' : 'Control listener'}</span><h2>{surface.title}</h2></div><p>{surface.description}</p></div>
 {key === 'control' && <div class="notice"><strong>可信控制面，不是 Agent Tool。</strong></div>}
 <div class="api-list">{surface.routes.map((route:any)=>{const req=route.request?.schema?surface.schemas[route.request.schema]:null;return <article class="api-card"><div class="api-heading"><span class:list={['method-badge',route.method.toLowerCase()]}>{route.method}</span><code class="api-path">{route.path}</code></div><h3>{route.summary}</h3><div class="api-meta"><span>operationId</span><code>{route.operationId}</code></div>
