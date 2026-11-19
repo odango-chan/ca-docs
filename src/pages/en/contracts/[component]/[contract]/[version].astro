@@ -1,0 +1,67 @@
+---
+import SiteLayout from '../../../../../layouts/SiteLayout.astro';
+import { loadPublicCatalog } from '../../../../../lib/public-catalog';
+
+export function getStaticPaths() {
+  const paths = [];
+  for (const { component, snapshot } of loadPublicCatalog()) {
+    for (const release of snapshot.releases || []) {
+      for (const contract of release.contracts || []) {
+        paths.push({
+          params: {
+            component: component.id,
+            contract: contract.contractId,
+            version: contract.version,
+          },
+          props: { component, release, contract },
+        });
+      }
+    }
+  }
+  return paths;
+}
+
+const { component, release, contract } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const href = (value: string) => base.replace(/\/?$/, '/') + value.replace(/^\/+/, '');
+const ownerTitle = component.title?.en || component.id;
+const provenanceUrl = base + contract.provenancePath.replace(/^\/+/, '');
+const releaseRecordUrl = base + release.releaseRecord.publicPath.replace(/^\/+/, '');
+---
+<SiteLayout title={contract.contractId + ' ' + contract.version} lang="en">
+  <section class="hero">
+    <span class="eyebrow">{ownerTitle} / Released Contract</span>
+    <h1>{contract.contractId}</h1>
+    <p class="lede">Contract version <code>{contract.version}</code> · Lifecycle <strong>{contract.lifecycleStatus}</strong></p>
+    <div class="page-tabs">
+      <a href={href('/en/contracts/')}>Contract Catalog</a>
+      <a href={href('/en/releases/')}>Owner Releases</a>
+      <a class="primary-tab" href={provenanceUrl}>Provenance JSON</a>
+    </div>
+  </section>
+  <section class="section">
+    <div class="stats">
+      <div class="stat"><strong>{contract.artifacts.length}</strong><span>Artifacts</span></div>
+      <div class="stat"><strong>{contract.sourceCommit.slice(0, 8)}</strong><span>Source Commit</span></div>
+    </div>
+    <p class="source-note">
+      Owner: <code>{component.repository}</code> · Release: <code>{release.releaseId}</code> ·
+      Source Commit: <code>{contract.sourceCommit}</code>
+    </p>
+    <p class="source-note">Owner Release Record: <a href={releaseRecordUrl}>View release record</a></p>
+  </section>
+  <section class="section">
+    <div class="section-head"><div><span class="eyebrow">Immutable artifacts</span><h2>Contract files</h2></div></div>
+    <div class="doc-index">
+      {contract.artifacts.map((artifact: any) => (
+        <a class="doc-row" href={base + artifact.publicPath.replace(/^\/+/, '')}>
+          <div>
+            <strong>{artifact.sourcePath}</strong>
+            <span>{artifact.kind} · {artifact.mediaType} · SHA-256 {artifact.sha256}</span>
+          </div>
+          <span>Download →</span>
+        </a>
+      ))}
+    </div>
+  </section>
+</SiteLayout>
