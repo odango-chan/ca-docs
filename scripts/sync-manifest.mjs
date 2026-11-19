@@ -661,21 +661,35 @@ export async function buildSnapshot(
   }
 
   const views = buildPresentation(component, sources);
+  const source = {
+    repository: component.repository,
+    ref: context.sourceRef || context.ref,
+    commit: revision.commit,
+    commitDate: revision.commitDate,
+    publicDocsManifest: component.manifest || 'docs/public-docs.yaml',
+    manifestSha256: sha256(manifestText),
+  };
+  if (component.presentation?.semantics?.facts) {
+    source.factSchema = sourceByRole(sources, component.presentation.semantics.facts.sourceRole).path;
+  }
+  if (component.presentation?.semantics?.operations) {
+    source.operationSchema = sourceByRole(sources, component.presentation.semantics.operations.sourceRole).path;
+  }
   const snapshot = {
     schemaVersion: 'connectionagent.io/ca-docs-snapshot/v2',
-    component: manifest.component,
+    component: component.id,
+    sourceComponent: manifest.component,
     title: manifest.title || component.title || { zh: manifest.component, en: manifest.component },
-    source: {
-      repository: component.repository,
-      ref: context.sourceRef || context.ref,
-      commit: revision.commit,
-      commitDate: revision.commitDate,
-      publicDocsManifest: component.manifest || 'docs/public-docs.yaml',
-      manifestSha256: sha256(manifestText),
-    },
+    source,
     sources,
     releases,
-    views,
+    publicDocs: {
+      apiVersion: manifest.apiVersion,
+      kind: manifest.kind,
+      manifest: component.manifest || 'docs/public-docs.yaml',
+      contracts: views.contracts,
+    },
+    ...views,
     sync: { mode: 'published', detail: null },
   };
   return { snapshot, publicFiles: [...publicFiles.values()] };
