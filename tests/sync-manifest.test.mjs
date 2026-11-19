@@ -252,7 +252,11 @@ test('released contract artifacts are pinned, hashed and append-only public file
   assert.match(releasedVectors.summary.text, /"id": "one"/);
   assert.match(result.snapshot.releases[0].releaseRecord.html, /Release record body/);
   assert.equal(result.publicFiles.length, 5);
-  assert.ok(result.publicFiles.some((file) => file.path.endsWith('/provenance.json')));
+  const provenanceFile = result.publicFiles.find((file) => file.path.endsWith('/provenance.json'));
+  const provenance = JSON.parse(provenanceFile.content);
+  assert.equal(provenance.artifacts.length, 3);
+  assert.equal('summary' in provenance.artifacts[0], false);
+  assert.equal(result.snapshot.releases[0].contracts[0].provenanceSha256, provenanceFile.sha256);
   assert.ok(result.publicFiles.some((file) => file.path.endsWith('/network-observation.schema.yaml')));
   assert.ok(result.publicFiles.every((file) => /^[0-9a-f]{64}$/.test(file.sha256)));
 });
