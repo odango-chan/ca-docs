@@ -673,6 +673,7 @@ export async function buildSnapshot(
         lifecycleStatus: contract.lifecycleStatus,
         sourceCommit: contract.source.ref,
         provenancePath: '/' + contractRoot + '/provenance.json',
+        provenanceSha256: sha256(provenanceText),
         artifacts: artifactEntries,
       });
     }
