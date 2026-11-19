@@ -34,9 +34,9 @@ properties:
 allOf:
   - anyOf:
       - properties:
-          sources: {minItems: 1}
+          sources: {type: array, minItems: 1}
       - properties:
-          releases: {minItems: 1}
+          releases: {type: array, minItems: 1}
 $defs:
   source:
     type: object
@@ -78,6 +78,7 @@ $defs:
         then:
           properties:
             publish:
+              type: array
               items: {enum: [metadata, implementation-summary]}
       - if:
           properties:
