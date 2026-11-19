@@ -79,6 +79,12 @@
 | `env-5gc-sim` | Private Owner 仓；已有 manifest、OpenAPI、Schema 和实现检查来源 | 沿用现有适配器，迁移到统一发布管线 |
 | `env-fabric` | Private Owner 仓；已在组件注册表中 | 沿用 manifest，增加正式 API/Schema 发布能力 |
 | `ca-provider-5gc` | 当前注册为 planned | 等待 Owner 契约和发布边界明确后接入 |
+| `ca-runtime` | 当前注册为 planned；Private Owner 仓 | 盘点 Runtime API、Procedure、Outcome、Evidence 和部署契约的正式 Owner / Release 身份后接入 |
+| `tool-mcp-gw` | Private Owner 仓；当前组件注册表尚未纳入 | 盘点 MCP Server Tool Catalog、Host Integration Profile 和 SDK 契约后接入 |
+| `ai-gateway` | Public Owner 仓；本轮尚未核对其 Release 与 API 契约清单 | 纳入后续 API / Component 接入审查，不提前假设已有正式 OpenAPI |
+| `ca-mcp` | 组件注册表中为 planned；当前未发现对应已安装仓库 | 先明确仓库和契约 Owner，再纳入 |
+| `ca-agent-demo` | Private 集成示例仓，不作为公共契约 Owner | 只发布经授权的示例、E2E 流程和验收说明；共享契约仍归正式 Owner 仓 |
+| `env-openamsm` | Private 5GC 环境 / NF 集成仓；本轮未盘点公开契约清单 | 只在确认外部协议文档、实现接口和发布权限后纳入 |
 
 **特别注意：** `ca-agent/docs/design/host-artifact-store-v1.md` 当前正文写有 “Accepted for implementation (draft PR)”，而 `ca-client-tools/docs/host-integration.md` 将其描述为 published and pinned。两处状态表述存在冲突。CA Docs 不应自行选择其中一个状态；该契约进入正式目录前必须由 Owner 统一状态、Release Record 和精确 commit。
 
@@ -481,7 +487,9 @@ ca-docs/
 3. `ca-client-tools`：先发布公开架构和集成文档；正式发布后再接入 v1.0.0 对应版本资产；
 4. `ca-agent`：先统一 Host Artifact Store 等跨仓契约状态和发布身份，再显式授权公开；
 5. `tool-common`、`env-fabric`、`env-5gc-sim`：从现有 manifest 迁移到统一发布管线，并保留现有页面；
-6. `ca-provider-5gc`：等 Owner 契约和正式发布身份明确后接入。
+6. `ca-provider-5gc`：等 Owner 契约和正式发布身份明确后接入；
+7. `ca-runtime`、`tool-mcp-gw`、`ai-gateway`：完成 Owner / Release / API 契约盘点后接入；
+8. `ca-agent-demo`、`env-openamsm`：只承载经授权的示例、集成说明和协议参考，不取代共享契约 Owner。
 
 ### Phase 5 — 生态关系与完善
 
