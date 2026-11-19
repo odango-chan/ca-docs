@@ -87,6 +87,7 @@ $defs:
         then:
           properties:
             publish:
+              type: array
               items: {enum: [metadata, body]}
       - if:
           properties:
@@ -95,6 +96,7 @@ $defs:
         then:
           properties:
             publish:
+              type: array
               items: {enum: [metadata, operations, fields, enums, examples, raw]}
       - if:
           properties:
@@ -103,6 +105,7 @@ $defs:
         then:
           properties:
             publish:
+              type: array
               items: {enum: [metadata, fields, enums, examples, raw]}
   release:
     type: object
@@ -182,6 +185,7 @@ $defs:
           properties:
             kind: {const: specification}
             publish:
+              type: array
               contains: {const: render}
           required: [kind, publish]
         then:
@@ -191,6 +195,7 @@ $defs:
           properties:
             kind: {const: other}
             publish:
+              type: array
               contains: {const: render}
           required: [kind, publish]
         then:
@@ -203,4 +208,5 @@ $defs:
         then:
           properties:
             publish:
+              type: array
               items: {const: download}
