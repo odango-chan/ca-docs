@@ -209,14 +209,28 @@ test('released contract artifacts are pinned, hashed and append-only public file
               mediaType: 'application/schema+yaml',
               publish: ['download', 'render'],
             },
+            {
+              kind: 'specification',
+              path: 'docs/network-observation.md',
+              mediaType: 'text/markdown',
+              publish: ['download', 'render'],
+            },
+            {
+              kind: 'other',
+              path: 'contracts/network-observation-vectors.json',
+              mediaType: 'application/json',
+              publish: ['download', 'render'],
+            },
           ],
         },
       ],
     },
   ]);
   const files = new Map([
-    ['docs/releases/fabric-v1.md@' + releaseCommit, '# Fabric contracts v1\n'],
+    ['docs/releases/fabric-v1.md@' + releaseCommit, '# Fabric contracts v1\n\nRelease record body.\n'],
     ['schemas/v1alpha2/network-observation.schema.yaml@' + branchCommit, 'type: object\nproperties: {}\n'],
+    ['docs/network-observation.md@' + branchCommit, '# Network Observation\n\nNormative specification body.\n'],
+    ['contracts/network-observation-vectors.json@' + branchCommit, '{"cases":[{"id":"one"}]}'],
   ]);
   const result = await buildSnapshot(
     component,
@@ -230,7 +244,14 @@ test('released contract artifacts are pinned, hashed and append-only public file
   assert.equal(releasedSchema.summary.kind, 'json-schema');
   assert.equal(releasedSchema.summary.rawPublicPath, releasedSchema.publicPath);
   assert.ok(releasedSchema.summaryRole);
-  assert.equal(result.publicFiles.length, 3);
+  const releasedSpecification = result.snapshot.releases[0].contracts[0].artifacts[1];
+  assert.equal(releasedSpecification.summary.kind, 'specification');
+  assert.match(releasedSpecification.summary.html, /Normative specification body/);
+  const releasedVectors = result.snapshot.releases[0].contracts[0].artifacts[2];
+  assert.equal(releasedVectors.summary.kind, 'other');
+  assert.match(releasedVectors.summary.text, /"id": "one"/);
+  assert.match(result.snapshot.releases[0].releaseRecord.html, /Release record body/);
+  assert.equal(result.publicFiles.length, 5);
   assert.ok(result.publicFiles.some((file) => file.path.endsWith('/provenance.json')));
   assert.ok(result.publicFiles.some((file) => file.path.endsWith('/network-observation.schema.yaml')));
   assert.ok(result.publicFiles.every((file) => /^[0-9a-f]{64}$/.test(file.sha256)));
