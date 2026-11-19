@@ -1,19 +1,20 @@
 ---
 import path from 'node:path';
 import SiteLayout from '../../../layouts/SiteLayout.astro';
-import { loadPublicCatalog } from '../../../lib/public-catalog';
+import { getJsonSchemaSources, loadPublicCatalog } from '../../../lib/public-catalog';
 
 export function getStaticPaths() {
   const paths = [];
   for (const { component, snapshot } of loadPublicCatalog()) {
-    const sources = (snapshot.sources || []).filter((source: any) => source.kind === 'json-schema');
-    const schemaLinks = Object.fromEntries(
-      sources.map((source: any) => [
-        source.path,
-        '/schemas/' + component.id + '/' + source.role + '/',
-      ]),
-    );
+    const sources = getJsonSchemaSources(snapshot);
     for (const source of sources) {
+      const peers = sources.filter((item: any) => item.schemaGroup === source.schemaGroup);
+      const schemaLinks = Object.fromEntries(
+        peers.map((item: any) => [
+          item.path,
+          '/schemas/' + component.id + '/' + item.role + '/',
+        ]),
+      );
       paths.push({
         params: { component: component.id, schema: source.role },
         props: { component, source, snapshot, schemaLinks },
@@ -58,6 +59,7 @@ const ruleText = (rule: any) =>
     <div class="page-tabs">
       <a href={href('/schemas/')}>Schema Catalog</a>
       <a href={href('/components/' + component.id + '/')}>组件文档</a>
+      {source.contractId && <a href={href('/contracts/' + component.id + '/' + source.contractId + '/' + source.contractVersion + '/')}>契约版本</a>}
       {rawUrl && <a class="primary-tab" href={rawUrl}>下载原始 Schema</a>}
     </div>
   </section>
@@ -70,7 +72,7 @@ const ruleText = (rule: any) =>
     </div>
     <p class="source-note">
       Owner：<code>{component.repository}</code> · Role：<code>{source.role}</code> ·
-      Commit：<code>{snapshot.source.commit}</code> · SHA-256：<code>{source.sha256}</code>
+      Commit：<code>{source.sourceCommit || snapshot.source.commit}</code> · SHA-256：<code>{source.sha256}</code>
     </p>
   </section>
 
