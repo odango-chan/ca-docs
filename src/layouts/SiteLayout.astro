@@ -21,6 +21,7 @@ const labels = lang === 'zh'
   ? {
       nav: '主导航', language: '语言', home: '文档首页', architecture: '平台架构',
       governance: '文档来源与治理', sandboxSource: '平台详细架构', benchmark: 'Benchmark 架构', benchmarkAssets: 'Benchmark 资产与用例', benchmarkEngine: '执行生命周期与结果', api: 'API 总览',
+      contracts: '契约目录', schemas: 'Schema 浏览', releases: '发布记录', contractGroup: '契约与 API',
       components: '组件参考', simulator: '5GC 模拟器', simulatorApi: 'HTTP API',
       facts: 'Facts', operations: 'Operations', standalone: '独立运行',
       common: '公共工具契约', commonApi: 'HTTP API', subject: 'Subject Identity',
@@ -32,7 +33,9 @@ const labels = lang === 'zh'
   : {
       nav: 'Main navigation', language: 'Language', home: 'Documentation home',
       architecture: 'Platform architecture', governance: 'Sources & governance', sandboxSource: 'Detailed platform architecture',
-      benchmark: 'Benchmark architecture', benchmarkAssets: 'Benchmark assets and Cases', benchmarkEngine: 'Execution lifecycle and results', api: 'API overview', components: 'Components',
+      benchmark: 'Benchmark architecture', benchmarkAssets: 'Benchmark assets and Cases', benchmarkEngine: 'Execution lifecycle and results', api: 'API overview',
+      contracts: 'Contracts', schemas: 'Schema Explorer', releases: 'Releases', contractGroup: 'Contracts & APIs',
+      components: 'Components',
       simulator: '5GC simulator', simulatorApi: 'HTTP API', facts: 'Facts',
       operations: 'Operations', standalone: 'Standalone',
       common: 'Shared tool contracts', commonApi: 'HTTP API', subject: 'Subject Identity',
@@ -68,6 +71,8 @@ const isActive = (path: string) => normalizedPath.replace(/\/$/, '') === path.re
           <a class:list={{ 'top-link-active': currentPath.includes('/architecture') }} href={pathFor('/architecture/system/')}>{labels.architecture}</a>
           <a class:list={{ 'top-link-active': currentPath.includes('/benchmark') }} href={pathFor('/benchmark/')}>{labels.benchmark}</a>
           <a class:list={{ 'top-link-active': currentPath.includes('/components') }} href={pathFor('/components/ca-5gc-sim/')}>{labels.components}</a>
+          <a class:list={{ 'top-link-active': currentPath.includes('/contracts') || currentPath.includes('/releases') }} href={pathFor('/contracts/')}>{labels.contracts}</a>
+          <a class:list={{ 'top-link-active': currentPath.includes('/schemas') }} href={pathFor('/schemas/')}>{labels.schemas}</a>
           <a class:list={{ 'top-link-active': currentPath.includes('/api') }} href={pathFor('/api/')}>{labels.api}</a>
         </nav>
         <div class="header-tools">
@@ -99,6 +104,12 @@ const isActive = (path: string) => normalizedPath.replace(/\/$/, '') === path.re
           <div class="sidebar-group">
             <p>{labels.componentGroup}</p>
             <a class:list={{ active: isActive('/api') }} href={pathFor('/api/')}>{labels.api}</a>
+          </div>
+          <div class="sidebar-group">
+            <p>{labels.contractGroup}</p>
+            <a class:list={{ active: isActive('/contracts') }} href={pathFor('/contracts/')}>{labels.contracts}</a>
+            <a class:list={{ active: isActive('/releases') }} href={pathFor('/releases/')}>{labels.releases}</a>
+            <a class:list={{ active: isActive('/schemas') }} href={pathFor('/schemas/')}>{labels.schemas}</a>
           </div>
           <div class="sidebar-group">
             <p>{labels.simulatorGroup}</p>
