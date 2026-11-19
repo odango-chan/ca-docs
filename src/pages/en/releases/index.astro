@@ -26,12 +26,12 @@ const releases = loadPublicCatalog().flatMap(({ component, snapshot }) =>
     {releases.length > 0 ? (
       <div class="doc-index">
         {releases.map((entry) => (
-          <a class="doc-row" href={base + entry.release.releaseRecord.publicPath.replace(/^\/+/, '')}>
+          <a class="doc-row" href={href('/en/releases/' + entry.componentId + '/' + entry.release.releaseId + '/')}>
             <div>
               <strong>{entry.release.releaseId}</strong>
               <span>{entry.componentTitle} · {entry.repository} · {entry.release.contracts.length} contract versions</span>
             </div>
-            <span>Release record →</span>
+            <span>View release record →</span>
           </a>
         ))}
       </div>
