@@ -41,6 +41,9 @@ jobs:
           CA_DOCS_SOURCE_TOKEN: ${{ secrets.CA_DOCS_SOURCE_TOKEN }}
           CA_DOCS_SYNC_STRICT: '1'
 
+      - name: Verify public artifact hashes and release provenance
+        run: node scripts/verify-public-artifacts.mjs
+
       - name: Verify immutable source provenance
         run: node scripts/verify-snapshot-provenance.mjs
         env:
