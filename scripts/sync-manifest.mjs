@@ -652,6 +652,15 @@ export async function buildSnapshot(
               title: rendered.title,
               html: rendered.html,
             };
+          } else if (artifact.kind === 'other' && artifact.mediaType === 'application/json') {
+            const json = JSON.parse(artifactText);
+            summary = {
+              kind: 'other',
+              role: summaryRole,
+              path: artifact.path,
+              title: path.posix.basename(artifact.path),
+              text: JSON.stringify(json, null, 2),
+            };
           } else {
             throw new Error(
               component.id + '/' + contract.contractId + ': artifact ' + artifact.path +
