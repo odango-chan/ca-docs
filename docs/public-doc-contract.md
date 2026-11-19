@@ -80,7 +80,13 @@ releases:
 - 每个 Contract Version 的全部 artifacts 来自它自己声明的完整 source commit；
 - Release Record 也固定到自己的完整 commit；
 - 每个 artifact 必须明确声明 kind、path、mediaType 和 publish；
-- `download` 是必需的公开能力，`render` 允许门户对该 artifact 提供结构化展示；
+- `download` 是必需的公开能力；`render` 只有在门户具有对应 renderer 时才允许声明；
+- 当前支持的 Released Artifact renderer：
+  - `openapi`：Scalar API Reference；
+  - `json-schema`：Schema Explorer；
+  - `specification` + `text/markdown`：经过安全链接处理和 HTML 转义的 Markdown 页面；
+  - `other` + `application/json`：只读 JSON 视图；
+- 尚未支持 renderer 的类型（例如 protobuf / AsyncAPI）只允许 `download`，不得声明 `render`；
 - 同一个 Contract ID + Version 不允许出现不同内容摘要；
 - 同一版本发布后不可覆盖，修订内容必须使用新的 Contract Version；
 - 生命周期状态和具体实现的 Qualification Claim 分开管理。
@@ -139,6 +145,16 @@ Manifest 显式列出的 release record 和 artifacts 就是 Owner 对这些文�
 
 未知来源类型、越界路径、非法 manifest 或不允许的 publish 组合必须使同步失败。
 
+### Released Artifact 的 download / render
+
+| Artifact kind | mediaType | render 行为 |
+| --- | --- | --- |
+| `openapi` | Owner 声明的 OpenAPI media type | Scalar；默认禁用 Test Request、Client、Developer Tools 和 Agent |
+| `json-schema` | JSON Schema JSON / YAML | Schema Explorer；支持 Owner 内已发布引用闭包 |
+| `specification` | `text/markdown` | 安全渲染 Markdown，原始文件仍可下载 |
+| `other` | `application/json` | 只读格式化 JSON 视图 |
+| 其他类型 | Owner 声明的 media type | 当前仅支持下载 |
+
 ## 5. 同步、不可变快照与失败处理
 
 ```text
@@ -172,6 +188,6 @@ Public snapshot 中的任何内容都会成为公开内容。Private Owner 文�
 - JSON Schema 来源提供数据契约摘要；明确授权 raw 后可以由 Schema Explorer 解析完整引用；
 - Markdown 来源提供 Owner 维护的长文档；
 - implementation-check 来源提供有限的派生摘要；
-- Released Contracts 提供不可变版本页面、原始文件下载和 provenance。
+- Released Contracts 提供不可变版本页面、Owner Release Record、安全渲染的 Markdown / JSON、原始文件下载和 provenance。
 
 门户不自动搬运整个 `docs/` 或源码目录，不创建第二份机器契约，不将同步成功或 Schema 校验通过标记为产品 Qualified。
