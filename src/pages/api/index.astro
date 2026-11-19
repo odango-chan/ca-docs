@@ -1,28 +1,19 @@
 ---
-import fs from 'node:fs';
-import path from 'node:path';
-import yaml from 'js-yaml';
 import SiteLayout from '../../layouts/SiteLayout.astro';
+import { getOpenApiSources, loadPublicCatalog } from '../../lib/public-catalog';
 
 const base = import.meta.env.BASE_URL;
 const href = (value: string) => base.replace(/\/?$/, '/') + value.replace(/^\/+/, '');
-const registry = yaml.load(fs.readFileSync('data/components.yaml', 'utf8'));
-const scalarApis = [];
-for (const component of registry.components || []) {
-  if (component.status !== 'active') continue;
-  const snapshotPath = path.resolve('data/generated', component.id + '.json');
-  if (!fs.existsSync(snapshotPath)) continue;
-  const snapshot = JSON.parse(fs.readFileSync(snapshotPath, 'utf8'));
-  for (const source of snapshot.sources || []) {
-    if (source.kind !== 'openapi' || !source.rawPublicPath) continue;
-    scalarApis.push({
+const scalarApis = loadPublicCatalog().flatMap(({ component, snapshot }) =>
+  getOpenApiSources(snapshot)
+    .filter((source: any) => source.rawPublicPath)
+    .map((source: any) => ({
       componentId: component.id,
       componentTitle: component.title?.zh || component.id,
       repository: component.repository,
       source,
-    });
-  }
-}
+    })),
+);
 ---
 <SiteLayout title="API" lang="zh">
   <section class="home-hero">
@@ -37,7 +28,7 @@ for (const component of registry.components || []) {
           <a class="doc-row primary" href={href('/api/' + api.componentId + '/' + api.source.role + '/')}>
             <div>
               <strong>{api.componentTitle} · {api.source.metadata?.title || api.source.role}</strong>
-              <span>{api.source.role} · {api.repository}</span>
+              <span>{api.source.role} · {api.repository} · {api.source.contractVersion || 'Living docs'}</span>
             </div>
             <span>→</span>
           </a>
@@ -59,6 +50,12 @@ for (const component of registry.components || []) {
       <a class="doc-row" href={href('/components/tool-common/api/')}>
         <div><strong>tool-common</strong><span>Provider API 与 Trusted Control API 摘要</span></div><span>→</span>
       </a>
+    </div>
+  </section>
+  <section class="home-section">
+    <div class="page-tabs">
+      <a href={href('/contracts/')}>Contract Catalog</a>
+      <a href={href('/schemas/')}>Schema Explorer</a>
     </div>
   </section>
 </SiteLayout>
