@@ -608,6 +608,31 @@ export async function buildSnapshot(
         const digest = sha256(artifactText);
         const publicPath = contractRoot + '/' + artifact.path;
         addPublicFile(publicFiles, publicPath, artifactText, digest);
+        let summary = null;
+        let summaryRole = null;
+        if (artifact.publish.includes('render') && ['openapi', 'json-schema'].includes(artifact.kind)) {
+          summaryRole =
+            contract.contractId +
+            '-' +
+            contract.version +
+            '-' +
+            path.posix.basename(artifact.path).replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+          const summarySource = {
+            kind: artifact.kind,
+            role: summaryRole,
+            path: artifact.path,
+            publish:
+              artifact.kind === 'openapi'
+                ? ['metadata', 'operations', 'fields', 'enums', 'examples']
+                : ['metadata', 'fields', 'enums', 'examples'],
+          };
+          summary =
+            artifact.kind === 'openapi'
+              ? summarizeOpenApi(parseYamlDocument(artifactText, summarySource), summarySource)
+              : summarizeJsonSchema(parseYamlDocument(artifactText, summarySource), summarySource);
+          summary.sha256 = digest;
+          summary.rawPublicPath = '/' + publicPath;
+        }
         artifactEntries.push({
           kind: artifact.kind,
           sourcePath: artifact.path,
@@ -615,6 +640,8 @@ export async function buildSnapshot(
           publish: artifact.publish,
           publicPath: '/' + publicPath,
           sha256: digest,
+          summaryRole,
+          summary,
         });
       }
       const provenance = {
