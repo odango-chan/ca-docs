@@ -57,7 +57,7 @@ function assertManifest(manifest, component) {
   const roles = new Set();
   for (const source of manifest.sources) {
     validateSourcePath(source.path);
-    const key = source.kind + ':' + source.role;
+    const key = source.role;
     if (roles.has(key)) throw new Error('duplicate source role ' + key);
     roles.add(key);
     if (source.kind === 'implementation-check' && source.extractor && source.extractor !== 'go-http-routes') {
