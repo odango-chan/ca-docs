@@ -31,10 +31,8 @@ async function assertDigest(publicPath, expected, label) {
   }
 }
 
-const registry = JSON.parse(await fs.readFile('data/components.json', 'utf8').catch(async () => {
-  const yaml = await import('js-yaml');
-  return JSON.stringify(yaml.load(await fs.readFile('data/components.yaml', 'utf8')));
-}));
+const yaml = await import('js-yaml');
+const registry = yaml.load(await fs.readFile('data/components.yaml', 'utf8'));
 
 let checkedSnapshots = 0;
 let checkedSources = 0;
@@ -72,7 +70,7 @@ for (const component of registry.components || []) {
       }
       await assertDigest(
         contract.provenancePath,
-        sha256(await readPublicFile(contract.provenancePath)),
+        contract.provenanceSha256,
         component.id + '/' + contract.contractId + '/provenance',
       );
       const provenanceBytes = await readPublicFile(contract.provenancePath);
@@ -89,7 +87,26 @@ for (const component of registry.components || []) {
       if (provenance.artifacts.length !== contract.artifacts.length) {
         throw new Error(component.id + '/' + contract.contractId + ': provenance artifact count mismatch');
       }
-      for (const artifact of contract.artifacts) {
+      if (
+        provenance.releaseRecord.publicPath !== release.releaseRecord.publicPath ||
+        provenance.releaseRecord.sha256 !== release.releaseRecord.sha256 ||
+        provenance.releaseRecord.sourceCommit !== release.releaseRecord.sourceCommit
+      ) {
+        throw new Error(component.id + '/' + contract.contractId + ': release record provenance mismatch');
+      }
+      for (let artifactIndex = 0; artifactIndex < contract.artifacts.length; artifactIndex += 1) {
+        const artifact = contract.artifacts[artifactIndex];
+        const provenanceArtifact = provenance.artifacts[artifactIndex];
+        if (
+          provenanceArtifact.kind !== artifact.kind ||
+          provenanceArtifact.sourcePath !== artifact.sourcePath ||
+          provenanceArtifact.mediaType !== artifact.mediaType ||
+          provenanceArtifact.publicPath !== artifact.publicPath ||
+          provenanceArtifact.sha256 !== artifact.sha256 ||
+          JSON.stringify(provenanceArtifact.publish) !== JSON.stringify(artifact.publish)
+        ) {
+          throw new Error(component.id + '/' + contract.contractId + ': artifact provenance mismatch at index ' + artifactIndex);
+        }
         checkedArtifacts += 1;
         if (!artifact.publish.includes('download')) {
           throw new Error(component.id + '/' + contract.contractId + ': artifact is not explicitly downloadable');
