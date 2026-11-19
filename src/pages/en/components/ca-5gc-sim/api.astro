@@ -89,7 +89,7 @@ const scalarSources=((data as any).sources ?? []).filter((source:any)=>source.ki
       <a href={href('/en/components/ca-5gc-sim/facts/')}>Facts</a>
       <a href={href('/en/components/ca-5gc-sim/operations/')}>Operations</a>
       <a href={href('/en/components/ca-5gc-sim/standalone/')}>Standalone</a>
-      {scalarSources.map((source:any)=><a href={href('/api/ca-5gc-sim/'+source.role+'/')}>Scalar · {source.role}</a>)}
+      {scalarSources.map((source:any)=><a href={href('/en/api/ca-5gc-sim/'+source.role+'/')}>Scalar · {source.role}</a>)}
     </div>
   </section>
 
