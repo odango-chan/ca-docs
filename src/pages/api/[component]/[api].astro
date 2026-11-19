@@ -1,0 +1,84 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import yaml from 'js-yaml';
+import SiteLayout from '../../../layouts/SiteLayout.astro';
+
+export function getStaticPaths() {
+  const registry = yaml.load(fs.readFileSync('data/components.yaml', 'utf8'));
+  const paths = [];
+  for (const component of registry.components || []) {
+    if (component.status !== 'active') continue;
+    const snapshotPath = path.resolve('data/generated', component.id + '.json');
+    if (!fs.existsSync(snapshotPath)) continue;
+    const snapshot = JSON.parse(fs.readFileSync(snapshotPath, 'utf8'));
+    for (const source of snapshot.sources || []) {
+      if (source.kind !== 'openapi' || !source.rawPublicPath) continue;
+      paths.push({
+        params: { component: component.id, api: source.role },
+        props: { component, source, snapshot },
+      });
+    }
+  }
+  return paths;
+}
+
+const { component, source, snapshot } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const href = (value) => base.replace(/\/?$/, '/') + value.replace(/^\/+/, '');
+const specUrl = base + source.rawPublicPath.replace(/^\/+/, '');
+const title = source.metadata?.title || source.role;
+const ownerTitle = component.title?.zh || component.id;
+---
+<SiteLayout title={title + ' API Reference'} lang="zh" description={ownerTitle + ' 的 OpenAPI 交互式参考'}>
+  <section class="hero">
+    <span class="eyebrow">{ownerTitle} / OpenAPI</span>
+    <h1>{title}</h1>
+    <p class="lede">此页面直接渲染 Owner 明确授权并按源 Commit 固定的 OpenAPI 原文。接口定义不会在 CA Docs 中被重新编写。</p>
+    <div class="page-tabs">
+      <a href={href('/api/')}>API 总览</a>
+      <a href={href('/components/' + component.id + '/')}>组件文档</a>
+      <a class="primary-tab" href={specUrl}>下载原始 OpenAPI</a>
+    </div>
+  </section>
+  <section class="section">
+    <div class="source-note">
+      Owner：<code>{component.repository}</code> · Role：<code>{source.role}</code> ·
+      Commit：<code>{snapshot.source.commit}</code> · SHA-256：<code>{source.sha256}</code>
+    </div>
+  </section>
+  <section class="section scalar-shell">
+    <div id="scalar-api-reference" data-spec-url={specUrl}></div>
+  </section>
+</SiteLayout>
+
+<style>
+  .scalar-shell { padding: 0; min-height: 78vh; }
+  #scalar-api-reference { min-height: 78vh; width: 100%; }
+</style>
+
+<script is:inline type="module">
+  import { createApiReference } from 'https://cdn.jsdelivr.net/npm/@scalar/api-reference@1.79.0/esm.js';
+
+  const container = document.querySelector('#scalar-api-reference');
+  const specUrl = container?.getAttribute('data-spec-url');
+  if (container && specUrl) {
+    createApiReference('#scalar-api-reference', {
+      url: specUrl,
+      layout: 'modern',
+      theme: 'default',
+      hideTestRequestButton: true,
+      hideClientButton: true,
+      hiddenClients: true,
+      showDeveloperTools: 'never',
+      documentDownloadType: 'direct',
+      defaultOpenFirstTag: false,
+      expandAllParameters: false,
+      hideDarkModeToggle: true,
+      persistAuth: false,
+      telemetry: false,
+      withDefaultFonts: false,
+      agent: { disabled: true },
+    });
+  }
+</script>
