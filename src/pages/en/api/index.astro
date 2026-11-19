@@ -34,7 +34,7 @@ for (const component of registry.components || []) {
     {scalarApis.length > 0 ? (
       <div class="doc-index">
         {scalarApis.map((api) => (
-          <a class="doc-row primary" href={href('/api/' + api.componentId + '/' + api.source.role + '/')}>
+          <a class="doc-row primary" href={href('/en/api/' + api.componentId + '/' + api.source.role + '/')}>
             <div>
               <strong>{api.componentTitle} · {api.source.metadata?.title || api.source.role}</strong>
               <span>{api.source.role} · {api.repository}</span>
@@ -53,10 +53,10 @@ for (const component of registry.components || []) {
   <section class="home-section">
     <h2>API summaries</h2>
     <div class="doc-index">
-      <a class="doc-row" href={href('/components/ca-5gc-sim/api/')}>
+      <a class="doc-row" href={href('/en/components/ca-5gc-sim/api/')}>
         <div><strong>ca-5gc-sim</strong><span>5GC simulator Owner API summary</span></div><span>→</span>
       </a>
-      <a class="doc-row" href={href('/components/tool-common/api/')}>
+      <a class="doc-row" href={href('/en/components/tool-common/api/')}>
         <div><strong>tool-common</strong><span>Provider API and Trusted Control API summary</span></div><span>→</span>
       </a>
     </div>
