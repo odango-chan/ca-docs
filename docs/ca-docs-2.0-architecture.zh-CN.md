@@ -23,7 +23,7 @@
 ### 1.2 关键设计决策
 
 1. 保留现有 Astro + GitHub Pages，不另建文档服务，不引入数据库。
-2. 保留现有 `docs/public-docs.yaml` 机制，扩展其能力时保持旧 manifest 兼容。
+2. 保留 `docs/public-docs.yaml` 作为 Owner 发布声明的固定路径，但直接采用新的 `PublicDocsManifest v1alpha2`；不实现 v1alpha1 兼容层。
 3. 将“持续更新的组件文档”和“不可变的正式契约发布”分成两条发布通道。
 4. 保存完整 OpenAPI 原文，以 Scalar 提供交互式 API Reference；现有摘要展示可以保留为目录/概览，不再充当唯一 API 展示。
 5. 保存完整 JSON Schema 原文，并提供结构化 Schema 浏览。
@@ -48,7 +48,7 @@
 - Markdown、OpenAPI、JSON Schema 和 implementation-check 的基础解析；
 - `data/generated/` 中的公开快照。
 
-现有同步器支持 manifest 驱动的组件，也保留了 `ca-5gc-sim`、`tool-common` 等历史适配器。现有网站和内容不应推倒重来。
+现有同步器同时包含 manifest 驱动路径和 `ca-5gc-sim`、`tool-common` 等历史专用适配器。2.0 应统一到新的 manifest 驱动管线，并删除已被替代的专用适配器；现有有价值的页面和内容保留，但不保留旧数据格式或旧同步实现。
 
 ### 2.2 当前缺口
 
@@ -161,7 +161,7 @@ Lifecycle Status 和 Qualification Status 是不同维度。例如 CA-SL v1alpha
 - 页面显示 source commit、source path 和同步时间；
 - 不把它冒充正式契约版本。
 
-现有 `data/generated/<component>.json` 继续服务这一通道，允许逐步重构，但不要求一次性删除历史适配器。
+Living Documentation 的输出仍可写入 `data/generated/<component>.json`，但所有快照都必须由新同步管线从 Owner 当前授权源重新生成；不读取或迁移旧格式快照，也不保留历史适配器。
 
 ### 4.2 通道 B：Released Contracts
 
@@ -187,16 +187,14 @@ Lifecycle Status 和 Qualification Status 是不同维度。例如 CA-SL v1alpha
 
 ## 5. Owner 发布声明与快照格式
 
-### 5.1 Manifest 兼容策略
+### 5.1 Manifest 版本策略
 
-保留现有 `PublicDocsManifest v1alpha1`，继续支持当前 `sources`。为正式契约发布增加新的可选发布声明，采用新版本 Schema（建议 `connectionagent.io/v1alpha2`），不静默改变 v1alpha1 的语义。
-
-v1alpha2 同时支持：
+`PublicDocsManifest v1alpha2` 是 CA Docs 2.0 唯一接受的发布声明格式，统一承载两类声明：
 
 - `sources`：Living Documentation；
 - `releases`：Released Contracts。
 
-未迁移的 Owner 继续使用 v1alpha1；不允许同步器把缺失的 `releases` 推断为“全部公开”。
+不实现 v1alpha1 解析器、双版本分支或旧格式 fallback。所有已接入 Owner 必须在启用新同步管线前一次性迁移到 v1alpha2；缺少或不符合 v1alpha2 的 manifest 直接阻止该 Owner 的同步。迁移期间不允许旧格式数据被当作新格式输入，也不允许把缺失的 `releases` 推断为“全部公开”。
 
 ### 5.2 发布声明示意
 
@@ -454,8 +452,10 @@ ca-docs/
 
 ### Phase 1 — 发布契约基础设施
 
-- [ ] 定义并测试 `PublicDocsManifest v1alpha2`
-- [ ] 保留 v1alpha1 向后兼容
+- [ ] 定义并测试唯一受支持的 `PublicDocsManifest v1alpha2`
+- [ ] 将所有已接入 Owner 的 manifest 一次性迁移到 v1alpha2
+- [ ] 删除 v1alpha1 parser、legacy fallback 和历史专用同步适配器
+- [ ] 从 Owner 授权源重新生成全部 `data/generated/` 快照，不迁移旧快照格式
 - [ ] 实现不可变 source ref 解析
 - [ ] 实现 release/artifact 白名单和路径安全校验
 - [ ] 实现 SHA-256 计算和 provenance 记录
@@ -490,7 +490,7 @@ ca-docs/
 2. `ca-skill-compiler`：Compiler v1alpha5 BuildRequest / BuildResult / DependencyInspection / Artifact 等自有契约；
 3. `ca-client-tools`：先发布公开架构和集成文档；正式发布后再接入 v1.0.0 对应版本资产；
 4. `ca-agent`：先统一 Host Artifact Store 等跨仓契约状态和发布身份，再显式授权公开；
-5. `tool-common`、`env-fabric`、`env-5gc-sim`：从现有 manifest 迁移到统一发布管线，并保留现有页面；
+5. `tool-common`、`env-fabric`、`env-5gc-sim`：统一迁移到 v1alpha2 发布管线，删除历史专用适配器，并保留现有页面内容；
 6. `ca-provider-5gc`：等 Owner 契约和正式发布身份明确后接入；
 7. `ca-runtime`、`tool-mcp-gw`、`ai-gateway`：完成 Owner / Release / API 契约盘点后接入；
 8. `ca-agent-demo`、`env-openamsm`：只承载经授权的示例、集成说明和协议参考，不取代共享契约 Owner。
@@ -578,9 +578,9 @@ Owner Release
 
 ## 14. 实施顺序与首个交付边界
 
-第一个可交付版本不追求一次接入全部 CA 仓库。建议先完成：
+第一个可交付版本不追求一次接入全部 CA 仓库，但所有当前已接入 Owner 必须在切换时完成统一迁移，不保留双轨同步。建议先完成：
 
-1. v1alpha2 发布 manifest 与不可变快照机制；
+1. 唯一受支持的 v1alpha2 发布 manifest、全量 Owner manifest 迁移与不可变快照机制；
 2. Contract Catalog 和 Release Catalog；
 3. Scalar 的一个真实 API 页面；
 4. 一个完整 JSON Schema 引用闭包页面；
