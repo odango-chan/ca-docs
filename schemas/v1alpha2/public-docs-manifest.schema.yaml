@@ -177,3 +177,30 @@ $defs:
           enum: [download, render]
         contains:
           const: download
+    allOf:
+      - if:
+          properties:
+            kind: {const: specification}
+            publish:
+              contains: {const: render}
+          required: [kind, publish]
+        then:
+          properties:
+            mediaType: {const: text/markdown}
+      - if:
+          properties:
+            kind: {const: other}
+            publish:
+              contains: {const: render}
+          required: [kind, publish]
+        then:
+          properties:
+            mediaType: {const: application/json}
+      - if:
+          properties:
+            kind: {enum: [markdown, protobuf, asyncapi]}
+          required: [kind]
+        then:
+          properties:
+            publish:
+              items: {const: download}
