@@ -21,6 +21,22 @@ components:
       zh: 5GC 模拟器
       en: 5GC simulator
 
+  - id: ca-skills
+    repository: odango-chan/ca-skills
+    status: planned
+    manifest: docs/public-docs.yaml
+    title:
+      zh: CA Skills 语言与契约
+      en: CA Skills Language and Contracts
+
+  - id: ca-skill-compiler
+    repository: odango-chan/ca-skill-compiler
+    status: planned
+    manifest: docs/public-docs.yaml
+    title:
+      zh: CA Skill Compiler
+      en: CA Skill Compiler
+
   - id: ca-runtime
     repository: odango-chan/ca-runtime
     status: planned
