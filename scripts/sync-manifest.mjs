@@ -658,7 +658,7 @@ export async function buildSnapshot(
           publicPath: '/' + recordPath,
           sha256: recordDigest,
         },
-        artifacts: artifactEntries,
+        artifacts: artifactEntries.map(({ summary, summaryRole, ...artifactEntry }) => artifactEntry),
       };
       const provenanceText = JSON.stringify(provenance, null, 2) + '\n';
       addPublicFile(
