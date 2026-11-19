@@ -450,6 +450,7 @@ function buildPresentation(component, sources) {
   const views = {};
   const schemaSources = sources.filter((source) => source.kind === 'json-schema');
   views.contracts = schemaSources.map((source) => ({
+    kind: source.kind,
     path: source.path,
     role: source.role,
     title: source.metadata?.title || source.path,
