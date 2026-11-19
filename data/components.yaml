@@ -23,7 +23,7 @@ components:
 
   - id: ca-skills
     repository: odango-chan/ca-skills
-    status: active
+    status: planned
     manifest: docs/public-docs.yaml
     title:
       zh: CA Skills 语言与契约
@@ -31,7 +31,7 @@ components:
 
   - id: ca-skill-compiler
     repository: odango-chan/ca-skill-compiler
-    status: active
+    status: planned
     manifest: docs/public-docs.yaml
     title:
       zh: CA Skill Compiler
