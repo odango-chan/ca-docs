@@ -263,6 +263,8 @@ CA Docs 的 manifest 解决“允许公开什么、在哪里、属于哪个契�
 
 在现有 Astro 5 站点集成官方 Astro 组件 `@scalar/astro`。
 
+Scalar 只负责 OpenAPI / Swagger 描述的 HTTP API。MCP、Provider 进程协议、NDJSON、Go SDK 和其他非 OpenAPI 契约必须使用对应的协议契约页面与 Schema 展示，不能为了统一 UI 而伪造 OpenAPI。3GPP SBI OpenAPI 只有在 Owner 明确授权公开、且版本来源和规范版权边界清楚时才进入 API Reference。
+
 参考：
 - <https://scalar.com/products/api-references/integrations/astro>
 - <https://scalar.com/products/api-references/configuration>
