@@ -15,7 +15,9 @@ Sandbox 平台的公开文档门户，提供平台架构、组件职责、Benchm
 - **[Benchmark 执行生命周期](https://odango-chan.github.io/ca-docs/components/ca-benchmark-engine/)**：EvaluationTask、ExecutionAttempt、Validity 和 EvaluationResult 的语义。
 - **[真实 5GC 运行手册](https://odango-chan.github.io/ca-docs/runbooks/real-5gc/)**：启动前检查、运行步骤、故障定位与验收流程。
 - **[真实 5GC 接口与证据手册](https://odango-chan.github.io/ca-docs/interfaces/real-5gc-evidence/)**：接口契约、关联键、事实来源和 PASS 判定要求。
-- **[组件接口总览](https://odango-chan.github.io/ca-docs/api/)**：按组件查阅公开接口。
+- **[API Reference](https://odango-chan.github.io/ca-docs/api/)**：按 Owner 浏览接口摘要和 Scalar 交互式 OpenAPI 页面。
+- **[Contract Catalog](https://odango-chan.github.io/ca-docs/contracts/)**：浏览 Owner 正式发布的不可变契约版本与来源证明。
+- **[Schema Explorer](https://odango-chan.github.io/ca-docs/schemas/)**：按 Owner 浏览 JSON Schema 字段、枚举、条件规则和跨文件引用。
 
 ## 文档边界与事实来源
 
