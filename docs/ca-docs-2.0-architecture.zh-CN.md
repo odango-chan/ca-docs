@@ -241,7 +241,7 @@ releases:
 - `releaseRecord.ref` 和每个 `source.ref` 都必须解析为完整 commit SHA；
 - 一个契约版本可以由多个文件组成；
 - `releaseRecord` 是 Owner 的人类可读发布记录；
-- `lifecycleStatus` 与 `qualificationStatus` 分开；
+- `lifecycleStatus` 与针对具体实现的 Qualification Claim 分开；
 - `publish` 是公开授权白名单，不是“自动公开全部字段”。
 
 正式实施前需要将示意结构落实为 JSON Schema，并明确允许的 artifact kind、media type、路径约束、重复 ID 和版本冲突规则。
@@ -511,7 +511,7 @@ ca-docs/
 ### 11.1 Owner 同步验收
 
 - manifest Schema 校验通过；
-- 每个源文件都来自声明的同一个 immutable commit；
+- 同一个 Contract Version 的所有 artifact 文件都来自该版本声明的同一个 immutable commit；release record 自身也固定来源 commit；不同 Contract Version 可以分别指向不同 commit；
 - release ref 可解析且完整 commit 可记录；
 - 文件路径不允许绝对路径、`..`、反斜杠或越界；
 - 未声明文件不会被读取或发布；
