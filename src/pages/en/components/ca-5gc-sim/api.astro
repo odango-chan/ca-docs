@@ -74,6 +74,7 @@ const ruleText = (rule: any) =>
 
 const documented = data.routes.filter((route) => route.documented);
 const implementationOnly = data.routes.filter((route) => route.implemented && !route.documented);
+const scalarSources=((data as any).sources ?? []).filter((source:any)=>source.kind==='openapi' && source.rawPublicPath);
 ---
 <SiteLayout title="ca-5gc-sim HTTP API" lang="en">
   <section class="hero">
@@ -88,6 +89,7 @@ const implementationOnly = data.routes.filter((route) => route.implemented && !r
       <a href={href('/en/components/ca-5gc-sim/facts/')}>Facts</a>
       <a href={href('/en/components/ca-5gc-sim/operations/')}>Operations</a>
       <a href={href('/en/components/ca-5gc-sim/standalone/')}>Standalone</a>
+      {scalarSources.map((source:any)=><a href={href('/api/ca-5gc-sim/'+source.role+'/')}>Scalar · {source.role}</a>)}
     </div>
   </section>
 
