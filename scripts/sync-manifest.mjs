@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import yaml from 'js-yaml';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { pinSourceContext } from './source-revision.mjs';
+import { renderPublicMarkdown } from '../src/lib/public-markdown.mjs';
 
 const token = process.env.CA_DOCS_SOURCE_TOKEN || '';
 const strict = process.env.CA_DOCS_SYNC_STRICT === '1';
@@ -589,6 +590,12 @@ export async function buildSnapshot(
   for (const release of manifest.releases) {
     const recordText = await readSource(release.releaseRecord.path, release.releaseRecord.ref);
     const recordDigest = sha256(recordText);
+    const renderedRecord = renderPublicMarkdown(recordText, {
+      repository: component.repository,
+      commit: release.releaseRecord.ref,
+      path: release.releaseRecord.path,
+      role: release.releaseId,
+    });
     const recordPath =
       'contracts/' +
       component.id +
@@ -610,26 +617,47 @@ export async function buildSnapshot(
         addPublicFile(publicFiles, publicPath, artifactText, digest);
         let summary = null;
         let summaryRole = null;
-        if (artifact.publish.includes('render') && ['openapi', 'json-schema'].includes(artifact.kind)) {
+        if (artifact.publish.includes('render')) {
           summaryRole =
             contract.contractId +
             '-' +
             contract.version +
             '-' +
             path.posix.basename(artifact.path).replace(/[^a-z0-9-]/gi, '-').toLowerCase();
-          const summarySource = {
-            kind: artifact.kind,
-            role: summaryRole,
-            path: artifact.path,
-            publish:
+          if (artifact.kind === 'openapi' || artifact.kind === 'json-schema') {
+            const summarySource = {
+              kind: artifact.kind,
+              role: summaryRole,
+              path: artifact.path,
+              publish:
+                artifact.kind === 'openapi'
+                  ? ['metadata', 'operations', 'fields', 'enums', 'examples']
+                  : ['metadata', 'fields', 'enums', 'examples'],
+            };
+            summary =
               artifact.kind === 'openapi'
-                ? ['metadata', 'operations', 'fields', 'enums', 'examples']
-                : ['metadata', 'fields', 'enums', 'examples'],
-          };
-          summary =
-            artifact.kind === 'openapi'
-              ? summarizeOpenApi(parseYamlDocument(artifactText, summarySource), summarySource)
-              : summarizeJsonSchema(parseYamlDocument(artifactText, summarySource), summarySource);
+                ? summarizeOpenApi(parseYamlDocument(artifactText, summarySource), summarySource)
+                : summarizeJsonSchema(parseYamlDocument(artifactText, summarySource), summarySource);
+          } else if (artifact.kind === 'specification' && artifact.mediaType === 'text/markdown') {
+            const rendered = renderPublicMarkdown(artifactText, {
+              repository: component.repository,
+              commit: contract.source.ref,
+              path: artifact.path,
+              role: summaryRole,
+            });
+            summary = {
+              kind: 'specification',
+              role: summaryRole,
+              path: artifact.path,
+              title: rendered.title,
+              html: rendered.html,
+            };
+          } else {
+            throw new Error(
+              component.id + '/' + contract.contractId + ': artifact ' + artifact.path +
+                ' declares render but has no renderer for ' + artifact.kind + ' ' + artifact.mediaType,
+            );
+          }
           summary.sha256 = digest;
           summary.rawPublicPath = '/' + publicPath;
         }
@@ -684,6 +712,8 @@ export async function buildSnapshot(
         sourceCommit: release.releaseRecord.ref,
         publicPath: '/' + recordPath,
         sha256: recordDigest,
+        title: renderedRecord.title,
+        html: renderedRecord.html,
       },
       contracts: contractEntries,
     });
