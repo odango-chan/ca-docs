@@ -88,6 +88,7 @@ for (const component of registry.components || []) {
         throw new Error(component.id + '/' + contract.contractId + ': provenance artifact count mismatch');
       }
       if (
+        provenance.releaseRecord.sourcePath !== release.releaseRecord.sourcePath ||
         provenance.releaseRecord.publicPath !== release.releaseRecord.publicPath ||
         provenance.releaseRecord.sha256 !== release.releaseRecord.sha256 ||
         provenance.releaseRecord.sourceCommit !== release.releaseRecord.sourceCommit
