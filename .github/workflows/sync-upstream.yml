@@ -11,6 +11,8 @@ on:
     paths:
       - '.github/workflows/sync-upstream.yml'
       - 'scripts/sync*.mjs'
+      - 'scripts/verify-*.mjs'
+      - 'schemas/**'
       - 'data/components.yaml'
 
 permissions:
