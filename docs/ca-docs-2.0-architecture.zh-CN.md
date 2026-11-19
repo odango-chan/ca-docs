@@ -218,7 +218,6 @@ releases:
       - contractId: ca-sl
         version: v1alpha5
         lifecycleStatus: FROZEN
-        qualificationStatus: NOT_QUALIFIED
         artifacts:
           - kind: specification
             path: docs/skill-language-spec.v1alpha5.zh-CN.md
@@ -364,7 +363,9 @@ Schema 解析必须基于同一发布版本的完整文件闭包。缺失引用�
 |---|---|---|
 | Publication | PUBLISHED / PREVIEW / WITHDRAWN | CA Docs 是否对外展示 |
 | Lifecycle | DRAFT / ACCEPTED / FROZEN / DEPRECATED | Owner 定义的契约生命周期 |
-| Qualification | QUALIFIED / NOT_QUALIFIED / NOT_RUN | 对应产品或运行场景的符合性状态 |
+| Qualification Claim | QUALIFIED / NOT_QUALIFIED / NOT_RUN | 针对明确实现、运行环境或 conformance target 的符合性状态 |
+
+Qualification Claim 必须同时记录被评估的 subject、目标契约版本、评估范围和证据来源。它不属于 Contract ID / Version 的固有属性。例如 CA-SL v1alpha5 语言语义可以 FROZEN / RELEASED，但 Compiler、Studio、Host、Runtime 或真实 5GC 的符合性分别保持 NOT_QUALIFIED，直到各自有对应证据。
 
 不得将同步成功、Schema 校验通过、Compiler 静态检查通过等同于 E2E PASS。
 
