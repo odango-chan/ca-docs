@@ -695,6 +695,33 @@ export async function buildSnapshot(
 
   const releases = [];
   for (const release of manifest.releases) {
+    if (release.publicationStatus === 'WITHDRAWN') {
+      releases.push({
+        releaseId: release.releaseId,
+        publicationStatus: release.publicationStatus,
+        withdrawn: true,
+        releaseRecord: {
+          sourcePath: release.releaseRecord.path,
+          sourceCommit: release.releaseRecord.ref,
+          publicPath: null,
+          sha256: null,
+          title: 'Withdrawn Owner Release',
+          html: null,
+        },
+        contracts: release.contracts.map((contract) => ({
+          contractId: contract.contractId,
+          version: contract.version,
+          lifecycleStatus: contract.lifecycleStatus,
+          publicationStatus: release.publicationStatus,
+          sourceCommit: contract.source.ref,
+          provenancePath: null,
+          provenanceSha256: null,
+          artifacts: [],
+          withdrawn: true,
+        })),
+      });
+      continue;
+    }
     const recordText = await readSource(release.releaseRecord.path, release.releaseRecord.ref);
     const recordDigest = sha256(recordText);
     const renderedRecord = renderPublicMarkdown(recordText, {
@@ -807,9 +834,11 @@ export async function buildSnapshot(
         component: component.id,
         repository: component.repository,
         releaseId: release.releaseId,
+        publicationStatus: release.publicationStatus,
         contractId: contract.contractId,
         version: contract.version,
         lifecycleStatus: contract.lifecycleStatus,
+        publicationStatus: release.publicationStatus,
         sourceCommit: contract.source.ref,
         releaseRecord: {
           sourcePath: release.releaseRecord.path,
@@ -838,6 +867,7 @@ export async function buildSnapshot(
     }
     releases.push({
       releaseId: release.releaseId,
+      publicationStatus: release.publicationStatus,
       releaseRecord: {
         sourcePath: release.releaseRecord.path,
         sourceCommit: release.releaseRecord.ref,
