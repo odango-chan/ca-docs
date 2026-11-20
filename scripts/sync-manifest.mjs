@@ -57,8 +57,11 @@ function assertManifest(manifest, component) {
   }
 
   const roles = new Set();
+  const sourcePaths = new Set();
   for (const source of manifest.sources) {
     validateSourcePath(source.path);
+    if (sourcePaths.has(source.path)) throw new Error('duplicate source path ' + source.path);
+    sourcePaths.add(source.path);
     const key = source.role;
     if (roles.has(key)) throw new Error('duplicate source role ' + key);
     roles.add(key);
@@ -170,13 +173,14 @@ function isPrivateIpv4(address) {
     (a === 172 && b >= 16 && b <= 31) ||
     (a === 192 && b === 168) ||
     (a === 100 && b >= 64 && b <= 127) ||
-    (a === 198 && (b === 18 || b === 19)) ||
-    (a === 192 && b === 0);
+    (a === 198 && (b === 18 || b === 19 || b === 51)) ||
+    (a === 192 && b === 0) ||
+    (a === 203 && b === 0);
 }
 
 function isPrivateIpv6(address) {
   const value = address.toLowerCase();
-  return value === '::' || value === '::1' || value.startsWith('fc') ||
+  return value === '::' || value === '::1' || value.startsWith('::ffff:') || value.startsWith('2001:db8:') || value.startsWith('fc') ||
     value.startsWith('fd') || value.startsWith('fe8') ||
     value.startsWith('fe9') || value.startsWith('fea') ||
     value.startsWith('feb') || value.startsWith('ff');
@@ -195,7 +199,13 @@ function assertPublicOpenApiServers(document, sourcePath) {
     }
     const value = raw.trim();
     if (value.startsWith('/') && !value.startsWith('//')) continue;
-    if (!/^[a-z][a-z0-9+.-]*:/i.test(value) && !value.startsWith('//')) continue;
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(value) && !value.startsWith('//')) {
+      const relativeHost = value.split('/')[0].split(':')[0];
+      if (isIP(relativeHost) !== 0) {
+        throw new Error('IP-literal OpenAPI server URL must use an explicit public HTTP(S) origin or a relative path in ' + sourcePath + ': ' + value);
+      }
+      continue;
+    }
     if (value.startsWith('//')) {
       throw new Error('protocol-relative OpenAPI server URL is not publishable in ' + sourcePath + ': ' + value);
     }
@@ -214,7 +224,9 @@ function assertPublicOpenApiServers(document, sourcePath) {
       host.endsWith('.local') || host.endsWith('.internal') ||
       host.endsWith('.cluster.local') || host.endsWith('.svc') ||
       host.endsWith('.test') || host.endsWith('.example') ||
-      host.endsWith('.invalid') || !host.includes('.') ||
+      host.endsWith('.invalid') || host.endsWith('.corp') ||
+      host.endsWith('.lan') || host.endsWith('.home') ||
+      host.endsWith('.intranet') || host.endsWith('.private') || !host.includes('.') ||
       (ipVersion === 4 && isPrivateIpv4(host)) ||
       (ipVersion === 6 && isPrivateIpv6(host));
     if (privateHost) {
@@ -227,7 +239,9 @@ function collectReferences(value, output = []) {
   if (Array.isArray(value)) {
     for (const item of value) collectReferences(item, output);
   } else if (value && typeof value === 'object') {
-    if (typeof value.$ref === 'string') output.push(value.$ref);
+    for (const key of ['$ref', '$dynamicRef', '$recursiveRef']) {
+      if (typeof value[key] === 'string') output.push(value[key]);
+    }
     for (const child of Object.values(value)) collectReferences(child, output);
   }
   return output;
