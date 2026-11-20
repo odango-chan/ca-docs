@@ -32,7 +32,7 @@ const recordUrl = base + release.releaseRecord.publicPath.replace(/^\/+/, '');
       {recordUrl && <a class="primary-tab" href={recordUrl}>Download original Release Record</a>}
     </div>
   </section>
-  {release.publicationStatus === 'WITHDRAWN' && <section class="section"><div class="notice"><strong>该 Owner Release 已撤回。</strong><p>此版本作为撤回记录保留；目录不再提供其契约下载入口，已发布的历史不可变文件不会被覆盖或删除。</p></div></section>}
+  {release.publicationStatus === 'WITHDRAWN' && <section class="section"><div class="notice"><strong>This Owner Release has been withdrawn.</strong><p>The tombstone remains visible, but the catalog no longer links its contract artifacts. Previously published immutable files are retained and never overwritten or deleted.</p></div></section>}
   {release.publicationStatus !== 'WITHDRAWN' && <section class="section">
     <div class="source-note">
       Owner: <code>{component.repository}</code> · SHA-256: <code>{release.releaseRecord.sha256}</code>
