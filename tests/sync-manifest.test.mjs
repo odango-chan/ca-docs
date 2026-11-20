@@ -334,6 +334,47 @@ test('released contract artifacts are pinned, hashed and append-only public file
   assert.ok(result.publicFiles.every((file) => /^[0-9a-f]{64}$/.test(file.sha256)));
 });
 
+test('withdrawn Owner Releases become tombstones without republishing artifacts', async () => {
+  const declared = manifest([], [
+    {
+      releaseId: 'withdrawn-contracts-v1',
+      publicationStatus: 'WITHDRAWN',
+      releaseRecord: { path: 'docs/releases/withdrawn.md', ref: releaseCommit },
+      contracts: [
+        {
+          contractId: 'withdrawn-contract',
+          version: 'v1',
+          lifecycleStatus: 'DEPRECATED',
+          source: { ref: branchCommit },
+          artifacts: [
+            {
+              kind: 'json-schema',
+              path: 'schemas/v1alpha2/withdrawn.schema.yaml',
+              mediaType: 'application/schema+yaml',
+              publish: ['download'],
+            },
+          ],
+        },
+      ],
+    },
+  ]);
+  const result = await buildSnapshot(
+    component,
+    yaml.dump(declared),
+    { ref: branchCommit },
+    { commit: branchCommit },
+    async () => {
+      throw new Error('withdrawn artifacts must not be fetched or republished');
+    },
+  );
+  const release = result.snapshot.releases[0];
+  assert.equal(release.publicationStatus, 'WITHDRAWN');
+  assert.equal(release.withdrawn, true);
+  assert.equal(release.releaseRecord.publicPath, null);
+  assert.deepEqual(release.contracts[0].artifacts, []);
+  assert.equal(result.publicFiles.length, 0);
+});
+
 test('manifest component identity can differ from the public site component id only when registry declares it', async () => {
   const aliased = { ...component, id: 'ca-5gc-sim', sourceIdentity: 'env-5gc-sim' };
   const declared = {
