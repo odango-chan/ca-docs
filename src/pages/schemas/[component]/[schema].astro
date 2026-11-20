@@ -64,6 +64,7 @@ const ruleText = (rule: any) =>
     </div>
   </section>
 
+  {snapshot.sync?.mode === 'stale' && <section class="section"><div class="notice"><strong>上游快照已过期</strong><p>{snapshot.sync.detail}</p></div></section>}
   <section class="section">
     <div class="stats">
       <div class="stat"><strong>{source.fields?.length || 0}</strong><span>字段定义</span></div>
