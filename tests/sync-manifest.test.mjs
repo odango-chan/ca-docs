@@ -172,7 +172,7 @@ components:
   schemas:
     Request: {$ref: './schemas/request.schema.yaml#/$defs/request'}
 `,
-    'contracts/schemas/request.schema.yaml': '$defs: {request: {type: object}}\\n',
+    'contracts/schemas/request.schema.yaml': '$defs: {request: {type: object}}',
   };
   const result = await buildSnapshot(
     component,
