@@ -264,7 +264,7 @@ CA Docs 的 manifest 解决“允许公开什么、在哪里、属于哪个契�
 
 ### 6.1 技术方案
 
-在现有 Astro 5 站点使用 Scalar 官方 standalone ESM 集成：固定 `@scalar/api-reference@1.79.0`，由静态页面加载，不增加运行时 API 服务或额外 npm 依赖。该方案使用 Scalar 官方 `createApiReference`，OpenAPI 文件从 CA Docs 同源静态快照读取。
+在现有 Astro 5 站点使用 Scalar 官方 standalone ESM 集成：固定 `@scalar/api-reference@1.81.0`，由静态页面加载，不增加运行时 API 服务或额外 npm 依赖。该方案使用 Scalar 官方 `createApiReference`，OpenAPI 文件从 CA Docs 同源静态快照读取。
 
 Scalar 只负责 OpenAPI / Swagger 描述的 HTTP API。MCP、Provider 进程协议、NDJSON、Go SDK 和其他非 OpenAPI 契约必须使用对应的协议契约页面与 Schema 展示，不能为了统一 UI 而伪造 OpenAPI。3GPP SBI OpenAPI 只有在 Owner 明确授权公开、且版本来源和规范版权边界清楚时才进入 API Reference。
 
@@ -313,6 +313,8 @@ API 页面包含：
 - 只有明确配置公共测试环境、CORS 和允许的 server URL 后，才启用 Try It；
 - 不代理用户的 API 请求，不在 CA Docs 存储业务凭据；
 - OpenAPI 文件必须由 Owner 明确授权公开；
+- 原始 OpenAPI / JSON Schema 的相对 `$ref` 必须形成完整的已声明文件闭包；远程 `$ref` 阻止发布；
+- OpenAPI server URL 只允许相对路径或明确公网 HTTP(S) 地址；loopback、私网、link-local、内部域名和占位主机名阻止发布；
 - 不自动改写 Owner 的原始 OpenAPI 文件；校验失败时阻止发布并给出路径/行号；
 - Scalar 依赖版本必须固定，并验证 GitHub Pages 的 base path、静态资源加载和深链接刷新；
 - 若使用 CDN，必须固定版本；同时评估将前端资源本地打包，避免站点运行依赖未固定的 latest CDN。
@@ -480,7 +482,7 @@ ca-docs/
 
 ### Phase 3 — API 与 Schema 可视化
 
-- [x] 集成固定版本的 Scalar standalone ESM（`@scalar/api-reference@1.79.0`）
+- [x] 集成固定版本的 Scalar standalone ESM（`@scalar/api-reference@1.81.0`）
 - [x] 按 Owner / source role 生成 Scalar API 页面
 - [x] Scalar 加载 CA Docs 同源、按 commit 固定的 OpenAPI 原文
 - [ ] OpenAPI 3.0/3.1 严格校验和错误定位
