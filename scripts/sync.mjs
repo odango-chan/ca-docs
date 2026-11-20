@@ -8,8 +8,10 @@ const registry = yaml.load(await fs.readFile('data/components.yaml', 'utf8'));
 const active = (registry.components || []).filter((component) => component.status === 'active');
 
 for (const component of active) {
-  // Domain projections preserve the existing component-specific pages. They do
-  // not own source resolution, manifest validation, raw publication or releases.
+  // These two domain-specific view builders are retained temporarily because the
+  // current pages consume their Facts / Operations / route-drift projections.
+  // The shared v1alpha2 pipeline below remains authoritative for source pinning,
+  // manifest validation, raw artifacts, release publication and catalogs.
   if (component.id === 'ca-5gc-sim') await syncCa5gcSim(component);
   if (component.id === 'tool-common') await syncToolCommon(component);
 
