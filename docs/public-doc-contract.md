@@ -45,6 +45,8 @@ CA Docs 2.0 是一次不兼容升级：只接受 `connectionagent.io/v1alpha2`�
 - 每个来源必须声明 kind、path、role 和 publish 白名单；
 - 同一轮同步的 manifest 和 sources 都读取自同一个固定 commit；
 - OpenAPI / JSON Schema 原文只有在显式声明 `publish: [raw]` 时才复制到公开站点；
+- raw OpenAPI 的 server URL 只能是相对路径或明确公网 HTTP(S) 地址；loopback、私网、link-local、内部域名和占位主机名会阻止发布；
+- raw OpenAPI / JSON Schema 的相对 `$ref` 必须在同一批 raw allowlist 中形成完整引用闭包；远程 `$ref` 会阻止发布；
 - Markdown 正文只有在显式声明 `publish: [body]` 时才复制；
 - 实现检查只发布派生摘要，不发布源码正文；
 - 每个来源记录源路径、来源 commit 和 SHA-256。
@@ -56,6 +58,7 @@ CA Docs 2.0 是一次不兼容升级：只接受 `connectionagent.io/v1alpha2`�
 ```yaml
 releases:
   - releaseId: ca-skills-release-2026-11
+    publicationStatus: PUBLISHED
     releaseRecord:
       path: docs/releases/ca-sl-v1alpha5.md
       ref: 0123456789abcdef0123456789abcdef01234567
@@ -75,6 +78,7 @@ releases:
 规则：
 
 - `releaseId` 是 Owner Release Record 的唯一标识；
+- `publicationStatus` 必须是 `PUBLISHED`、`PREVIEW` 或 `WITHDRAWN`；`WITHDRAWN` 生成 tombstone，不再生成下载入口；此前已发布的不可变文件保留但不再进入目录；
 - `contractId + version` 是单个契约的稳定身份；
 - 一个 Owner Release 可以发布多个独立 Contract Version；
 - 每个 Contract Version 的全部 artifacts 来自它自己声明的完整 source commit；
@@ -170,7 +174,7 @@ Owner repository
   -> build and deploy static pages from committed public assets
 ```
 
-- 同步失败不能把旧快照标记为最新；
+- 同步失败不能把旧快照标记为最新；非严格模式会将已提交快照标记为 `sync.mode: stale` 并展示错误原因；严格模式直接失败；
 - 本地无 Token 时只使用仓库中已提交的快照，不读取或转换旧格式数据；
 - 严格同步模式下，任一 Owner 的 manifest、来源文件、引用或发布冲突失败都会使整轮同步失败；
 - 已发布路径已存在时，内容摘要必须一致，否则拒绝覆盖；
