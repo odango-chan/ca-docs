@@ -838,7 +838,6 @@ export async function buildSnapshot(
         contractId: contract.contractId,
         version: contract.version,
         lifecycleStatus: contract.lifecycleStatus,
-        publicationStatus: release.publicationStatus,
         sourceCommit: contract.source.ref,
         releaseRecord: {
           sourcePath: release.releaseRecord.path,
@@ -859,6 +858,7 @@ export async function buildSnapshot(
         contractId: contract.contractId,
         version: contract.version,
         lifecycleStatus: contract.lifecycleStatus,
+        publicationStatus: release.publicationStatus,
         sourceCommit: contract.source.ref,
         provenancePath: '/' + contractRoot + '/provenance.json',
         provenanceSha256: sha256(provenanceText),
