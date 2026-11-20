@@ -1,0 +1,71 @@
+---
+import SiteLayout from '../../../layouts/SiteLayout.astro';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+export async function getStaticPaths() {
+  const directory = path.resolve('data/generated');
+  const files = (await fs.readdir(directory)).filter((name) => name.endsWith('.json'));
+  const pages = [];
+  for (const file of files) {
+    const snapshot = JSON.parse(await fs.readFile(path.join(directory, file), 'utf8'));
+    for (const [index, source] of (snapshot.sources || []).entries()) {
+      if (source.kind !== 'openapi' || !source.rawArtifact?.url) continue;
+      pages.push({
+        params: { component: snapshot.component || path.basename(file, '.json'), source: String(index) },
+        props: { snapshot, source, sourceIndex: index },
+      });
+    }
+  }
+  return pages;
+}
+
+const { snapshot, source, sourceIndex } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const specUrl = `${base.replace(/\/?$/, '/')}${source.rawArtifact.url.replace(/^\/+/, '')}`;
+const title = source.metadata?.title || source.role || 'OpenAPI Reference';
+const commit = source.rawArtifact.sourceCommit || snapshot.source?.commit || 'unknown';
+const sourceLabel = `${snapshot.source?.repository || 'Owner'}@${commit.slice(0, 12)}`;
+---
+<SiteLayout title={`${title} · API Reference`} lang="zh">
+  <main class="api-reference-page">
+    <header class="api-reference-header">
+      <div>
+        <span class="eyebrow">{snapshot.component} / API Reference</span>
+        <h1>{title}</h1>
+        <p>{source.metadata?.description || 'Owner 发布的 OpenAPI 原始契约，由 Scalar 渲染。'}</p>
+        <p class="source-note">来源：<code>{sourceLabel}</code> · <code>{source.path}</code> · SHA-256 <code>{source.rawArtifact.sha256}</code></p>
+      </div>
+      <a class="download-link" href={`${base.replace(/\/?$/, '/')}${source.rawArtifact.url}`} download>下载原始 OpenAPI</a>
+    </header>
+    <div id="scalar-api-reference" class="scalar-host" aria-label="Interactive OpenAPI reference"></div>
+  </main>
+</SiteLayout>
+
+<script is:inline type="module" define:vars={{ specUrl }}>
+  import { createApiReference } from 'https://cdn.jsdelivr.net/npm/@scalar/api-reference@1.81.0/esm.js';
+
+  createApiReference('#scalar-api-reference', {
+    url: specUrl,
+    theme: 'default',
+    layout: 'modern',
+    showOperationId: true,
+    hideTestRequestButton: true,
+    hideClientButton: true,
+    documentDownloadType: 'yaml',
+    showDeveloperTools: 'never',
+    withDefaultFonts: false,
+    telemetry: false,
+  });
+</script>
+
+<style>
+  .api-reference-page { width: 100%; max-width: none; padding: 2rem clamp(1rem, 3vw, 3rem) 4rem; }
+  .api-reference-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; margin-bottom: 1.5rem; }
+  .api-reference-header h1 { margin: .35rem 0 .5rem; }
+  .api-reference-header p { max-width: 70rem; }
+  .source-note { color: var(--muted, #667085); font-size: .85rem; overflow-wrap: anywhere; }
+  .download-link { white-space: nowrap; border: 1px solid var(--border, #d0d5dd); border-radius: .6rem; padding: .65rem .9rem; text-decoration: none; }
+  .scalar-host { min-height: 80vh; width: 100%; }
+  @media (max-width: 760px) { .api-reference-header { display: block; } .download-link { display: inline-block; margin-top: .75rem; } }
+</style>
