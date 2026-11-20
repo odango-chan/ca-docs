@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import yaml from 'js-yaml';
 import { pinSourceContext } from './source-revision.mjs';
 import { parseManifest, validateSourcePath } from './public-docs-manifest.mjs';
+import { assertPublicOpenApiServers } from './public-openapi.mjs';
 
 const token = process.env.CA_DOCS_SOURCE_TOKEN || '';
 const strict = process.env.CA_DOCS_SYNC_STRICT === '1';
@@ -153,7 +154,11 @@ function summarizeJsonSchema(document, source) {
 
 export function summarizeDeclaredSource(source, sourceText) {
   const publish = new Set(source.publish || []);
-  if (source.kind === 'openapi') return summarizeOpenApi(yaml.load(sourceText), source);
+  if (source.kind === 'openapi') {
+    const document = yaml.load(sourceText);
+    if (publish.has('raw')) assertPublicOpenApiServers(document, source.path);
+    return summarizeOpenApi(document, source);
+  }
   if (source.kind === 'json-schema') return summarizeJsonSchema(yaml.load(sourceText), source);
   if (source.kind === 'markdown') {
     return {
