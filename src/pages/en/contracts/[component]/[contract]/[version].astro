@@ -6,6 +6,7 @@ export function getStaticPaths() {
   const paths = [];
   for (const { component, snapshot } of loadPublicCatalog()) {
     for (const release of snapshot.releases || []) {
+      if (release.publicationStatus === 'WITHDRAWN') continue;
       for (const contract of release.contracts || []) {
         paths.push({
           params: {
@@ -33,7 +34,7 @@ const releaseRecordRawUrl = base + release.releaseRecord.publicPath.replace(/^\/
   <section class="hero">
     <span class="eyebrow">{ownerTitle} / Released Contract</span>
     <h1>{contract.contractId}</h1>
-    <p class="lede">Contract version <code>{contract.version}</code> · Lifecycle <strong>{contract.lifecycleStatus}</strong></p>
+    <p class="lede">Contract version <code>{contract.version}</code> · Lifecycle <strong>{contract.lifecycleStatus}</strong> · Publication <strong>{release.publicationStatus}</strong> · Publication <strong>{release.publicationStatus}</strong> · Publication <strong>{release.publicationStatus}</strong> · Publication <strong>{release.publicationStatus}</strong> · Publication <strong>{release.publicationStatus}</strong></p>
     <div class="page-tabs">
       <a href={href('/en/contracts/')}>Contract Catalog</a>
       <a href={href('/en/releases/')}>Owner Releases</a>
