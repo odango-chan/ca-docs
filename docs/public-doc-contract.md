@@ -140,6 +140,8 @@ releases:
 
 `raw` 只适用于 OpenAPI / JSON Schema sources，表示 Owner 明确授权发布原始文件。正式 Released Contract 的 artifacts 始终作为不可变文件快照保存。
 
+启用 `raw` 的 OpenAPI / JSON Schema 必须满足引用闭包：所有相对 `$ref` 目标都必须在同一批 raw allowlist 中；禁止远程 `$ref`，避免构建依赖未固定的外部内容。OpenAPI 的 server URL 只能使用相对路径或明确的公网 HTTP(S) 地址；loopback、RFC1918、link-local、内部域名和未解析的占位主机名会阻止发布。
+
 ## 6. 同步、版本与失败处理
 
 同步流程：
