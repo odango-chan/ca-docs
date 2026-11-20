@@ -36,7 +36,7 @@ export function assertPublicOpenApiServers(document, sourcePath = '(OpenAPI)') {
       throw new Error(`invalid OpenAPI server URL in ${sourcePath}`);
     }
     const value = raw.trim();
-    if (value.startsWith('/')) continue;
+    if (value.startsWith('/') && !value.startsWith('//')) continue;
 
     let parsed;
     try {
