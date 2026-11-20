@@ -14,7 +14,7 @@ export function validateSourcePath(sourcePath) {
   if (typeof sourcePath !== 'string' || sourcePath.length === 0) {
     throw new Error(`invalid public-doc source path ${sourcePath}`);
   }
-  if (sourcePath.startsWith('/') || sourcePath.includes('\\\\') || /^[A-Za-z]:/.test(sourcePath)) {
+  if (sourcePath.startsWith('/') || sourcePath.includes(String.fromCharCode(92)) || /^[A-Za-z]:/.test(sourcePath)) {
     throw new Error(`invalid public-doc source path ${sourcePath}`);
   }
   const segments = sourcePath.split('/');
