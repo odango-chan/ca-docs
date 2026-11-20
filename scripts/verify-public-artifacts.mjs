@@ -58,6 +58,15 @@ for (const component of registry.components || []) {
   }
 
   for (const release of snapshot.releases || []) {
+    if (release.publicationStatus === 'WITHDRAWN') {
+      if (release.contracts.some((contract) => contract.artifacts.length !== 0 || contract.provenancePath !== null)) {
+        throw new Error(component.id + '/' + release.releaseId + ': withdrawn release must be a tombstone without published artifact links');
+      }
+      continue;
+    }
+    if (!['PUBLISHED', 'PREVIEW'].includes(release.publicationStatus)) {
+      throw new Error(component.id + '/' + release.releaseId + ': invalid publication status');
+    }
     await assertDigest(
       release.releaseRecord.publicPath,
       release.releaseRecord.sha256,
@@ -78,8 +87,11 @@ for (const component of registry.components || []) {
       if (
         provenance.component !== component.id ||
         provenance.releaseId !== release.releaseId ||
+        provenance.publicationStatus !== release.publicationStatus ||
         provenance.contractId !== contract.contractId ||
         provenance.version !== contract.version ||
+        provenance.publicationStatus !== contract.publicationStatus ||
+        contract.publicationStatus !== release.publicationStatus ||
         provenance.sourceCommit !== contract.sourceCommit
       ) {
         throw new Error(component.id + '/' + contract.contractId + ': provenance identity mismatch');
