@@ -28,7 +28,7 @@ const commit = source.rawArtifact.sourceCommit || snapshot.source?.commit || 'un
 const sourceLabel = `${snapshot.source?.repository || 'Owner'}@${commit.slice(0, 12)}`;
 ---
 <SiteLayout title={`${title} · API Reference`} lang="zh">
-  <main class="api-reference-page">
+  <div class="api-reference-page">
     <header class="api-reference-header">
       <div>
         <span class="eyebrow">{snapshot.component} / API Reference</span>
@@ -39,7 +39,7 @@ const sourceLabel = `${snapshot.source?.repository || 'Owner'}@${commit.slice(0,
       <a class="download-link" href={`${base.replace(/\/?$/, '/')}${source.rawArtifact.url}`} download>下载原始 OpenAPI</a>
     </header>
     <div id="scalar-api-reference" class="scalar-host" aria-label="Interactive OpenAPI reference"></div>
-  </main>
+  </div>
 </SiteLayout>
 
 <script is:inline type="module" define:vars={{ specUrl }}>
@@ -60,6 +60,7 @@ const sourceLabel = `${snapshot.source?.repository || 'Owner'}@${commit.slice(0,
 </script>
 
 <style>
+  :global(.docs-article) { max-width: none; }
   .api-reference-page { width: 100%; max-width: none; padding: 2rem clamp(1rem, 3vw, 3rem) 4rem; }
   .api-reference-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; margin-bottom: 1.5rem; }
   .api-reference-header h1 { margin: .35rem 0 .5rem; }
