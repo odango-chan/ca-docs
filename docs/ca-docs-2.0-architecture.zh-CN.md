@@ -216,6 +216,7 @@ sources:
 
 releases:
   - releaseId: ca-skills-release-record-v1alpha5
+    publicationStatus: PUBLISHED
     releaseRecord:
       path: docs/releases/ca-sl-v1alpha5.md
       ref: <release-record-commit>
