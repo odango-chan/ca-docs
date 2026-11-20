@@ -21,6 +21,7 @@ function getPublishedSources(snapshot, kind) {
     .map((source) => ({ ...source, schemaGroup: 'living' }));
   const released = [];
   for (const release of snapshot.releases || []) {
+    if (release.publicationStatus === 'WITHDRAWN') continue;
     for (const contract of release.contracts || []) {
       for (const artifact of contract.artifacts || []) {
         if (artifact.kind !== kind || !artifact.summary) continue;
@@ -32,6 +33,7 @@ function getPublishedSources(snapshot, kind) {
           contractId: contract.contractId,
           contractVersion: contract.version,
           lifecycleStatus: contract.lifecycleStatus,
+          publicationStatus: release.publicationStatus,
           sourceCommit: contract.sourceCommit,
           schemaGroup: contract.contractId + '@' + contract.version,
         });
