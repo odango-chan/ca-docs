@@ -368,9 +368,12 @@ async function fallback(snapshotPath, error) {
   if (strict) throw error;
   try {
     const current = JSON.parse(await fs.readFile(snapshotPath, 'utf8'));
-    console.warn(`${current.component}: ${error.message}; using published snapshot ${current.source?.commit || 'unknown'}`);
-  } catch {
-    throw error;
+    current.sync = { mode: 'stale', detail: error.message, observedAt: new Date().toISOString() };
+    await fs.writeFile(snapshotPath, JSON.stringify(current, null, 2) + '\n');
+    console.warn(`${current.component}: ${error.message}; serving stale snapshot ${current.source?.commit || 'unknown'}`);
+  } catch (readError) {
+    if (readError.code === 'ENOENT') throw error;
+    throw readError;
   }
 }
 
@@ -384,11 +387,9 @@ export async function syncManifest(component) {
   }
   try {
     const rev = await sourceRevision(context);
-    // Resolve the moving ref once, then read the manifest and every declared file
-    // from that exact commit. This prevents a moving branch from producing a
-    // snapshot whose provenance points at a different revision than its content.
     const pinnedContext = pinSourceContext(context, rev);
     const manifestText = await fetchText(pinnedContext, component.manifest || 'docs/public-docs.yaml');
+    const manifest = parseManifest(manifestText, component.sourceIdentity || component.id);
     const snapshot = await buildSnapshot(
       component,
       manifestText,
@@ -396,9 +397,38 @@ export async function syncManifest(component) {
       rev,
       (sourcePath) => fetchText(pinnedContext, sourcePath),
     );
+    const published = await publishManifestArtifacts(component, manifest, pinnedContext, rev);
+    for (const artifact of published.rawArtifacts) {
+      const source = snapshot.sources.find((item) => item.path === artifact.sourcePath);
+      if (source) {
+        source.rawArtifact = {
+          url: artifact.url,
+          mediaType: artifact.mediaType,
+          sha256: artifact.sha256,
+          size: artifact.size,
+          sourceCommit: artifact.sourceCommit,
+        };
+      }
+    }
+
+    let existing = {};
+    try {
+      existing = JSON.parse(await fs.readFile(snapshotPath, 'utf8'));
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+    }
+    const mergedSnapshot = {
+      ...snapshot,
+      ...existing,
+      component: existing.component || component.id,
+      title: snapshot.title,
+      source: { ...(existing.source || {}), ...snapshot.source },
+      sources: snapshot.sources,
+      sync: { mode: 'published', detail: null },
+    };
     await fs.mkdir(path.dirname(snapshotPath), { recursive: true });
-    await fs.writeFile(snapshotPath, JSON.stringify(snapshot, null, 2) + '\n');
-    console.log(`${component.id}: refreshed ${snapshot.sources.length} declared public sources from ${rev.commit}`);
+    await fs.writeFile(snapshotPath, JSON.stringify(mergedSnapshot, null, 2) + '\n');
+    console.log(`${component.id}: refreshed ${snapshot.sources.length} declared public sources, ${published.catalog.releases.length} releases from ${rev.commit}`);
   } catch (error) {
     await fallback(snapshotPath, error instanceof Error ? error : new Error(String(error)));
   }
