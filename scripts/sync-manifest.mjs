@@ -27,7 +27,7 @@ async function fetchBytes(context, sourcePath) {
   if (!response.ok) throw new Error(`failed to fetch declared source ${rel}: HTTP ${response.status}`);
   const body = await response.json();
   if (!body?.content || body.encoding !== 'base64') throw new Error(`unexpected response while reading ${rel}`);
-  return Buffer.from(body.content.replace(/\\n/g, ''), 'base64');
+  return Buffer.from(body.content.replace(/\n/g, ''), 'base64');
 }
 
 async function fetchText(context, sourcePath) {
@@ -300,7 +300,7 @@ async function publishManifestArtifacts(component, manifest, context, revision) 
         artifacts,
       };
       const provenancePath = `contracts/${component.id}/${contract.contractId}/${contract.version}/.ca-provenance.json`;
-      await writeImmutableArtifact(provenancePath, JSON.stringify(provenance, null, 2) + '\\n');
+      await writeImmutableArtifact(provenancePath, JSON.stringify(provenance, null, 2) + '\n');
       contracts.push(provenance);
     }
 
@@ -326,7 +326,7 @@ async function publishManifestArtifacts(component, manifest, context, revision) 
   };
   const catalogPath = path.resolve('data/catalog', `${component.id}.json`);
   await fs.mkdir(path.dirname(catalogPath), { recursive: true });
-  await fs.writeFile(catalogPath, JSON.stringify(catalog, null, 2) + '\\n');
+  await fs.writeFile(catalogPath, JSON.stringify(catalog, null, 2) + '\n');
   return { rawArtifacts, catalog };
 }
 
@@ -360,8 +360,8 @@ export async function buildCatalogIndex() {
     throw new Error('multiple latest pointers for a Contract ID across Owner catalogs');
   }
   await fs.mkdir(directory, { recursive: true });
-  await fs.writeFile(path.join(directory, 'contracts.json'), JSON.stringify({ contracts }, null, 2) + '\\n');
-  await fs.writeFile(path.join(directory, 'releases.json'), JSON.stringify({ releases }, null, 2) + '\\n');
+  await fs.writeFile(path.join(directory, 'contracts.json'), JSON.stringify({ contracts }, null, 2) + '\n');
+  await fs.writeFile(path.join(directory, 'releases.json'), JSON.stringify({ releases }, null, 2) + '\n');
 }
 
 async function fallback(snapshotPath, error) {
