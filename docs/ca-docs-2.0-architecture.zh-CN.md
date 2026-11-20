@@ -459,26 +459,26 @@ ca-docs/
 
 ### Phase 1 — 发布契约基础设施
 
-- [ ] 定义并测试唯一受支持的 `PublicDocsManifest v1alpha2`
+- [x] 定义并测试唯一受支持的 `PublicDocsManifest v1alpha2`
 - [ ] 将所有已接入 Owner 的 manifest 一次性迁移到 v1alpha2
-- [ ] 删除 v1alpha1 parser、legacy fallback 和历史专用同步适配器
+- [x] 删除 v1alpha1 parser、legacy fallback 和历史专用同步适配器
 - [ ] 从 Owner 授权源重新生成全部 `data/generated/` 快照，不迁移旧快照格式
-- [ ] 实现不可变 source ref 解析
-- [ ] 实现 release/artifact 白名单和路径安全校验
-- [ ] 实现 SHA-256 计算和 provenance 记录
-- [ ] 实现 append-only 快照写入与同版本冲突拒绝
-- [ ] 生成 Contract / Release Catalog
+- [x] 实现不可变 source ref 解析
+- [x] 实现 release/artifact 白名单和路径安全校验
+- [x] 实现 SHA-256 计算和 provenance 记录
+- [x] 实现 append-only 快照写入与同版本冲突拒绝
+- [x] 生成 Contract / Release Catalog
 - [ ] 为撤回、废弃和 latest 指针定义行为
-- [ ] 增加私有源读取失败、过期快照和同步时间的明确诊断
+- [x] 增加私有源读取失败、过期快照和同步时间的明确诊断
 
 ### Phase 2 — CA Docs 产品定位与导航
 
 - [ ] Sandbox Docs → CA Docs 品牌和首页
-- [ ] 导航增加 Contracts / API Reference / Releases
+- [x] 导航增加 Contracts / API Reference / Releases
 - [ ] Sandbox 现有内容迁移到 Architecture / Components
-- [ ] 保留中文默认和英文页面
+- [x] 保留中文默认和英文页面
 - [ ] 增加全站搜索或契约目录过滤
-- [ ] 显示源仓、commit、版本和同步时间
+- [x] 显示源仓、commit、版本和同步时间
 
 ### Phase 3 — API 与 Schema 可视化
 
