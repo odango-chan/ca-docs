@@ -316,11 +316,11 @@ export async function syncCa5gcSim(component) {
 
     if (
       !manifest ||
-      manifest.apiVersion !== 'connectionagent.io/v1alpha1' ||
+      manifest.apiVersion !== 'connectionagent.io/v1alpha2' ||
       manifest.kind !== 'PublicDocsManifest' ||
       !sourceIdentityMatches(manifest, component)
     ) {
-      throw new Error(`invalid PublicDocsManifest at ${manifestPath}`);
+      throw new Error(`invalid PublicDocsManifest v1alpha2 at ${manifestPath}`);
     }
 
     const openApiSource = requireSource(manifest, 'owner-provider-http-api', 'openapi', ['operations']);
