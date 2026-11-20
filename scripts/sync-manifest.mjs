@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import yaml from 'js-yaml';
 import { pinSourceContext } from './source-revision.mjs';
 import { parseManifest, validateSourcePath } from './public-docs-manifest.mjs';
-import { assertPublicOpenApiServers } from './public-openapi.mjs';
+import { assertDeclaredReferenceClosure, assertPublicOpenApiServers } from './public-openapi.mjs';
 
 const token = process.env.CA_DOCS_SOURCE_TOKEN || '';
 const strict = process.env.CA_DOCS_SYNC_STRICT === '1';
@@ -238,12 +238,22 @@ async function writeImmutableArtifact(relativePath, content) {
 
 async function publishManifestArtifacts(component, manifest, context, revision) {
   const rawArtifacts = [];
-  for (const source of manifest.sources) {
-    if (!(source.publish || []).includes('raw')) continue;
+  const rawSources = manifest.sources.filter((source) => (source.publish || []).includes('raw'));
+  for (const source of rawSources) {
     if (!['openapi', 'json-schema'].includes(source.kind)) {
       throw new Error(`raw publication is not supported for source kind ${source.kind}`);
     }
-    const bytes = await fetchBytes(context, source.path);
+  }
+  const rawEntries = await Promise.all(rawSources.map(async (source) => ({
+    source,
+    bytes: await fetchBytes(context, source.path),
+  })));
+  const rawDocuments = new Map(rawEntries.map(({ source, bytes }) => [
+    source.path,
+    yaml.load(bytes.toString('utf8')),
+  ]));
+  assertDeclaredReferenceClosure(rawDocuments, rawEntries.map(({ source }) => source.path));
+  for (const { source, bytes } of rawEntries) {
     const relativePath = `source-artifacts/${component.id}/${revision.commit}/${source.path}`;
     const written = await writeImmutableArtifact(relativePath, bytes);
     rawArtifacts.push({
@@ -269,8 +279,22 @@ async function publishManifestArtifacts(component, manifest, context, revision) 
       const artifacts = [];
       if (release.publicationStatus !== 'WITHDRAWN') {
         const contractContext = { ...context, ref: contract.source.ref };
-        for (const artifact of contract.artifacts) {
-          const bytes = await fetchBytes(contractContext, artifact.path);
+        const contractEntries = await Promise.all(contract.artifacts.map(async (artifact) => ({
+          artifact,
+          bytes: await fetchBytes(contractContext, artifact.path),
+        })));
+        const contractSchemaEntries = contractEntries.filter(({ artifact }) =>
+          ['openapi', 'json-schema'].includes(artifact.kind),
+        );
+        const contractDocuments = new Map(contractSchemaEntries.map(({ artifact, bytes }) => [
+          artifact.path,
+          yaml.load(bytes.toString('utf8')),
+        ]));
+        assertDeclaredReferenceClosure(
+          contractDocuments,
+          contractSchemaEntries.map(({ artifact }) => artifact.path),
+        );
+        for (const { artifact, bytes } of contractEntries) {
           const publicPath = `contracts/${component.id}/${contract.contractId}/${contract.version}/${artifact.path}`;
           const written = await writeImmutableArtifact(publicPath, bytes);
           artifacts.push({
