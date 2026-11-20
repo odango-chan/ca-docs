@@ -157,7 +157,7 @@ export async function syncToolCommon(component) {
     const pinnedCtx = pinSourceContext(ctx, rev);
     const manifestText = await fetchText(pinnedCtx, manifestPath);
     const manifest = yaml.load(manifestText);
-    if (!manifest || manifest.kind !== 'PublicDocsManifest' || manifest.component !== component.id) {
+    if (!manifest || manifest.apiVersion !== 'connectionagent.io/v1alpha2' || manifest.kind !== 'PublicDocsManifest' || manifest.component !== component.id) {
       throw new Error(`invalid PublicDocsManifest at ${manifestPath}`);
     }
 
