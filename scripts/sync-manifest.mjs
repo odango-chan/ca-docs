@@ -667,9 +667,13 @@ export async function buildSnapshot(
   assertManifest(manifest, component);
   const publicFiles = new Map();
 
+  const rawDocuments = new Map();
   const sources = await Promise.all(
     manifest.sources.map(async (source) => {
       const sourceText = await readSource(source.path, context.ref);
+      if (source.publish.includes('raw') && ['openapi', 'json-schema'].includes(source.kind)) {
+        rawDocuments.set(source.path, parseYamlDocument(sourceText, source));
+      }
       const summary = summarizeDeclaredSource(source, sourceText);
       if (source.publish.includes('raw')) {
         const publicPath =
@@ -685,6 +689,9 @@ export async function buildSnapshot(
       return summary;
     }),
   );
+  if (rawDocuments.size > 0) {
+    assertReferenceClosure(rawDocuments, rawDocuments.keys(), 'raw OpenAPI / JSON Schema');
+  }
 
   const releases = [];
   for (const release of manifest.releases) {
