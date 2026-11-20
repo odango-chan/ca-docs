@@ -34,11 +34,11 @@ sources:
   - kind: openapi
     path: schemas/v1alpha1/service-fabric.openapi.yaml
     role: business-api
-    publish: [metadata, operations, fields]
+    publish: [metadata, operations, fields, raw]
   - kind: json-schema
     path: schemas/v1alpha1/network-observation-result.schema.yaml
     role: network-observation-result
-    publish: [metadata, fields]
+    publish: [metadata, fields, raw]
   - kind: markdown
     path: docs/public/overview.zh-CN.md
     role: overview
@@ -98,6 +98,7 @@ Markdown 正文会显示在对应语言的组件页面中。正文开头的一�
 | `examples` | owner 明确允许公开的示例 |
 | `body` | owner 明确允许公开的 Markdown 正文 |
 | `implementation-summary` | 实现检查的派生结果，不含源码正文 |
+| `raw` | OpenAPI / JSON Schema 原始文件；按来源 commit 固定保存并计算 SHA-256 |
 
 未知来源类型、越界路径、非法 manifest 或不允许的 publish 组合必须使同步失败。
 
@@ -149,11 +150,12 @@ owner repository
   -> read docs/public-docs.yaml at that commit
   -> validate manifest and read only declared paths
   -> generate sanitized snapshot with source provenance
-  -> commit snapshot to ca-docs
-  -> build and deploy static pages from committed snapshots
+  -> publish raw / released artifacts into immutable public paths
+  -> generate per-owner and global contract catalogs
+  -> build and deploy static pages
 ```
 
-Manifest 和所有来源文件必须读取自同一个不可变 commit，避免快照内容与记录的来源版本不一致。同步失败时严格模式必须失败；不能把旧快照标成最新。Pages 构建只读取已提交的 public snapshot，不接触 private token。
+Living Documentation 的 manifest 和所有 sources 必须读取自同一个不可变 commit。Released Contract 的每个 contract artifacts 必须读取自该 contract 声明的 source.ref，release record 读取自自身声明的 releaseRecord.ref。，避免快照内容与记录的来源版本不一致。同步失败时严格模式必须失败；不能把旧快照标成最新。Pages 构建只读取已提交的 public snapshot，不接触 private token。
 
 ## 7. 权限
 
