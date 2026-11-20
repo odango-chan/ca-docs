@@ -1,10 +1,10 @@
-# Sandbox Docs 公开文档契约
+# CA Docs 公开文档契约
 
-Sandbox Docs 是跨仓文档入口，不是机器契约或实现的第二份事实源。每个 owner 仓决定哪些内容适合公开，并通过 `docs/public-docs.yaml` 明确声明；门户只读取声明的文件，生成带来源版本的公开快照。
+CA Docs 是跨仓文档入口，不是机器契约或实现的第二份事实源。每个 owner 仓决定哪些内容适合公开，并通过 `docs/public-docs.yaml` 明确声明；门户只读取声明的文件，生成带来源版本的公开快照。
 
 ## 1. 组件注册表
 
-过渡期注册表位于 `data/components.yaml`。它决定来源仓、公开站使用的组件 ID、显示名称和同步方式。
+组件注册表位于 `data/components.yaml`。它决定来源仓、公开站使用的组件 ID、显示名称和同步方式。
 
 ```yaml
 - id: env-fabric
@@ -24,7 +24,7 @@ Sandbox Docs 是跨仓文档入口，不是机器契约或实现的第二份事�
 每个来源仓的 `docs/public-docs.yaml` 采用 `PublicDocsManifest` 契约：
 
 ```yaml
-apiVersion: connectionagent.io/v1alpha1
+apiVersion: connectionagent.io/v1alpha2
 kind: PublicDocsManifest
 component: env-fabric
 title:
@@ -46,7 +46,7 @@ sources:
     publish: [metadata, body]
 ```
 
-机器约束位于 `schemas/v1alpha1/public-docs-manifest.schema.yaml`。Manifest 中每个来源都必须显式声明 `publish`；缺省不表示“全部公开”。
+机器约束位于 `schemas/v1alpha2/public-docs-manifest.schema.yaml`。Manifest 中每个来源都必须显式声明 `publish`；缺省不表示“全部公开”。
 
 ## 3. 支持的来源类型
 
@@ -101,7 +101,45 @@ Markdown 正文会显示在对应语言的组件页面中。正文开头的一�
 
 未知来源类型、越界路径、非法 manifest 或不允许的 publish 组合必须使同步失败。
 
-## 5. 同步、版本与失败处理
+## 5. Released Contracts
+
+正式契约通过 manifest 的 `releases` 声明发布。即使 Owner 当前没有正式契约版本，也必须显式写入 `releases: []`。
+
+```yaml
+releases:
+  - releaseId: ca-skills-release-2026-11
+    publicationStatus: PUBLISHED
+    releaseRecord:
+      path: docs/releases/ca-sl-v1alpha5.md
+      ref: 0123456789abcdef0123456789abcdef01234567
+    contracts:
+      - contractId: ca-sl
+        version: v1alpha5
+        lifecycleStatus: FROZEN
+        latest: true
+        source:
+          ref: 0123456789abcdef0123456789abcdef01234567
+        artifacts:
+          - kind: specification
+            path: docs/skill-language-spec.v1alpha5.zh-CN.md
+            mediaType: text/markdown
+            language: zh
+```
+
+规则：
+
+- `releaseId` 标识 Owner 的一次发布；`contractId + version` 标识独立契约版本。
+- `publicationStatus` 是 PUBLISHED、PREVIEW 或 WITHDRAWN；撤回通过 tombstone 保留历史，不删除既有公开快照。
+- `lifecycleStatus` 描述契约生命周期，与产品 Qualification Claim 分开。
+- `releaseRecord.ref` 和每个契约的 `source.ref` 必须是完整 40 位 commit SHA。
+- 同一契约版本的所有 artifact 必须来自其声明的同一个 `source.ref`。
+- `latest: true` 每个 Contract ID 最多只能有一个，且只能指向 PUBLISHED 版本。
+- 同一 Contract ID + Version 的 artifact 或 provenance 内容发生变化时，同步必须失败，不能覆盖。
+- CA Docs 不接受 v1alpha1 Manifest，不提供双格式解析、fallback 或旧快照格式迁移。
+
+`raw` 只适用于 OpenAPI / JSON Schema sources，表示 Owner 明确授权发布原始文件。正式 Released Contract 的 artifacts 始终作为不可变文件快照保存。
+
+## 6. 同步、版本与失败处理
 
 同步流程：
 
@@ -117,13 +155,13 @@ owner repository
 
 Manifest 和所有来源文件必须读取自同一个不可变 commit，避免快照内容与记录的来源版本不一致。同步失败时严格模式必须失败；不能把旧快照标成最新。Pages 构建只读取已提交的 public snapshot，不接触 private token。
 
-## 6. 权限
+## 7. 权限
 
 `CA_DOCS_SOURCE_TOKEN` 只用于同步 workflow。它只需要对已接入的 private 来源仓有 `Contents: Read-only` 权限，不应授予写权限，也不应传给 GitHub Pages 构建任务。
 
 当前接入来源包括 `sandbox`、`ca-benchmarks`、`ca-benchmark-engine`、`env-fabric`、`tool-common` 和 `env-5gc-sim`。新增 private 来源前，应先把仓库加入 token 的 Repository access，再将其设为 active。
 
-## 7. 页面模型
+## 8. 页面模型
 
 manifest 声明的来源类型决定组件页面的内容：
 
