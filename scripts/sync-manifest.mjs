@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { isIP } from 'node:net';
 import yaml from 'js-yaml';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { pinSourceContext } from './source-revision.mjs';
@@ -160,6 +161,104 @@ function parseYamlDocument(sourceText, source) {
   return document;
 }
 
+function isPrivateIpv4(address) {
+  const parts = address.split('.').map(Number);
+  if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return true;
+  const [a, b] = parts;
+  return a === 0 || a === 10 || a === 127 || a >= 224 ||
+    (a === 169 && b === 254) ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && b === 168) ||
+    (a === 100 && b >= 64 && b <= 127) ||
+    (a === 198 && (b === 18 || b === 19)) ||
+    (a === 192 && b === 0);
+}
+
+function isPrivateIpv6(address) {
+  const value = address.toLowerCase();
+  return value === '::' || value === '::1' || value.startsWith('fc') ||
+    value.startsWith('fd') || value.startsWith('fe8') ||
+    value.startsWith('fe9') || value.startsWith('fea') ||
+    value.startsWith('feb') || value.startsWith('ff');
+}
+
+function assertPublicOpenApiServers(document, sourcePath) {
+  const servers = [...(document.servers || [])];
+  for (const pathItem of Object.values(document.paths || {})) {
+    servers.push(...(pathItem?.servers || []));
+    for (const method of HTTP_METHODS) servers.push(...(pathItem?.[method]?.servers || []));
+  }
+  for (const server of servers) {
+    const raw = server?.url;
+    if (typeof raw !== 'string' || !raw.trim()) {
+      throw new Error('invalid OpenAPI server URL in ' + sourcePath);
+    }
+    const value = raw.trim();
+    if (value.startsWith('/') && !value.startsWith('//')) continue;
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(value) && !value.startsWith('//')) continue;
+    if (value.startsWith('//')) {
+      throw new Error('protocol-relative OpenAPI server URL is not publishable in ' + sourcePath + ': ' + value);
+    }
+    let parsed;
+    try {
+      parsed = new URL(value.replace(/\\{[^}]+\\}/g, 'placeholder'));
+    } catch {
+      throw new Error('unresolvable OpenAPI server URL in ' + sourcePath + ': ' + value);
+    }
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      throw new Error('non-HTTP OpenAPI server URL is not publishable in ' + sourcePath + ': ' + value);
+    }
+    const host = parsed.hostname.replace(/^\\[|\\]$/g, '').toLowerCase();
+    const ipVersion = isIP(host);
+    const privateHost = host === 'localhost' || host.endsWith('.localhost') ||
+      host.endsWith('.local') || host.endsWith('.internal') ||
+      host.endsWith('.cluster.local') || host.endsWith('.svc') ||
+      host.endsWith('.test') || host.endsWith('.example') ||
+      host.endsWith('.invalid') || !host.includes('.') ||
+      (ipVersion === 4 && isPrivateIpv4(host)) ||
+      (ipVersion === 6 && isPrivateIpv6(host));
+    if (privateHost) {
+      throw new Error('private or placeholder OpenAPI server URL is not publishable in ' + sourcePath + ': ' + value);
+    }
+  }
+}
+
+function collectReferences(value, output = []) {
+  if (Array.isArray(value)) {
+    for (const item of value) collectReferences(item, output);
+  } else if (value && typeof value === 'object') {
+    if (typeof value.$ref === 'string') output.push(value.$ref);
+    for (const child of Object.values(value)) collectReferences(child, output);
+  }
+  return output;
+}
+
+function assertReferenceClosure(documents, declaredPaths, label) {
+  const declared = new Set(declaredPaths);
+  for (const [sourcePath, document] of documents) {
+    for (const reference of collectReferences(document)) {
+      const referencePath = reference.split('#')[0];
+      if (!referencePath) continue;
+      if (/^[a-z][a-z0-9+.-]*:/i.test(referencePath) || referencePath.startsWith('//')) {
+        throw new Error('remote ' + label + ' reference is not publishable: ' + sourcePath + ' -> ' + reference);
+      }
+      let decoded;
+      try {
+        decoded = decodeURIComponent(referencePath);
+      } catch {
+        throw new Error('invalid encoded ' + label + ' reference: ' + sourcePath + ' -> ' + reference);
+      }
+      const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(sourcePath), decoded));
+      if (resolved === '..' || resolved.startsWith('../') || path.posix.isAbsolute(resolved)) {
+        throw new Error(label + ' reference escapes Owner repository: ' + sourcePath + ' -> ' + reference);
+      }
+      if (!declared.has(resolved)) {
+        throw new Error('undeclared ' + label + ' reference: ' + sourcePath + ' -> ' + resolved);
+      }
+    }
+  }
+}
+
 function schemaName(ref) {
   if (typeof ref !== 'string') return null;
   const marker = '#/components/schemas/';
@@ -258,6 +357,7 @@ function summarizeOpenApi(document, source) {
   }
 
   const publish = new Set(source.publish || []);
+  if (publish.has('raw')) assertPublicOpenApiServers(document, source.path);
   const result = {
     kind: source.kind,
     role: source.role || null,
