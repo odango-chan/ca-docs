@@ -201,6 +201,169 @@ export async function buildSnapshot(component, manifestText, context, revision, 
   };
 }
 
+function inferMediaType(sourcePath, fallback = 'application/octet-stream') {
+  const extension = path.extname(sourcePath).toLowerCase();
+  if (extension === '.yaml' || extension === '.yml') return 'application/yaml';
+  if (extension === '.json') return 'application/json';
+  if (extension === '.md' || extension === '.markdown') return 'text/markdown';
+  if (extension === '.txt') return 'text/plain';
+  return fallback;
+}
+
+async function writeImmutableArtifact(relativePath, content) {
+  const rel = validateSourcePath(relativePath);
+  const root = path.resolve('public');
+  const target = path.resolve(root, ...rel.split('/'));
+  if (!target.startsWith(root + path.sep)) throw new Error(`public artifact path escapes public/: ${rel}`);
+  const bytes = Buffer.isBuffer(content) ? content : Buffer.from(String(content), 'utf8');
+  const sha256 = createHash('sha256').update(bytes).digest('hex');
+  await fs.mkdir(path.dirname(target), { recursive: true });
+  try {
+    const current = await fs.readFile(target);
+    const currentHash = createHash('sha256').update(current).digest('hex');
+    if (currentHash !== sha256) {
+      throw new Error(`immutable artifact conflict at public/${rel}: existing SHA-256 ${currentHash}, incoming ${sha256}`);
+    }
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    await fs.writeFile(target, bytes, { flag: 'wx' });
+  }
+  return { path: rel, sha256, size: bytes.length };
+}
+
+async function publishManifestArtifacts(component, manifest, context, revision) {
+  const rawArtifacts = [];
+  for (const source of manifest.sources) {
+    if (!(source.publish || []).includes('raw')) continue;
+    if (!['openapi', 'json-schema'].includes(source.kind)) {
+      throw new Error(`raw publication is not supported for source kind ${source.kind}`);
+    }
+    const bytes = await fetchBytes(context, source.path);
+    const relativePath = `source-artifacts/${component.id}/${revision.commit}/${source.path}`;
+    const written = await writeImmutableArtifact(relativePath, bytes);
+    rawArtifacts.push({
+      sourcePath: source.path,
+      kind: source.kind,
+      url: written.path,
+      mediaType: inferMediaType(source.path),
+      sha256: written.sha256,
+      size: written.size,
+      sourceCommit: revision.commit,
+    });
+  }
+
+  const releases = [];
+  for (const release of manifest.releases) {
+    const recordContext = { ...context, ref: release.releaseRecord.ref };
+    const recordBytes = await fetchBytes(recordContext, release.releaseRecord.path);
+    const recordPath = `releases/${component.id}/${release.releaseId}/${path.basename(release.releaseRecord.path)}`;
+    const record = await writeImmutableArtifact(recordPath, recordBytes);
+    const contracts = [];
+
+    for (const contract of release.contracts) {
+      const artifacts = [];
+      if (release.publicationStatus !== 'WITHDRAWN') {
+        const contractContext = { ...context, ref: contract.source.ref };
+        for (const artifact of contract.artifacts) {
+          const bytes = await fetchBytes(contractContext, artifact.path);
+          const publicPath = `contracts/${component.id}/${contract.contractId}/${contract.version}/${artifact.path}`;
+          const written = await writeImmutableArtifact(publicPath, bytes);
+          artifacts.push({
+            kind: artifact.kind,
+            title: artifact.title || path.basename(artifact.path),
+            language: artifact.language || null,
+            sourcePath: artifact.path,
+            url: written.path,
+            mediaType: artifact.mediaType,
+            sha256: written.sha256,
+            size: written.size,
+          });
+        }
+      }
+
+      const provenance = {
+        owner: component.repository,
+        component: component.id,
+        releaseId: release.releaseId,
+        publicationStatus: release.publicationStatus,
+        contractId: contract.contractId,
+        version: contract.version,
+        lifecycleStatus: contract.lifecycleStatus,
+        latest: contract.latest === true,
+        sourceCommit: contract.source.ref,
+        releaseRecord: {
+          sourceCommit: release.releaseRecord.ref,
+          sourcePath: release.releaseRecord.path,
+          url: record.path,
+          sha256: record.sha256,
+        },
+        artifacts,
+      };
+      const provenancePath = `contracts/${component.id}/${contract.contractId}/${contract.version}/.ca-provenance.json`;
+      await writeImmutableArtifact(provenancePath, JSON.stringify(provenance, null, 2) + '\\n');
+      contracts.push(provenance);
+    }
+
+    releases.push({
+      releaseId: release.releaseId,
+      publicationStatus: release.publicationStatus,
+      releaseRecord: {
+        sourcePath: release.releaseRecord.path,
+        sourceCommit: release.releaseRecord.ref,
+        url: record.path,
+        sha256: record.sha256,
+      },
+      contracts,
+    });
+  }
+
+  const catalog = {
+    component: component.id,
+    owner: component.repository,
+    sourceCommit: revision.commit,
+    generatedAt: new Date().toISOString(),
+    releases,
+  };
+  const catalogPath = path.resolve('data/catalog', `${component.id}.json`);
+  await fs.mkdir(path.dirname(catalogPath), { recursive: true });
+  await fs.writeFile(catalogPath, JSON.stringify(catalog, null, 2) + '\\n');
+  return { rawArtifacts, catalog };
+}
+
+export async function buildCatalogIndex() {
+  const directory = path.resolve('data/catalog');
+  let files = [];
+  try {
+    files = (await fs.readdir(directory)).filter((name) => name.endsWith('.json') && !['contracts.json', 'releases.json'].includes(name));
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
+  const catalogs = await Promise.all(files.map(async (name) => JSON.parse(await fs.readFile(path.join(directory, name), 'utf8'))));
+  const releases = catalogs.flatMap((catalog) => (catalog.releases || []).map((release) => ({
+    component: catalog.component,
+    owner: catalog.owner,
+    ...release,
+  })));
+  const contracts = releases.flatMap((release) => release.contracts.map((contract) => ({
+    component: release.component,
+    owner: release.owner,
+    releaseId: release.releaseId,
+    publicationStatus: release.publicationStatus,
+    ...contract,
+  })));
+  const identities = contracts.map((contract) => `${contract.contractId}@${contract.version}`);
+  if (new Set(identities).size !== identities.length) {
+    throw new Error('duplicate Contract ID + Version across Owner catalogs');
+  }
+  const latest = contracts.filter((contract) => contract.latest);
+  if (new Set(latest.map((contract) => contract.contractId)).size !== latest.length) {
+    throw new Error('multiple latest pointers for a Contract ID across Owner catalogs');
+  }
+  await fs.mkdir(directory, { recursive: true });
+  await fs.writeFile(path.join(directory, 'contracts.json'), JSON.stringify({ contracts }, null, 2) + '\\n');
+  await fs.writeFile(path.join(directory, 'releases.json'), JSON.stringify({ releases }, null, 2) + '\\n');
+}
+
 async function fallback(snapshotPath, error) {
   if (strict) throw error;
   try {
