@@ -10,19 +10,37 @@ const component = {
   title: { zh: 'env-fabric', en: 'env-fabric' },
 };
 
-test('manifest loader accepts canonical non-ca component slugs and emits allowlisted API/schema summaries', async () => {
-  const manifest = {
-    apiVersion: 'connectionagent.io/v1alpha1',
+const branchCommit = 'd4696c2bbcba3a0c78371102bc934dc051036b5c';
+const releaseCommit = 'a4696c2bbcba3a0c78371102bc934dc051036b5c';
+
+function manifest(sources, releases = []) {
+  return {
+    apiVersion: 'connectionagent.io/v1alpha2',
     kind: 'PublicDocsManifest',
     component: 'env-fabric',
     title: { zh: 'env-fabric', en: 'env-fabric' },
-    sources: [
-      { kind: 'openapi', path: 'schemas/v1alpha1/business.yaml', role: 'business-api', publish: ['metadata', 'operations', 'fields'] },
-      { kind: 'json-schema', path: 'schemas/v1alpha1/observation.schema.yaml', role: 'network-observation', publish: ['metadata', 'fields'] },
-    ],
+    sources,
+    releases,
   };
+}
+
+test('v1alpha2 manifest emits a versioned source snapshot and allowlisted summaries', async () => {
+  const declared = manifest([
+    {
+      kind: 'openapi',
+      path: 'schemas/v1alpha2/business.yaml',
+      role: 'business-api',
+      publish: ['metadata', 'operations', 'fields'],
+    },
+    {
+      kind: 'json-schema',
+      path: 'schemas/v1alpha2/observation.schema.yaml',
+      role: 'network-observation',
+      publish: ['metadata', 'fields', 'enums'],
+    },
+  ]);
   const texts = {
-    'schemas/v1alpha1/business.yaml': `openapi: 3.1.0
+    'schemas/v1alpha2/business.yaml': `openapi: 3.1.0
 info: {title: Business API, description: Owner APIs, version: v1}
 paths:
   /v1/observations/query:
@@ -30,6 +48,7 @@ paths:
       operationId: queryObservations
       summary: Query observations
       requestBody:
+        required: true
         content:
           application/json:
             schema: {$ref: '#/components/schemas/Query'}
@@ -45,7 +64,7 @@ components:
         pageSize: {type: integer, description: Result limit}
         secretMode: {type: string, enum: [private, internal]}
 `,
-    'schemas/v1alpha1/observation.schema.yaml': `$id: https://example.test/observation
+    'schemas/v1alpha2/observation.schema.yaml': `$id: https://example.test/observation
 title: Network Observation
 description: Owner-native network record
 type: object
@@ -55,78 +74,320 @@ properties:
   disposition: {type: string, enum: [OBSERVED, DROPPED]}
 `,
   };
-  const snapshot = await buildSnapshot(
+  const result = await buildSnapshot(
     component,
-    yaml.dump(manifest),
-    { ref: 'main' },
-    { commit: 'abc123', commitDate: '2026-10-14T00:00:00Z' },
+    yaml.dump(declared),
+    { ref: branchCommit, sourceRef: 'main' },
+    { commit: branchCommit, commitDate: '2026-11-19T00:00:00Z' },
     async (sourcePath) => texts[sourcePath],
   );
-
+  const snapshot = result.snapshot;
+  assert.equal(snapshot.schemaVersion, 'connectionagent.io/ca-docs-snapshot/v2');
   assert.equal(snapshot.component, 'env-fabric');
+  assert.equal(snapshot.source.commit, branchCommit);
   const api = snapshot.sources.find((source) => source.kind === 'openapi');
-  const contract = snapshot.sources.find((source) => source.kind === 'json-schema');
+  const contract = snapshot.publicDocs.contracts.find((source) => source.kind === 'json-schema');
   assert.equal(api.operations[0].operationId, 'queryObservations');
-  assert.equal(api.operations[0].examples, undefined);
+  assert.equal(api.operations[0].request.schema, 'Query');
+  assert.equal(api.operations[0].request.example, undefined);
   assert.deepEqual(api.schemas.Query.fields.map((field) => field.path), ['pageSize', 'secretMode']);
-  assert.equal(api.schemas.Query.fields[1].enum, undefined);
   assert.deepEqual(contract.fields.map((field) => field.path), ['sourceAuthority', 'disposition']);
-  assert.equal(contract.fields[1].enum, undefined);
-  assert.equal(contract.metadata.title, 'network-observation');
-  assert.equal(JSON.stringify(snapshot).includes('sensitive'), false);
-  assert.equal(JSON.stringify(snapshot).includes('internal'), false);
-  assert.equal(snapshot.source.commit, 'abc123');
+  assert.deepEqual(contract.enums.disposition, ['OBSERVED', 'DROPPED']);
+  assert.equal(snapshot.source.ref, 'main');
+  assert.equal(result.publicFiles.length, 0);
+});
+
+test('raw OpenAPI publication creates a commit-pinned public artifact only when explicitly allowlisted', async () => {
+  const openApi = `openapi: 3.1.0
+info: {title: Public API, version: v1}
+paths: {}
+`;
+  const declared = manifest([
+    {
+      kind: 'openapi',
+      path: 'contracts/public.openapi.yaml',
+      role: 'public-api',
+      publish: ['metadata', 'operations', 'raw'],
+    },
+  ]);
+  const result = await buildSnapshot(
+    component,
+    yaml.dump(declared),
+    { ref: branchCommit },
+    { commit: branchCommit },
+    async () => openApi,
+  );
+  assert.equal(
+    result.snapshot.sources[0].rawPublicPath,
+    '/api-snapshots/env-fabric/' + branchCommit + '/contracts/public.openapi.yaml',
+  );
+  assert.equal(result.publicFiles[0].content, openApi);
+});
+
+test('raw OpenAPI rejects loopback and private server URLs', async () => {
+  const declared = manifest([
+    {
+      kind: 'openapi',
+      path: 'contracts/public.openapi.yaml',
+      role: 'public-api',
+      publish: ['metadata', 'operations', 'raw'],
+    },
+  ]);
+  await assert.rejects(
+    buildSnapshot(
+      component,
+      yaml.dump(declared),
+      { ref: branchCommit },
+      { commit: branchCommit },
+      async () => `openapi: 3.1.0
+info: {title: Public API, version: v1}
+servers: [{url: 'http://127.0.0.1:8080'}]
+paths: {}
+`,
+    ),
+    /private or placeholder OpenAPI server URL/,
+  );
+});
+
+test('raw OpenAPI and JSON Schema references must be fully declared', async () => {
+  const declared = manifest([
+    {
+      kind: 'openapi',
+      path: 'contracts/public.openapi.yaml',
+      role: 'public-api',
+      publish: ['metadata', 'operations', 'raw'],
+    },
+    {
+      kind: 'json-schema',
+      path: 'contracts/schemas/request.schema.yaml',
+      role: 'request-schema',
+      publish: ['metadata', 'fields', 'raw'],
+    },
+  ]);
+  const texts = {
+    'contracts/public.openapi.yaml': `openapi: 3.1.0
+info: {title: Public API, version: v1}
+paths: {}
+components:
+  schemas:
+    Request: {$ref: './schemas/request.schema.yaml#/$defs/request'}
+`,
+    'contracts/schemas/request.schema.yaml': '$defs: {request: {type: object}}',
+  };
+  const result = await buildSnapshot(
+    component,
+    yaml.dump(declared),
+    { ref: branchCommit },
+    { commit: branchCommit },
+    async (sourcePath) => texts[sourcePath],
+  );
+  assert.equal(result.publicFiles.length, 2);
+
+  const incomplete = manifest([declared.sources[0]]);
+  await assert.rejects(
+    buildSnapshot(
+      component,
+      yaml.dump(incomplete),
+      { ref: branchCommit },
+      { commit: branchCommit },
+      async () => texts['contracts/public.openapi.yaml'],
+    ),
+    /undeclared raw OpenAPI \/ JSON Schema reference/,
+  );
+});
+
+test('v1alpha1 manifests are rejected rather than silently accepted', async () => {
+  const legacy = {
+    ...manifest([{ kind: 'markdown', path: 'docs/overview.md', role: 'overview', publish: ['body'] }]),
+    apiVersion: 'connectionagent.io/v1alpha1',
+  };
+  await assert.rejects(
+    buildSnapshot(component, yaml.dump(legacy), { ref: branchCommit }, { commit: branchCommit }, async () => '# Overview'),
+    /invalid PublicDocsManifest v1alpha2/,
+  );
 });
 
 test('manifest loader rejects source path traversal before reading source content', async () => {
-  const manifest = {
-    apiVersion: 'connectionagent.io/v1alpha1',
-    kind: 'PublicDocsManifest',
-    component: 'env-fabric',
-    sources: [{ kind: 'markdown', path: '../private.md', role: 'overview', publish: ['metadata', 'body'] }],
-  };
+  const declared = manifest([
+    { kind: 'markdown', path: '../private.md', role: 'overview', publish: ['metadata', 'body'] },
+  ]);
   await assert.rejects(
-    buildSnapshot(component, yaml.dump(manifest), { ref: 'main' }, { commit: 'abc123' }, async () => ''),
-    /invalid PublicDocsManifest|invalid public-doc source path/,
+    buildSnapshot(component, yaml.dump(declared), { ref: branchCommit }, { commit: branchCommit }, async () => ''),
+    /invalid PublicDocsManifest v1alpha2|invalid public-doc source path/,
   );
   assert.throws(() => validateSourcePath('/etc/passwd'), /invalid public-doc source path/);
-});
-
-test('manifest loader supports markdown only when the manifest explicitly permits body publication', async () => {
-  const manifest = {
-    apiVersion: 'connectionagent.io/v1alpha1',
-    kind: 'PublicDocsManifest',
-    component: 'env-fabric',
-    sources: [{ kind: 'markdown', path: 'docs/public/overview.md', role: 'overview', language: 'en', publish: ['metadata', 'body'] }],
-  };
-  const snapshot = await buildSnapshot(component, yaml.dump(manifest), { ref: 'main' }, { commit: 'abc123' }, async () => '# Public overview\n');
-  assert.equal(snapshot.sources[0].body, '# Public overview\n');
-});
-
-
-test('snapshot records the human-facing source ref while pinning provenance to an immutable commit', async () => {
-  const manifest = {
-    apiVersion: 'connectionagent.io/v1alpha1',
-    kind: 'PublicDocsManifest',
-    component: 'env-fabric',
-    sources: [{ kind: 'implementation-check', path: 'internal/httpapi/server.go', role: 'routes', publish: ['metadata', 'implementation-summary'] }],
-  };
-  const privateSource = 'package httpapi; // MUST_NOT_LEAK_PRIVATE_SOURCE';
-  const snapshot = await buildSnapshot(
-    component,
-    yaml.dump(manifest),
-    { ref: 'd4696c2bbcba3a0c78371102bc934dc051036b5c', sourceRef: 'main' },
-    { commit: 'd4696c2bbcba3a0c78371102bc934dc051036b5c', commitDate: '2026-10-14T06:46:55Z' },
-    async () => privateSource,
-  );
-  assert.equal(snapshot.source.ref, 'main');
-  assert.equal(snapshot.source.commit, 'd4696c2bbcba3a0c78371102bc934dc051036b5c');
-  assert.match(snapshot.sources[0].implementationSummary, /pinned source revision/);
-  assert.equal(JSON.stringify(snapshot).includes('MUST_NOT_LEAK_PRIVATE_SOURCE'), false);
-});
-
-test('manifest loader rejects Windows separators and dot segments in declared paths', async () => {
   for (const sourcePath of ['..\\private.md', 'docs//public.md', './public.md']) {
     assert.throws(() => validateSourcePath(sourcePath), /invalid public-doc source path/);
   }
+});
+
+test('Markdown body is published only when explicitly allowlisted', async () => {
+  const declared = manifest([
+    {
+      kind: 'markdown',
+      path: 'docs/public/overview.md',
+      role: 'overview',
+      language: 'en',
+      publish: ['metadata', 'body'],
+    },
+  ]);
+  const result = await buildSnapshot(
+    component,
+    yaml.dump(declared),
+    { ref: branchCommit },
+    { commit: branchCommit },
+    async () => '# Public overview\n',
+  );
+  assert.equal(result.snapshot.sources[0].body, '# Public overview\n');
+});
+
+test('implementation checks publish derived routes but never private source text', async () => {
+  const declared = manifest([
+    {
+      kind: 'implementation-check',
+      path: 'internal/httpapi/server.go',
+      role: 'http-route-registration',
+      extractor: 'go-http-routes',
+      publish: ['metadata', 'implementation-summary'],
+    },
+  ]);
+  const privateSource = 'package httpapi\n// DO_NOT_PUBLISH\nfunc register(mux *http.ServeMux) { mux.HandleFunc("POST /v1/observations", handler) }';
+  const result = await buildSnapshot(
+    component,
+    yaml.dump(declared),
+    { ref: branchCommit },
+    { commit: branchCommit },
+    async () => privateSource,
+  );
+  assert.deepEqual(result.snapshot.sources[0].routes, [{ method: 'POST', path: '/v1/observations' }]);
+  assert.equal(JSON.stringify(result.snapshot).includes('DO_NOT_PUBLISH'), false);
+});
+
+test('released contract artifacts are pinned, hashed and append-only public files', async () => {
+  const declared = manifest([], [
+    {
+      releaseId: 'fabric-contracts-v1',
+      publicationStatus: 'PUBLISHED',
+      releaseRecord: { path: 'docs/releases/fabric-v1.md', ref: releaseCommit },
+      contracts: [
+        {
+          contractId: 'network-observation',
+          version: 'v1',
+          lifecycleStatus: 'FROZEN',
+          source: { ref: branchCommit },
+          artifacts: [
+            {
+              kind: 'json-schema',
+              path: 'schemas/v1alpha2/network-observation.schema.yaml',
+              mediaType: 'application/schema+yaml',
+              publish: ['download', 'render'],
+            },
+            {
+              kind: 'specification',
+              path: 'docs/network-observation.md',
+              mediaType: 'text/markdown',
+              publish: ['download', 'render'],
+            },
+            {
+              kind: 'other',
+              path: 'contracts/network-observation-vectors.json',
+              mediaType: 'application/json',
+              publish: ['download', 'render'],
+            },
+          ],
+        },
+      ],
+    },
+  ]);
+  const files = new Map([
+    ['docs/releases/fabric-v1.md@' + releaseCommit, '# Fabric contracts v1\n\nRelease record body.\n'],
+    ['schemas/v1alpha2/network-observation.schema.yaml@' + branchCommit, 'type: object\nproperties: {}\n'],
+    ['docs/network-observation.md@' + branchCommit, '# Network Observation\n\nNormative specification body.\n'],
+    ['contracts/network-observation-vectors.json@' + branchCommit, '{"cases":[{"id":"one"}]}'],
+  ]);
+  const result = await buildSnapshot(
+    component,
+    yaml.dump(declared),
+    { ref: branchCommit },
+    { commit: branchCommit },
+    async (sourcePath, sourceRef) => files.get(sourcePath + '@' + sourceRef),
+  );
+  assert.equal(result.snapshot.releases[0].contracts[0].contractId, 'network-observation');
+  const releasedSchema = result.snapshot.releases[0].contracts[0].artifacts[0];
+  assert.equal(releasedSchema.summary.kind, 'json-schema');
+  assert.equal(releasedSchema.summary.rawPublicPath, releasedSchema.publicPath);
+  assert.ok(releasedSchema.summaryRole);
+  const releasedSpecification = result.snapshot.releases[0].contracts[0].artifacts[1];
+  assert.equal(releasedSpecification.summary.kind, 'specification');
+  assert.match(releasedSpecification.summary.html, /Normative specification body/);
+  const releasedVectors = result.snapshot.releases[0].contracts[0].artifacts[2];
+  assert.equal(releasedVectors.summary.kind, 'other');
+  assert.match(releasedVectors.summary.text, /"id": "one"/);
+  assert.match(result.snapshot.releases[0].releaseRecord.html, /Release record body/);
+  assert.equal(result.publicFiles.length, 5);
+  const provenanceFile = result.publicFiles.find((file) => file.path.endsWith('/provenance.json'));
+  const provenance = JSON.parse(provenanceFile.content);
+  assert.equal(provenance.artifacts.length, 3);
+  assert.equal('summary' in provenance.artifacts[0], false);
+  assert.equal(result.snapshot.releases[0].contracts[0].provenanceSha256, provenanceFile.sha256);
+  assert.ok(result.publicFiles.some((file) => file.path.endsWith('/network-observation.schema.yaml')));
+  assert.ok(result.publicFiles.every((file) => /^[0-9a-f]{64}$/.test(file.sha256)));
+});
+
+test('withdrawn Owner Releases become tombstones without republishing artifacts', async () => {
+  const declared = manifest([], [
+    {
+      releaseId: 'withdrawn-contracts-v1',
+      publicationStatus: 'WITHDRAWN',
+      releaseRecord: { path: 'docs/releases/withdrawn.md', ref: releaseCommit },
+      contracts: [
+        {
+          contractId: 'withdrawn-contract',
+          version: 'v1',
+          lifecycleStatus: 'DEPRECATED',
+          source: { ref: branchCommit },
+          artifacts: [
+            {
+              kind: 'json-schema',
+              path: 'schemas/v1alpha2/withdrawn.schema.yaml',
+              mediaType: 'application/schema+yaml',
+              publish: ['download'],
+            },
+          ],
+        },
+      ],
+    },
+  ]);
+  const result = await buildSnapshot(
+    component,
+    yaml.dump(declared),
+    { ref: branchCommit },
+    { commit: branchCommit },
+    async () => {
+      throw new Error('withdrawn artifacts must not be fetched or republished');
+    },
+  );
+  const release = result.snapshot.releases[0];
+  assert.equal(release.publicationStatus, 'WITHDRAWN');
+  assert.equal(release.withdrawn, true);
+  assert.equal(release.releaseRecord.publicPath, null);
+  assert.deepEqual(release.contracts[0].artifacts, []);
+  assert.equal(result.publicFiles.length, 0);
+});
+
+test('manifest component identity can differ from the public site component id only when registry declares it', async () => {
+  const aliased = { ...component, id: 'ca-5gc-sim', sourceIdentity: 'env-5gc-sim' };
+  const declared = {
+    ...manifest([{ kind: 'markdown', path: 'docs/overview.md', role: 'overview', publish: ['body'] }]),
+    component: 'env-5gc-sim',
+  };
+  const result = await buildSnapshot(
+    aliased,
+    yaml.dump(declared),
+    { ref: branchCommit },
+    { commit: branchCommit },
+    async () => '# Overview',
+  );
+  assert.equal(result.snapshot.component, 'ca-5gc-sim');
+  assert.equal(result.snapshot.sourceComponent, 'env-5gc-sim');
 });

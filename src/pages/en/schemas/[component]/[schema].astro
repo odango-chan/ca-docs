@@ -1,0 +1,137 @@
+---
+import path from 'node:path';
+import SiteLayout from '../../../../layouts/SiteLayout.astro';
+import { getJsonSchemaSources, loadPublicCatalog } from '../../../../lib/public-catalog';
+
+export function getStaticPaths() {
+  const paths = [];
+  for (const { component, snapshot } of loadPublicCatalog()) {
+    const sources = getJsonSchemaSources(snapshot);
+    for (const source of sources) {
+      const peers = sources.filter((item: any) => item.schemaGroup === source.schemaGroup);
+      const schemaLinks = Object.fromEntries(
+        peers.map((item: any) => [
+          item.path,
+          '/en/schemas/' + component.id + '/' + item.role + '/',
+        ]),
+      );
+      paths.push({
+        params: { component: component.id, schema: source.role },
+        props: { component, source, snapshot, schemaLinks },
+      });
+    }
+  }
+  return paths;
+}
+
+const { component, source, snapshot, schemaLinks } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const href = (value: string) => base.replace(/\/?$/, '/') + value.replace(/^\/+/, '');
+const title = source.metadata?.title || source.role;
+const ownerTitle = component.title?.en || component.id;
+const rawUrl = source.rawPublicPath ? base + source.rawPublicPath.replace(/^\/+/, '') : null;
+
+function targetForRef(ref: string | null) {
+  if (!ref || ref.startsWith('#') || /^https?:\/\//.test(ref)) return null;
+  const file = ref.split('#')[0];
+  if (!file) return null;
+  const target = path.posix.normalize(path.posix.join(path.posix.dirname(source.path), file));
+  return schemaLinks[target] || null;
+}
+const fieldDetail = (field: any) => {
+  if (Object.prototype.hasOwnProperty.call(field, 'const')) return 'Constant: ' + String(field.const);
+  if (Array.isArray(field.enum)) return 'Enum: ' + field.enum.join(' / ');
+  if (field.ref) return 'Reference: ' + field.ref;
+  if (field.oneOfRefs?.length) return 'oneOf: ' + field.oneOfRefs.join(' / ');
+  if (field.anyOfRefs?.length) return 'anyOf: ' + field.anyOfRefs.join(' / ');
+  return field.type || 'Unspecified';
+};
+const ruleText = (rule: any) =>
+  Object.entries(rule.when || {})
+    .map(([name, values]) => name + ' = ' + (values as any[]).join(' / '))
+    .join(', ');
+---
+<SiteLayout title={title + ' · Schema'} lang="en" description={'JSON Schema structure for ' + ownerTitle}>
+  <section class="hero">
+    <span class="eyebrow">{ownerTitle} / JSON Schema</span>
+    <h1>{title}</h1>
+    <p class="lede">{source.metadata?.description || 'Owner-published JSON Schema structure and field constraints.'}</p>
+    <div class="page-tabs">
+      <a href={href('/en/schemas/')}>Schema Catalog</a>
+      <a href={href('/en/components/' + component.id + '/')}>Component docs</a>
+      {source.contractId && <a href={href('/en/contracts/' + component.id + '/' + source.contractId + '/' + source.contractVersion + '/')}>Contract version</a>}
+      {rawUrl && <a class="primary-tab" href={rawUrl}>Download original Schema</a>}
+    </div>
+  </section>
+
+  {snapshot.sync?.mode === 'stale' && <section class="section"><div class="notice"><strong>Upstream snapshot is stale</strong><p>{snapshot.sync.detail}</p></div></section>}
+  <section class="section">
+    <div class="stats">
+      <div class="stat"><strong>{source.fields?.length || 0}</strong><span>Fields</span></div>
+      <div class="stat"><strong>{source.rules?.length || 0}</strong><span>Conditional rules</span></div>
+      <div class="stat"><strong>{source.examplesAllowed ? 'Allowed' : 'Not authorized'}</strong><span>Examples</span></div>
+    </div>
+    <p class="source-note">
+      Owner: <code>{component.repository}</code> · Role: <code>{source.role}</code> ·
+      Commit: <code>{source.sourceCommit || snapshot.source.commit}</code> · SHA-256: <code>{source.sha256}</code>
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div><span class="eyebrow">Properties</span><h2>Field structure</h2></div></div>
+    {(source.fields || []).length > 0 ? (
+      <div class="api-list">
+        {source.fields.map((field: any) => (
+          <article class="api-card schema-field">
+            <div class="api-heading">
+              <code class="api-path">{field.path}</code>
+              <span class="pill">{field.required ? 'Required' : 'Optional'}</span>
+              <span class="pill">{field.type || 'Unspecified type'}</span>
+            </div>
+            {field.description && <p>{field.description}</p>}
+            <div class="schema-detail">
+              {Object.prototype.hasOwnProperty.call(field, 'const') && <div><strong>Constant:</strong> <code>{String(field.const)}</code></div>}
+              {Array.isArray(field.enum) && <div><strong>Enum:</strong> {field.enum.map((value: any) => <code>{String(value)}</code>)}</div>}
+              {field.ref && <div><strong>$ref:</strong> {targetForRef(field.ref) ? <a href={href(targetForRef(field.ref)!)}><code>{field.ref}</code></a> : <code>{field.ref}</code>}</div>}
+              {field.oneOfRefs?.length > 0 && <div><strong>oneOf:</strong> {field.oneOfRefs.map((ref: string) => targetForRef(ref) ? <a href={href(targetForRef(ref)!)}><code>{ref}</code></a> : <code>{ref}</code>)}</div>}
+              {field.anyOfRefs?.length > 0 && <div><strong>anyOf:</strong> {field.anyOfRefs.map((ref: string) => targetForRef(ref) ? <a href={href(targetForRef(ref)!)}><code>{ref}</code></a> : <code>{ref}</code>)}</div>}
+              {field.default !== undefined && <div><strong>Default:</strong> <code>{JSON.stringify(field.default)}</code></div>}
+            </div>
+          </article>
+        ))}
+      </div>
+    ) : <div class="notice">This source has not authorized field summaries.</div>}
+  </section>
+
+  {(source.rules || []).length > 0 && (
+    <section class="section">
+      <div class="section-head"><div><span class="eyebrow">Conditional validation</span><h2>Conditional constraints</h2></div></div>
+      <div class="api-list">
+        {source.rules.map((rule: any) => (
+          <article class="api-card">
+            <h3>{ruleText(rule) || 'Conditional branch'}</h3>
+            {rule.required?.length > 0 && <p>Required fields: {rule.required.map((name: string) => <code>{name}</code>)}</p>}
+            {(rule.fields || []).map((field: any) => (
+              <div class="schema-detail">
+                <code>{field.path}</code> · {field.required ? 'required' : 'optional'} · {fieldDetail(field)}
+              </div>
+            ))}
+          </article>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {source.examplesAllowed && source.examples && (
+    <section class="section">
+      <div class="section-head"><div><span class="eyebrow">Examples</span><h2>Examples</h2></div></div>
+      <pre><code>{JSON.stringify(source.examples, null, 2)}</code></pre>
+    </section>
+  )}
+</SiteLayout>
+
+<style>
+  .schema-field { gap: .65rem; }
+  .schema-detail { display: flex; flex-wrap: wrap; gap: .5rem .8rem; color: var(--muted, #64748b); }
+  .schema-detail code { overflow-wrap: anywhere; }
+</style>

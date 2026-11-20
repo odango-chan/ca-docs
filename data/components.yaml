@@ -1,14 +1,41 @@
-version: 1
+version: 2
 
 components:
   - id: ca-5gc-sim
     repository: odango-chan/env-5gc-sim
     status: active
     sourceIdentity: env-5gc-sim
+    manifest: docs/public-docs.yaml
+    presentation:
+      semantics:
+        facts:
+          sourceRole: fact-inventory
+          fieldPath: spec.factSemantic
+        operations:
+          sourceRole: operation-inventory
+          fieldPath: spec.operationSemantic
+      routeComparison:
+        openapiRole: owner-provider-http-api
+        implementationRole: http-route-registration
     title:
       zh: 5GC 模拟器
       en: 5GC simulator
+
+  - id: ca-skills
+    repository: odango-chan/ca-skills
+    status: planned
     manifest: docs/public-docs.yaml
+    title:
+      zh: CA Skills 语言与契约
+      en: CA Skills Language and Contracts
+
+  - id: ca-skill-compiler
+    repository: odango-chan/ca-skill-compiler
+    status: planned
+    manifest: docs/public-docs.yaml
+    title:
+      zh: CA Skill Compiler
+      en: CA Skill Compiler
 
   - id: ca-runtime
     repository: odango-chan/ca-runtime
@@ -20,19 +47,31 @@ components:
   - id: env-fabric
     repository: odango-chan/env-fabric
     status: active
-    sync: manifest
+    manifest: docs/public-docs.yaml
     title:
       zh: env-fabric 网络边界中介
       en: env-fabric network boundary mediation
-    manifest: docs/public-docs.yaml
 
   - id: tool-common
     repository: odango-chan/tool-common
     status: active
+    manifest: docs/public-docs.yaml
+    presentation:
+      apiSurfaces:
+        provider: provider-http-api
+        control: control-http-api
+      markdownPages:
+        zh:
+          overview: overview
+          subjectIdentity: subject-identity
+          boundaries: boundaries
+        en:
+          overview: overview-en
+          subjectIdentity: subject-identity-en
+          boundaries: boundaries-en
     title:
       zh: tool-common
       en: tool-common
-    manifest: docs/public-docs.yaml
 
   - id: ca-provider-5gc
     repository: odango-chan/ca-provider-5gc
@@ -51,26 +90,23 @@ components:
   - id: sandbox
     repository: odango-chan/sandbox
     status: active
-    sync: manifest
+    manifest: docs/public-docs.yaml
     title:
       zh: Sandbox 平台架构与 Benchmark
       en: Sandbox Architecture and Benchmark
-    manifest: docs/public-docs.yaml
 
   - id: ca-benchmarks
     repository: odango-chan/ca-benchmarks
     status: active
-    sync: manifest
+    manifest: docs/public-docs.yaml
     title:
       zh: Benchmark 资产与用例语义
       en: Benchmark Assets and Case Semantics
-    manifest: docs/public-docs.yaml
 
   - id: ca-benchmark-engine
     repository: odango-chan/ca-benchmark-engine
     status: active
-    sync: manifest
+    manifest: docs/public-docs.yaml
     title:
       zh: Benchmark 执行引擎
       en: Benchmark Evaluation Engine
-    manifest: docs/public-docs.yaml

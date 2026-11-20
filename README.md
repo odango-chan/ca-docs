@@ -7,6 +7,7 @@ Sandbox 平台的公开文档门户，提供平台架构、组件职责、Benchm
 
 ## 从哪里开始
 
+- **[CA Docs 2.0 架构设计与仓库改造计划](docs/ca-docs-2.0-architecture.zh-CN.md)**：CA 生态统一文档与契约门户的目标架构、版本模型、OpenAPI / Schema 可视化和分阶段迁移计划。
 - **[Sandbox 总体架构](https://odango-chan.github.io/ca-docs/architecture/system/)**：平台分层、组件职责、事实权威，以及真实 5GC 请求的跨组件路径。
 - **[Sandbox 源仓架构详解](https://odango-chan.github.io/ca-docs/components/sandbox/)**：由 Sandbox 治理仓维护的完整架构与 Benchmark 框架说明。
 - **[Benchmark 与可靠性评估](https://odango-chan.github.io/ca-docs/benchmark/)**：CUT、冻结任务、执行尝试、证据有效性和 Verdict 的边界。
@@ -14,7 +15,9 @@ Sandbox 平台的公开文档门户，提供平台架构、组件职责、Benchm
 - **[Benchmark 执行生命周期](https://odango-chan.github.io/ca-docs/components/ca-benchmark-engine/)**：EvaluationTask、ExecutionAttempt、Validity 和 EvaluationResult 的语义。
 - **[真实 5GC 运行手册](https://odango-chan.github.io/ca-docs/runbooks/real-5gc/)**：启动前检查、运行步骤、故障定位与验收流程。
 - **[真实 5GC 接口与证据手册](https://odango-chan.github.io/ca-docs/interfaces/real-5gc-evidence/)**：接口契约、关联键、事实来源和 PASS 判定要求。
-- **[组件接口总览](https://odango-chan.github.io/ca-docs/api/)**：按组件查阅公开接口。
+- **[API Reference](https://odango-chan.github.io/ca-docs/api/)**：按 Owner 浏览接口摘要和 Scalar 交互式 OpenAPI 页面。
+- **[Contract Catalog](https://odango-chan.github.io/ca-docs/contracts/)**：浏览 Owner 正式发布的不可变契约版本与来源证明。
+- **[Schema Explorer](https://odango-chan.github.io/ca-docs/schemas/)**：按 Owner 浏览 JSON Schema 字段、枚举、条件规则和跨文件引用。
 
 ## 文档边界与事实来源
 
@@ -86,4 +89,4 @@ npm run build
 CA_DOCS_SOURCE_TOKEN=... CA_DOCS_SYNC_STRICT=1 npm run sync
 ```
 
-仓库名称仍为 `ca-docs`，但公开站的产品定位是 **Sandbox Docs**。
+当前公开站仍以 **Sandbox Docs** 定位运行；CA Docs 2.0 品牌切换将在架构评审通过后实施。

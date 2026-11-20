@@ -1,0 +1,66 @@
+---
+import SiteLayout from '../../../../layouts/SiteLayout.astro';
+import { loadPublicCatalog } from '../../../../lib/public-catalog';
+
+export function getStaticPaths() {
+  const paths = [];
+  for (const { component, snapshot } of loadPublicCatalog()) {
+    for (const release of snapshot.releases || []) {
+      paths.push({
+        params: { component: component.id, release: release.releaseId },
+        props: { component, release },
+      });
+    }
+  }
+  return paths;
+}
+
+const { component, release } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const href = (value: string) => base.replace(/\/?$/, '/') + value.replace(/^\/+/, '');
+const ownerTitle = component.title?.en || component.id;
+const recordUrl = release.releaseRecord.publicPath ? base + release.releaseRecord.publicPath.slice(1) : null;
+---
+<SiteLayout title={release.releaseRecord.title || release.releaseId} lang="en">
+  <section class="hero">
+    <span class="eyebrow">{ownerTitle} / Owner Release</span>
+    <h1>{release.releaseRecord.title || release.releaseId}</h1>
+    <p class="lede">Owner Release: <code>{release.releaseId}</code> · Publication: <strong>{release.publicationStatus}</strong> · Source Commit: <code>{release.releaseRecord.sourceCommit}</code></p>
+    <div class="page-tabs">
+      <a href={href('/en/releases/')}>Owner Releases</a>
+      <a href={href('/en/contracts/')}>Contract Catalog</a>
+      {recordUrl && <a class="primary-tab" href={recordUrl}>Download original Release Record</a>}
+    </div>
+  </section>
+  {release.publicationStatus === 'WITHDRAWN' && <section class="section"><div class="notice"><strong>This Owner Release has been withdrawn.</strong><p>The tombstone remains visible, but the catalog no longer links its contract artifacts. Previously published immutable files are retained and never overwritten or deleted.</p></div></section>}
+  {release.publicationStatus !== 'WITHDRAWN' && <section class="section">
+    <div class="source-note">
+      Owner: <code>{component.repository}</code> · SHA-256: <code>{release.releaseRecord.sha256}</code>
+    </div>
+  </section>}
+  {release.publicationStatus !== 'WITHDRAWN' && <section class="section">
+    <div class="section-head"><div><span class="eyebrow">Released contracts</span><h2>Contract versions in this release</h2></div></div>
+    <div class="doc-index">
+      {release.contracts.map((contract: any) => (
+        <a class="doc-row" href={href('/en/contracts/' + component.id + '/' + contract.contractId + '/' + contract.version + '/')}>
+          <div>
+            <strong>{contract.contractId} · {contract.version}</strong>
+            <span>{contract.lifecycleStatus} · {contract.artifacts.length} published artifacts</span>
+          </div>
+          <span>→</span>
+        </a>
+      ))}
+    </div>
+  </section>}
+  {release.publicationStatus !== 'WITHDRAWN' && <section class="section">
+    <div class="section-head"><div><span class="eyebrow">Owner release record</span><h2>Release record</h2></div></div>
+    <article class="markdown-body" set:html={release.releaseRecord.html}></article>
+  </section>}
+</SiteLayout>
+
+<style>
+  .markdown-body :global(h2) { margin-top: 2rem; }
+  .markdown-body :global(pre) { overflow-x: auto; }
+  .markdown-body :global(table) { display: block; overflow-x: auto; }
+  .markdown-body :global(img) { max-width: 100%; height: auto; }
+</style>

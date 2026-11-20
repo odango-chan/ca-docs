@@ -1,4 +1,61 @@
 ---
-import SiteLayout from '../../../layouts/SiteLayout.astro'; const base=import.meta.env.BASE_URL; const href=(v:string)=>`${base.replace(/\/?$/, '/')}${v.replace(/^\/+/, '')}`;
+import SiteLayout from '../../../layouts/SiteLayout.astro';
+import { getOpenApiSources, loadPublicCatalog } from '../../../lib/public-catalog';
+
+const base = import.meta.env.BASE_URL;
+const href = (value: string) => base.replace(/\/?$/, '/') + value.replace(/^\/+/, '');
+const scalarApis = loadPublicCatalog().flatMap(({ component, snapshot }) =>
+  getOpenApiSources(snapshot)
+    .filter((source: any) => source.rawPublicPath)
+    .map((source: any) => ({
+      componentId: component.id,
+      componentTitle: component.title?.en || component.id,
+      repository: component.repository,
+      source,
+    })),
+);
 ---
-<SiteLayout title="API" lang="en"><section class="home-hero"><h1>API</h1><p>Browse APIs by component.</p></section><section class="home-section"><div class="doc-index"><a class="doc-row" href={href('/en/components/ca-5gc-sim/api/')}><div><strong>ca-5gc-sim</strong><span>5GC simulator owner API</span></div><span>→</span></a><a class="doc-row primary" href={href('/en/components/tool-common/api/')}><div><strong>tool-common</strong><span>Subject Identity Provider API + Trusted Control API</span></div><span>→</span></a></div></section></SiteLayout>
+<SiteLayout title="API" lang="en">
+  <section class="home-hero">
+    <h1>API Reference</h1>
+    <p>Browse API definitions by Owner and contract. Original OpenAPI documents appear here only after explicit Owner authorization.</p>
+  </section>
+  <section class="home-section">
+    <h2>Interactive OpenAPI</h2>
+    {scalarApis.length > 0 ? (
+      <div class="doc-index">
+        {scalarApis.map((api) => (
+          <a class="doc-row primary" href={href('/en/api/' + api.componentId + '/' + api.source.role + '/')}>
+            <div>
+              <strong>{api.componentTitle} · {api.source.metadata?.title || api.source.role}</strong>
+              <span>{api.source.role} · {api.repository} · {api.source.contractVersion || 'Living docs'}</span>
+            </div>
+            <span>→</span>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="notice">
+        <strong>No original OpenAPI snapshots have been published yet.</strong>
+        <p>An Owner must explicitly authorize raw publication in PublicDocsManifest and complete a strict sync before a Scalar page appears here.</p>
+      </div>
+    )}
+  </section>
+  <section class="home-section">
+    <h2>API summaries</h2>
+    <div class="doc-index">
+      <a class="doc-row" href={href('/en/components/ca-5gc-sim/api/')}>
+        <div><strong>ca-5gc-sim</strong><span>5GC simulator Owner API summary</span></div><span>→</span>
+      </a>
+      <a class="doc-row" href={href('/en/components/tool-common/api/')}>
+        <div><strong>tool-common</strong><span>Provider API and Trusted Control API summary</span></div><span>→</span>
+      </a>
+    </div>
+  </section>
+  <section class="home-section">
+    <div class="page-tabs">
+      <a href={href('/en/contracts/')}>Contract Catalog</a>
+      <a href={href('/en/schemas/')}>Schema Explorer</a>
+    </div>
+  </section>
+</SiteLayout>

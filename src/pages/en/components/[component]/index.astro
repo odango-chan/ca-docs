@@ -43,6 +43,8 @@ const href = (value) => `${base.replace(/\/?$/, '/')}${value.replace(/^\/+/, '')
     <p>This page renders documentation and contract summaries explicitly approved by the owner repository. Implementation status follows owner documentation and associated acceptance evidence; successful synchronization or build does not by itself mean a feature is implemented or accepted.</p>
   </section>
 
+  {data.sync?.mode === 'stale' && <section class="section"><div class="notice"><strong>Upstream snapshot is stale</strong><p>{data.sync.detail}</p></div></section>}
+
   {publicDocs.map(({ source, title: documentTitle, html }) => <section class="section" id={source.role}>
     <div class="section-head"><div><span class="eyebrow">Owner documentation</span><h2>{documentTitle}</h2></div></div>
     <div class="prose owner-document" set:html={html}></div>

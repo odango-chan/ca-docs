@@ -50,7 +50,7 @@ function resolvePageRoute(target, locale) {
 
     const component = components.get(componentId);
     const snapshotPath = path.join(root, 'data', 'generated', `${componentId}.json`);
-    if (!component || component.status !== 'active' || component.sync !== 'manifest' || !fs.existsSync(snapshotPath)) {
+    if (!component || component.status !== 'active' || typeof component.manifest !== 'string' || !fs.existsSync(snapshotPath)) {
       return { exists: false, reason: 'component detail route is not generated' };
     }
 

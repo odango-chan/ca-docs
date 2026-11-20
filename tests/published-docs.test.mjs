@@ -8,7 +8,7 @@ import { renderPublicMarkdown } from '../src/lib/public-markdown.mjs';
 const root = process.cwd();
 const registry = yaml.load(fs.readFileSync(path.join(root, 'data/components.yaml'), 'utf8'));
 const publishedComponents = (registry.components || []).filter(
-  (component) => component.status === 'active' && component.sync === 'manifest',
+  (component) => component.status === 'active' && typeof component.manifest === 'string',
 );
 
 function siteRouteExists(urlString) {

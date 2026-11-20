@@ -1,0 +1,86 @@
+---
+import SiteLayout from '../../../../layouts/SiteLayout.astro';
+import { loadPublicCatalog } from '../../../../lib/public-catalog';
+
+export function getStaticPaths() {
+  const paths = [];
+  for (const { component, snapshot } of loadPublicCatalog()) {
+    for (const release of snapshot.releases || []) {
+      if (release.publicationStatus === 'WITHDRAWN') continue;
+      for (const contract of release.contracts || []) {
+        paths.push({
+          params: {
+            component: component.id,
+            contract: contract.contractId,
+            version: contract.version,
+          },
+          props: { component, release, contract },
+        });
+      }
+    }
+  }
+  return paths;
+}
+
+const { component, release, contract } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const href = (value: string) => base.replace(/\/?$/, '/') + value.replace(/^\/+/, '');
+const ownerTitle = component.title?.zh || component.id;
+const provenanceUrl = base + contract.provenancePath.replace(/^\/+/, '');
+const releaseRecordUrl = href('/releases/' + component.id + '/' + release.releaseId + '/');
+const releaseRecordRawUrl = base + release.releaseRecord.publicPath.replace(/^\/+/, '');
+---
+<SiteLayout title={contract.contractId + ' ' + contract.version} lang="zh">
+  <section class="hero">
+    <span class="eyebrow">{ownerTitle} / Released Contract</span>
+    <h1>{contract.contractId}</h1>
+    <p class="lede">契约版本 <code>{contract.version}</code> · 生命周期 <strong>{contract.lifecycleStatus}</strong></p>
+    <div class="page-tabs">
+      <a href={href('/contracts/')}>Contract Catalog</a>
+      <a href={href('/releases/')}>Owner Releases</a>
+      <a class="primary-tab" href={provenanceUrl}>Provenance JSON</a>
+    </div>
+  </section>
+  <section class="section">
+    <div class="stats">
+      <div class="stat"><strong>{contract.artifacts.length}</strong><span>发布文件</span></div>
+      <div class="stat"><strong>{contract.sourceCommit.slice(0, 8)}</strong><span>Source Commit</span></div>
+    </div>
+    <p class="source-note">
+      Owner：<code>{component.repository}</code> · Release：<code>{release.releaseId}</code> ·
+      Source Commit：<code>{contract.sourceCommit}</code>
+    </p>
+    <p class="source-note">Owner Release Record：<a href={releaseRecordUrl}>查看发布记录</a> · <a href={releaseRecordRawUrl}>下载原文</a></p>
+  </section>
+  <section class="section">
+    <div class="section-head"><div><span class="eyebrow">Immutable artifacts</span><h2>契约文件</h2></div></div>
+    <div class="doc-index">
+      {contract.artifacts.map((artifact: any) => (
+        <div class="doc-row">
+          <div>
+            <strong>{artifact.sourcePath}</strong>
+            <span>{artifact.kind} · {artifact.mediaType} · SHA-256 {artifact.sha256}</span>
+          </div>
+          <span>
+            {artifact.summaryRole && artifact.kind === 'json-schema' && <a href={href('/schemas/' + component.id + '/' + artifact.summaryRole + '/')}>Schema Explorer</a>}
+            {artifact.summaryRole && artifact.kind === 'openapi' && <a href={href('/api/' + component.id + '/' + artifact.summaryRole + '/')}>Scalar Reference</a>}
+            <a href={base + artifact.publicPath.replace(/^\/+/, '')}>下载 →</a>
+          </span>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  {contract.artifacts.filter((artifact: any) => artifact.summary?.kind === 'specification').map((artifact: any) => (
+    <section class="section">
+      <div class="section-head"><div><span class="eyebrow">Normative specification</span><h2>{artifact.summary.title}</h2></div></div>
+      <article class="markdown-body" set:html={artifact.summary.html}></article>
+    </section>
+  ))}
+  {contract.artifacts.filter((artifact: any) => artifact.summary?.kind === 'other').map((artifact: any) => (
+    <section class="section">
+      <div class="section-head"><div><span class="eyebrow">Published JSON artifact</span><h2>{artifact.summary.title}</h2></div></div>
+      <pre><code>{artifact.summary.text}</code></pre>
+    </section>
+  ))}
+</SiteLayout>

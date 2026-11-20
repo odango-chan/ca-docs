@@ -1,0 +1,49 @@
+---
+import SiteLayout from '../../../layouts/SiteLayout.astro';
+import { loadPublicCatalog } from '../../../lib/public-catalog';
+
+const base = import.meta.env.BASE_URL;
+const href = (value: string) => base.replace(/\/?$/, '/') + value.replace(/^\/+/, '');
+const contracts = loadPublicCatalog().flatMap(({ component, snapshot }) =>
+  (snapshot.releases || []).filter((release: any) => release.publicationStatus !== 'WITHDRAWN').flatMap((release: any) =>
+    (release.contracts || []).map((contract: any) => ({
+      componentId: component.id,
+      componentTitle: component.title?.en || component.id,
+      repository: component.repository,
+      release,
+      contract,
+    })),
+  ),
+);
+---
+<SiteLayout title="Contract Catalog" lang="en">
+  <section class="home-hero">
+    <h1>Contract Catalog</h1>
+    <p>Only immutable contract versions explicitly released by their Owners appear here. Contract versions, Owner product versions, and CA-SL language versions are independent.</p>
+  </section>
+  <section class="home-section">
+    <div class="page-tabs">
+      <a class="primary-tab" href={href('/en/contracts/')}>Contract versions</a>
+      <a href={href('/en/releases/')}>Owner Releases</a>
+      <a href={href('/en/schemas/')}>Schema Explorer</a>
+    </div>
+    {contracts.length > 0 ? (
+      <div class="doc-index">
+        {contracts.map((entry) => (
+          <a class="doc-row" href={href('/en/contracts/' + entry.componentId + '/' + entry.contract.contractId + '/' + entry.contract.version + '/')}>
+            <div>
+              <strong>{entry.contract.contractId} · {entry.contract.version}</strong>
+              <span>{entry.componentTitle} · {entry.repository} · {entry.contract.lifecycleStatus} · {entry.release.publicationStatus}</span>
+            </div>
+            <span>→</span>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="notice">
+        <strong>No formal contract versions have been published through CA Docs yet.</strong>
+        <p>Owner documentation and OpenAPI summaries remain available. A formal contract appears here only after its Owner provides an immutable Release Record, commit, and artifact allowlist.</p>
+      </div>
+    )}
+  </section>
+</SiteLayout>

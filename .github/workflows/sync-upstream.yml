@@ -11,6 +11,8 @@ on:
     paths:
       - '.github/workflows/sync-upstream.yml'
       - 'scripts/sync*.mjs'
+      - 'scripts/verify-*.mjs'
+      - 'schemas/**'
       - 'data/components.yaml'
 
 permissions:
@@ -33,19 +35,30 @@ jobs:
           node-version: 22
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
-      - name: Refresh private upstream snapshot
+      - name: Refresh private upstream snapshots and released contracts
         run: npm run sync
         env:
           CA_DOCS_SOURCE_TOKEN: ${{ secrets.CA_DOCS_SOURCE_TOKEN }}
           CA_DOCS_SYNC_STRICT: '1'
 
-      - name: Commit sanitized snapshot when changed
+      - name: Verify public artifact hashes and release provenance
+        run: node scripts/verify-public-artifacts.mjs
+
+      - name: Verify immutable source provenance
+        run: node scripts/verify-snapshot-provenance.mjs
+        env:
+          CA_DOCS_SOURCE_TOKEN: ${{ secrets.CA_DOCS_SOURCE_TOKEN }}
+
+      - name: Commit sanitized snapshots and public contract artifacts when changed
         shell: bash
         run: |
-          rm -rf /tmp/ca-docs-generated
-          cp -a data/generated /tmp/ca-docs-generated
+          rm -rf /tmp/ca-docs-generated /tmp/ca-docs-contracts /tmp/ca-docs-api-snapshots
+          mkdir -p /tmp/ca-docs-generated /tmp/ca-docs-contracts /tmp/ca-docs-api-snapshots
+          cp -a data/generated/. /tmp/ca-docs-generated/
+          if [ -d public/contracts ]; then cp -a public/contracts/. /tmp/ca-docs-contracts/; fi
+          if [ -d public/api-snapshots ]; then cp -a public/api-snapshots/. /tmp/ca-docs-api-snapshots/; fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -53,15 +66,18 @@ jobs:
           for attempt in 1 2 3; do
             git fetch origin main
             git reset --hard origin/main
-            rm -rf data/generated
-            cp -a /tmp/ca-docs-generated data/generated
+            rm -rf data/generated public/contracts public/api-snapshots
+            mkdir -p data/generated public/contracts public/api-snapshots
+            cp -a /tmp/ca-docs-generated/. data/generated/
+            cp -a /tmp/ca-docs-contracts/. public/contracts/
+            cp -a /tmp/ca-docs-api-snapshots/. public/api-snapshots/
 
-            if git diff --quiet -- data/generated; then
+            if git diff --quiet -- data/generated public/contracts public/api-snapshots; then
               echo "No published snapshot changes."
               exit 0
             fi
 
-            git add data/generated
+            git add data/generated public/contracts public/api-snapshots
             git commit -m "chore: refresh public docs snapshots"
 
             if git push origin HEAD:main; then
