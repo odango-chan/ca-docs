@@ -25,19 +25,20 @@ const recordUrl = base + release.releaseRecord.publicPath.replace(/^\/+/, '');
   <section class="hero">
     <span class="eyebrow">{ownerTitle} / Owner Release</span>
     <h1>{release.releaseRecord.title || release.releaseId}</h1>
-    <p class="lede">Owner Release: <code>{release.releaseId}</code> · Source Commit: <code>{release.releaseRecord.sourceCommit}</code></p>
+    <p class="lede">Owner Release: <code>{release.releaseId}</code> · Publication: <strong>{release.publicationStatus}</strong> · Source Commit: <code>{release.releaseRecord.sourceCommit}</code></p>
     <div class="page-tabs">
       <a href={href('/en/releases/')}>Owner Releases</a>
       <a href={href('/en/contracts/')}>Contract Catalog</a>
-      <a class="primary-tab" href={recordUrl}>Download original Release Record</a>
+      {recordUrl && <a class="primary-tab" href={recordUrl}>Download original Release Record</a>}
     </div>
   </section>
-  <section class="section">
+  {release.publicationStatus === 'WITHDRAWN' && <section class="section"><div class="notice"><strong>该 Owner Release 已撤回。</strong><p>此版本作为撤回记录保留；目录不再提供其契约下载入口，已发布的历史不可变文件不会被覆盖或删除。</p></div></section>}
+  {release.publicationStatus !== 'WITHDRAWN' && <section class="section">
     <div class="source-note">
       Owner: <code>{component.repository}</code> · SHA-256: <code>{release.releaseRecord.sha256}</code>
     </div>
-  </section>
-  <section class="section">
+  </section>}
+  {release.publicationStatus !== 'WITHDRAWN' && <section class="section">
     <div class="section-head"><div><span class="eyebrow">Released contracts</span><h2>Contract versions in this release</h2></div></div>
     <div class="doc-index">
       {release.contracts.map((contract: any) => (
@@ -50,11 +51,11 @@ const recordUrl = base + release.releaseRecord.publicPath.replace(/^\/+/, '');
         </a>
       ))}
     </div>
-  </section>
-  <section class="section">
+  </section>}
+  {release.publicationStatus !== 'WITHDRAWN' && <section class="section">
     <div class="section-head"><div><span class="eyebrow">Owner release record</span><h2>Release record</h2></div></div>
     <article class="markdown-body" set:html={release.releaseRecord.html}></article>
-  </section>
+  </section>}
 </SiteLayout>
 
 <style>
