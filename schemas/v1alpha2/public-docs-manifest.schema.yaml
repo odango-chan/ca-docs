@@ -110,11 +110,13 @@ $defs:
   release:
     type: object
     additionalProperties: false
-    required: [releaseId, releaseRecord, contracts]
+    required: [releaseId, publicationStatus, releaseRecord, contracts]
     properties:
       releaseId:
         type: string
         pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+      publicationStatus:
+        enum: [PUBLISHED, PREVIEW, WITHDRAWN]
       releaseRecord:
         type: object
         additionalProperties: false
