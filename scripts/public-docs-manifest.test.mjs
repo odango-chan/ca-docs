@@ -46,7 +46,7 @@ test('requires releases even when there are no formal releases', () => {
 });
 
 test('rejects unsafe source and artifact paths', () => {
-  for (const value of ['/absolute/file', '../escape', 'docs/../secret', 'docs\\\\secret', 'C:/secret']) {
+  for (const value of ['/absolute/file', '../escape', 'docs/../secret', `docs${String.fromCharCode(92)}secret`, 'C:/secret']) {
     assert.throws(() => validateSourcePath(value), /invalid public-doc source path/);
   }
 });
