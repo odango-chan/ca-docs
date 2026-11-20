@@ -2,34 +2,10 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import yaml from 'js-yaml';
 import { pinSourceContext } from './source-revision.mjs';
-import Ajv2020 from 'ajv/dist/2020.js';
+import { parseManifest, validateSourcePath } from './public-docs-manifest.mjs';
 
 const token = process.env.CA_DOCS_SOURCE_TOKEN || '';
 const strict = process.env.CA_DOCS_SYNC_STRICT === '1';
-const manifestSchema = yaml.load(await fs.readFile('schemas/v1alpha1/public-docs-manifest.schema.yaml', 'utf8'));
-const validateManifestSchema = new Ajv2020({ allErrors: true }).compile(manifestSchema);
-
-export function validateSourcePath(sourcePath) {
-  if (typeof sourcePath !== 'string' || !sourcePath || sourcePath.startsWith('/') || sourcePath.includes('\\')) {
-    throw new Error(`invalid public-doc source path ${sourcePath}`);
-  }
-  const segments = sourcePath.split('/');
-  if (segments.some((part) => !part || part === '.' || part === '..')) {
-    throw new Error(`invalid public-doc source path ${sourcePath}`);
-  }
-  return sourcePath;
-}
-
-function assertManifest(manifest, component) {
-  if (!validateManifestSchema(manifest)) {
-    const detail = validateManifestSchema.errors?.map((error) => `${error.instancePath} ${error.message}`).join('; ');
-    throw new Error(`invalid PublicDocsManifest: ${detail}`);
-  }
-  if (manifest.component !== component.id) {
-    throw new Error(`manifest component ${manifest.component} does not match registry ${component.id}`);
-  }
-  for (const source of manifest.sources) validateSourcePath(source.path);
-}
 
 function headers() {
   const result = { Accept: 'application/vnd.github+json', 'User-Agent': 'ca-docs-manifest-sync' };
@@ -198,8 +174,7 @@ export function summarizeDeclaredSource(source, sourceText) {
 }
 
 export async function buildSnapshot(component, manifestText, context, revision, readSource = (sourcePath) => fetchText(context, sourcePath)) {
-  const manifest = yaml.load(manifestText);
-  assertManifest(manifest, component);
+  const manifest = parseManifest(manifestText, component.id);
   const sources = await Promise.all(manifest.sources.map(async (source) => {
     const text = await readSource(source.path);
     return summarizeDeclaredSource(source, text);
