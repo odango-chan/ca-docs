@@ -12,6 +12,7 @@ const valid = {
   releases: [
     {
       releaseId: 'sample-v1',
+      publicationStatus: 'PUBLISHED',
       releaseRecord: { path: 'releases/v1.md', ref: '0123456789abcdef0123456789abcdef01234567' },
       contracts: [
         {
@@ -54,6 +55,7 @@ test('rejects duplicate contract versions and duplicate latest pointers', () => 
   const manifest = structuredClone(valid);
   manifest.releases.push({
     releaseId: 'sample-v2',
+    publicationStatus: 'PUBLISHED',
     releaseRecord: { path: 'releases/v2.md', ref: '0123456789abcdef0123456789abcdef01234567' },
     contracts: [structuredClone(valid.releases[0].contracts[0])],
   });
