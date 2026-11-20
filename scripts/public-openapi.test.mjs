@@ -28,3 +28,26 @@ test('validates server URLs declared on individual operations', () => {
     /not publishable/,
   );
 });
+
+test('accepts a fully declared relative schema reference closure', () => {
+  const documents = new Map([
+    ['schemas/api.openapi.yaml', { components: { schemas: { Request: { $ref: './request.schema.yaml#/$defs/request' } } } }],
+    ['schemas/request.schema.yaml', { $defs: { request: { type: 'object' } } }],
+  ]);
+  assert.doesNotThrow(() => assertDeclaredReferenceClosure(documents, [...documents.keys()]));
+});
+
+test('rejects undeclared and remote schema references', () => {
+  assert.throws(
+    () => assertDeclaredReferenceClosure(new Map([
+      ['api.openapi.yaml', { components: { schemas: { Request: { $ref: './private.schema.yaml' } } } }],
+    ]), ['api.openapi.yaml']),
+    /unpublished schema reference/,
+  );
+  assert.throws(
+    () => assertDeclaredReferenceClosure(new Map([
+      ['api.openapi.yaml', { components: { schemas: { Request: { $ref: 'https://schemas.example.net/request.json' } } } }],
+    ]), ['api.openapi.yaml']),
+    /remote OpenAPI \/ JSON Schema reference/,
+  );
+});
