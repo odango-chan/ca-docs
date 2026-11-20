@@ -34,6 +34,7 @@ const ownerTitle = component.title?.en || component.id;
       <a class="primary-tab" href={specUrl}>Download original OpenAPI</a>
     </div>
   </section>
+  {snapshot.sync?.mode === 'stale' && <section class="section"><div class="notice"><strong>Upstream snapshot is stale</strong><p>{snapshot.sync.detail}</p></div></section>}
   <section class="section">
     <div class="source-note">
       Owner: <code>{component.repository}</code> · Role: <code>{source.role}</code> ·
