@@ -956,11 +956,11 @@ export async function syncManifest(component) {
         fetchText({ ...pinnedContext, ref: sourceRef }, sourcePath),
     );
 
-    await fs.mkdir(path.dirname(snapshotPath), { recursive: true });
-    await fs.writeFile(snapshotPath, JSON.stringify(result.snapshot, null, 2) + '\n', 'utf8');
     for (const file of result.publicFiles) {
       await writeImmutableFile(file.path, file.content, file.sha256);
     }
+    await fs.mkdir(path.dirname(snapshotPath), { recursive: true });
+    await fs.writeFile(snapshotPath, JSON.stringify(result.snapshot, null, 2) + '\n', 'utf8');
     console.log(
       component.id +
         ': refreshed ' +
