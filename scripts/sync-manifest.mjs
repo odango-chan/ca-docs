@@ -972,6 +972,15 @@ export async function syncManifest(component) {
     );
   } catch (error) {
     if (strict) throw error;
-    console.warn(component.id + ': upstream refresh failed; committed snapshot retained: ' + error.message);
+    const detail = error instanceof Error ? error.message : String(error);
+    try {
+      const snapshot = JSON.parse(await fs.readFile(snapshotPath, 'utf8'));
+      snapshot.sync = { mode: 'stale', detail, observedAt: new Date().toISOString() };
+      await fs.writeFile(snapshotPath, JSON.stringify(snapshot, null, 2) + '\\n', 'utf8');
+    } catch (snapshotError) {
+      if (snapshotError?.code === 'ENOENT') throw error;
+      throw snapshotError;
+    }
+    console.warn(component.id + ': upstream refresh failed; serving explicitly stale snapshot: ' + detail);
   }
 }
