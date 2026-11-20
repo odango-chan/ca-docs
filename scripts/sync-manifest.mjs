@@ -201,14 +201,14 @@ function assertPublicOpenApiServers(document, sourcePath) {
     }
     let parsed;
     try {
-      parsed = new URL(value.replace(/\\{[^}]+\\}/g, 'placeholder'));
+      parsed = new URL(value.replace(/\{[^}]+\}/g, 'placeholder'));
     } catch {
       throw new Error('unresolvable OpenAPI server URL in ' + sourcePath + ': ' + value);
     }
     if (!['http:', 'https:'].includes(parsed.protocol)) {
       throw new Error('non-HTTP OpenAPI server URL is not publishable in ' + sourcePath + ': ' + value);
     }
-    const host = parsed.hostname.replace(/^\\[|\\]$/g, '').toLowerCase();
+    const host = parsed.hostname.replace(/^\[|\]$/g, '').toLowerCase();
     const ipVersion = isIP(host);
     const privateHost = host === 'localhost' || host.endsWith('.localhost') ||
       host.endsWith('.local') || host.endsWith('.internal') ||
