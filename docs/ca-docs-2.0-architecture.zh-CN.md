@@ -426,7 +426,6 @@ ca-docs/
 │   └── build-catalog.mjs
 ├── src/
 │   ├── components/
-│   │   ├── ScalarReference.astro
 │   │   ├── SchemaExplorer.astro
 │   │   └── ContractProvenance.astro
 │   ├── lib/
@@ -480,7 +479,7 @@ ca-docs/
 
 ### Phase 3 — API 与 Schema 可视化
 
-- [ ] 集成固定版本的 `@scalar/astro`
+- [x] 增加动态 Scalar API Reference 页面，使用固定版本的 standalone ESM bundle
 - [ ] 按 API Contract ID / Version 生成 API 页面
 - [ ] Scalar 加载 CA Docs 本地发布的 OpenAPI 文件
 - [ ] OpenAPI 3.0/3.1 校验和错误定位
