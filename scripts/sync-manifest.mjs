@@ -250,7 +250,7 @@ async function publishManifestArtifacts(component, manifest, context, revision) 
       sourcePath: source.path,
       kind: source.kind,
       url: written.path,
-      mediaType: inferMediaType(source.path),
+      mediaType: source.kind === 'openapi' ? 'application/vnd.oai.openapi' : inferMediaType(source.path),
       sha256: written.sha256,
       size: written.size,
       sourceCommit: revision.commit,
@@ -326,7 +326,7 @@ async function publishManifestArtifacts(component, manifest, context, revision) 
     component: component.id,
     owner: component.repository,
     sourceCommit: revision.commit,
-    generatedAt: new Date().toISOString(),
+    generatedAt: revision.commitDate || null,
     releases,
   };
   const catalogPath = path.resolve('data/catalog', `${component.id}.json`);
@@ -339,7 +339,7 @@ export async function buildCatalogIndex() {
   const directory = path.resolve('data/catalog');
   let files = [];
   try {
-    files = (await fs.readdir(directory)).filter((name) => name.endsWith('.json') && !['contracts.json', 'releases.json'].includes(name));
+    files = (await fs.readdir(directory)).filter((name) => name.endsWith('.json') && !['contracts.json', 'releases.json'].includes(name)).sort();
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
   }
@@ -349,6 +349,7 @@ export async function buildCatalogIndex() {
     owner: catalog.owner,
     ...release,
   })));
+  releases.sort((left, right) => `${left.component}/${left.releaseId}`.localeCompare(`${right.component}/${right.releaseId}`));
   const contracts = releases.flatMap((release) => release.contracts.map((contract) => ({
     component: release.component,
     owner: release.owner,
@@ -356,6 +357,7 @@ export async function buildCatalogIndex() {
     publicationStatus: release.publicationStatus,
     ...contract,
   })));
+  contracts.sort((left, right) => `${left.contractId}@${left.version}`.localeCompare(`${right.contractId}@${right.version}`));
   const identities = contracts.map((contract) => `${contract.contractId}@${contract.version}`);
   if (new Set(identities).size !== identities.length) {
     throw new Error('duplicate Contract ID + Version across Owner catalogs');
