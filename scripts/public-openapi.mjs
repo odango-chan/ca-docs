@@ -1,4 +1,5 @@
 import { isIP } from 'node:net';
+import path from 'node:path';
 
 function isPrivateIpv4(address) {
   const parts = address.split('.').map(Number);
@@ -59,6 +60,42 @@ export function assertPublicOpenApiServers(document, sourcePath = '(OpenAPI)') {
       (ipVersion === 6 && isPrivateIpv6(host));
     if (privateHost) {
       throw new Error(`private or placeholder OpenAPI server URL is not publishable in ${sourcePath}: ${value}`);
+    }
+  }
+}
+
+function collectReferences(value, output = []) {
+  if (Array.isArray(value)) {
+    for (const item of value) collectReferences(item, output);
+  } else if (value && typeof value === 'object') {
+    if (typeof value.$ref === 'string') output.push(value.$ref);
+    for (const child of Object.values(value)) collectReferences(child, output);
+  }
+  return output;
+}
+
+export function assertDeclaredReferenceClosure(documents, declaredPaths) {
+  const declared = new Set(declaredPaths);
+  for (const [sourcePath, document] of documents) {
+    for (const reference of collectReferences(document)) {
+      const [referencePath] = reference.split('#', 1);
+      if (!referencePath) continue;
+      if (/^[A-Za-z][A-Za-z0-9+.-]*:/.test(referencePath) || referencePath.startsWith('//')) {
+        throw new Error(`remote OpenAPI / JSON Schema reference is not publishable: ${sourcePath} -> ${reference}`);
+      }
+      let decoded;
+      try {
+        decoded = decodeURIComponent(referencePath);
+      } catch {
+        throw new Error(`invalid encoded schema reference: ${sourcePath} -> ${reference}`);
+      }
+      const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(sourcePath), decoded));
+      if (resolved === '..' || resolved.startsWith('../') || path.posix.isAbsolute(resolved)) {
+        throw new Error(`schema reference escapes the Owner repository: ${sourcePath} -> ${reference}`);
+      }
+      if (!declared.has(resolved)) {
+        throw new Error(`unpublished schema reference: ${sourcePath} -> ${resolved}; declare the referenced file with raw publication`);
+      }
     }
   }
 }
