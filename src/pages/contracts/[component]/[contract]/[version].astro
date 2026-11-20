@@ -6,6 +6,7 @@ export function getStaticPaths() {
   const paths = [];
   for (const { component, snapshot } of loadPublicCatalog()) {
     for (const release of snapshot.releases || []) {
+      if (release.publicationStatus === 'WITHDRAWN') continue;
       for (const contract of release.contracts || []) {
         paths.push({
           params: {
