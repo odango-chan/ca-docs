@@ -264,7 +264,7 @@ CA Docs 的 manifest 解决“允许公开什么、在哪里、属于哪个契�
 
 ### 6.1 技术方案
 
-在现有 Astro 5 站点集成官方 Astro 组件 `@scalar/astro`。
+在现有 Astro 5 页面中使用 Scalar 官方 standalone ESM bundle，固定到明确版本并由页面加载。当前实现固定 `@scalar/api-reference@1.81.0`；不使用 `latest`，不引入服务端 API 代理。
 
 Scalar 只负责 OpenAPI / Swagger 描述的 HTTP API。MCP、Provider 进程协议、NDJSON、Go SDK 和其他非 OpenAPI 契约必须使用对应的协议契约页面与 Schema 展示，不能为了统一 UI 而伪造 OpenAPI。3GPP SBI OpenAPI 只有在 Owner 明确授权公开、且版本来源和规范版权边界清楚时才进入 API Reference。
 
@@ -311,6 +311,8 @@ API 页面包含：
 - 只有明确配置公共测试环境、CORS 和允许的 server URL 后，才启用 Try It；
 - 不代理用户的 API 请求，不在 CA Docs 存储业务凭据；
 - OpenAPI 文件必须由 Owner 明确授权公开；
+- 原始 OpenAPI / JSON Schema 的相对 `$ref` 必须形成完整的已声明文件闭包；禁止远程 `$ref`；
+- OpenAPI server URL 必须是相对路径或明确公网地址，拒绝 loopback、私网、link-local、内部域名和占位主机名；
 - 不自动改写 Owner 的原始 OpenAPI 文件；校验失败时阻止发布并给出路径/行号；
 - Scalar 依赖版本必须固定，并验证 GitHub Pages 的 base path、静态资源加载和深链接刷新；
 - 若使用 CDN，必须固定版本；同时评估将前端资源本地打包，避免站点运行依赖未固定的 latest CDN。
