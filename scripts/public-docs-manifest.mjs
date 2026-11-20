@@ -51,7 +51,7 @@ export function validateManifest(manifest, componentId) {
 
   for (const source of manifest.sources) validateSourcePath(source.path);
   unique(manifest.sources.map((source) => source.role).filter(Boolean), 'source role');
-  unique(manifest.sources.map((source) => `${source.kind}:${source.path}`), 'source path');
+  unique(manifest.sources.map((source) => source.path), 'source path');
 
   const releaseIds = [];
   const contractVersions = [];
@@ -62,9 +62,17 @@ export function validateManifest(manifest, componentId) {
     for (const contract of release.contracts) {
       const identity = `${contract.contractId}@${contract.version}`;
       contractVersions.push(identity);
-      if (contract.latest === true) latestContracts.push(contract.contractId);
+      if (contract.latest === true) {
+        if (release.publicationStatus !== 'PUBLISHED') throw new Error(`latest contract ${identity} must have publicationStatus PUBLISHED`);
+        latestContracts.push(contract.contractId);
+      }
       unique(contract.artifacts.map((artifact) => artifact.path), `artifact path in ${identity}`);
-      for (const artifact of contract.artifacts) validateSourcePath(artifact.path);
+      for (const artifact of contract.artifacts) {
+        validateSourcePath(artifact.path);
+        if (artifact.path === '.ca-provenance.json' || artifact.path.endsWith('/.ca-provenance.json')) {
+          throw new Error(`artifact path is reserved for provenance: ${artifact.path}`);
+        }
+      }
     }
   }
   unique(releaseIds, 'releaseId');
