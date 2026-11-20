@@ -174,7 +174,7 @@ export function summarizeDeclaredSource(source, sourceText) {
 }
 
 export async function buildSnapshot(component, manifestText, context, revision, readSource = (sourcePath) => fetchText(context, sourcePath)) {
-  const manifest = parseManifest(manifestText, component.id);
+  const manifest = parseManifest(manifestText, component.sourceIdentity || component.id);
   const sources = await Promise.all(manifest.sources.map(async (source) => {
     const text = await readSource(source.path);
     return summarizeDeclaredSource(source, text);
