@@ -976,7 +976,7 @@ export async function syncManifest(component) {
     try {
       const snapshot = JSON.parse(await fs.readFile(snapshotPath, 'utf8'));
       snapshot.sync = { mode: 'stale', detail, observedAt: new Date().toISOString() };
-      await fs.writeFile(snapshotPath, JSON.stringify(snapshot, null, 2) + '\\n', 'utf8');
+      await fs.writeFile(snapshotPath, JSON.stringify(snapshot, null, 2) + '\n', 'utf8');
     } catch (snapshotError) {
       if (snapshotError?.code === 'ENOENT') throw error;
       throw snapshotError;
