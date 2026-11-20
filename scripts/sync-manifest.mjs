@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import yaml from 'js-yaml';
 import { pinSourceContext } from './source-revision.mjs';
 import { parseManifest, validateSourcePath } from './public-docs-manifest.mjs';
@@ -19,26 +20,28 @@ function splitRepository(value) {
   return { owner: parts[0], repo: parts[1] };
 }
 
-async function fetchText(context, sourcePath) {
+async function fetchBytes(context, sourcePath) {
   const rel = validateSourcePath(sourcePath);
   const url = `https://api.github.com/repos/${context.owner}/${context.repo}/contents/${rel}?ref=${encodeURIComponent(context.ref)}`;
   const response = await fetch(url, { headers: headers() });
   if (!response.ok) throw new Error(`failed to fetch declared source ${rel}: HTTP ${response.status}`);
   const body = await response.json();
   if (!body?.content || body.encoding !== 'base64') throw new Error(`unexpected response while reading ${rel}`);
-  return Buffer.from(body.content.replace(/\n/g, ''), 'base64').toString('utf8');
+  return Buffer.from(body.content.replace(/\\n/g, ''), 'base64');
 }
 
+async function fetchText(context, sourcePath) {
+  return (await fetchBytes(context, sourcePath)).toString('utf8');
+}
 async function sourceRevision(context) {
-  const response = await fetch(`https://api.github.com/repos/${context.owner}/${context.repo}/branches/${encodeURIComponent(context.ref)}`, { headers: headers() });
+  const response = await fetch(`https://api.github.com/repos/${context.owner}/${context.repo}/commits/${encodeURIComponent(context.ref)}`, { headers: headers() });
   if (!response.ok) throw new Error(`failed to resolve source ref ${context.ref}: HTTP ${response.status}`);
   const body = await response.json();
   return {
-    commit: body?.commit?.sha || null,
-    commitDate: body?.commit?.commit?.committer?.date || body?.commit?.commit?.author?.date || null,
+    commit: body?.sha || null,
+    commitDate: body?.commit?.committer?.date || body?.commit?.author?.date || null,
   };
 }
-
 function schemaName(ref) {
   if (typeof ref !== 'string') return null;
   const marker = '#/components/schemas/';
@@ -81,6 +84,7 @@ function summarizeOpenApi(document, source) {
     kind: source.kind,
     role: source.role || null,
     path: source.path,
+    publish: [...publish],
     metadata: publish.has('metadata') ? {
       title: document.info?.title || source.role || 'API',
       description: document.info?.description || '',
@@ -156,6 +160,7 @@ export function summarizeDeclaredSource(source, sourceText) {
       kind: source.kind,
       role: source.role || null,
       path: source.path,
+      publish: [...publish],
       language: source.language || null,
       body: publish.has('body') ? sourceText : null,
     };
@@ -165,6 +170,7 @@ export function summarizeDeclaredSource(source, sourceText) {
       kind: source.kind,
       role: source.role || null,
       path: source.path,
+      publish: [...publish],
       implementationSummary: publish.has('implementation-summary')
         ? `Declared implementation source is present at the pinned source revision (${sourceText.length} characters).`
         : null,
