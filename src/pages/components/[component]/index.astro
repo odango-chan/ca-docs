@@ -43,6 +43,8 @@ const href = (value) => `${base.replace(/\/?$/, '/')}${value.replace(/^\/+/, '')
     <p>本站展示经 owner 明确授权的文档正文与契约摘要。实现状态以源仓文档和对应验收证据为准；同步或构建成功本身不代表功能已实现或验收通过。</p>
   </section>
 
+  {data.sync?.mode === 'stale' && <section class="section"><div class="notice"><strong>上游快照已过期</strong><p>{data.sync.detail}</p></div></section>}
+
   {publicDocs.map(({ source, title: documentTitle, html }) => <section class="section" id={source.role}>
     <div class="section-head"><div><span class="eyebrow">源仓文档 / Owner documentation</span><h2>{documentTitle}</h2></div></div>
     <div class="prose owner-document" set:html={html}></div>
