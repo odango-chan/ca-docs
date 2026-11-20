@@ -124,6 +124,78 @@ paths: {}
   assert.equal(result.publicFiles[0].content, openApi);
 });
 
+test('raw OpenAPI rejects loopback and private server URLs', async () => {
+  const declared = manifest([
+    {
+      kind: 'openapi',
+      path: 'contracts/public.openapi.yaml',
+      role: 'public-api',
+      publish: ['metadata', 'operations', 'raw'],
+    },
+  ]);
+  await assert.rejects(
+    buildSnapshot(
+      component,
+      yaml.dump(declared),
+      { ref: branchCommit },
+      { commit: branchCommit },
+      async () => `openapi: 3.1.0
+info: {title: Public API, version: v1}
+servers: [{url: 'http://127.0.0.1:8080'}]
+paths: {}
+`,
+    ),
+    /private or placeholder OpenAPI server URL/,
+  );
+});
+
+test('raw OpenAPI and JSON Schema references must be fully declared', async () => {
+  const declared = manifest([
+    {
+      kind: 'openapi',
+      path: 'contracts/public.openapi.yaml',
+      role: 'public-api',
+      publish: ['metadata', 'operations', 'raw'],
+    },
+    {
+      kind: 'json-schema',
+      path: 'contracts/schemas/request.schema.yaml',
+      role: 'request-schema',
+      publish: ['metadata', 'fields', 'raw'],
+    },
+  ]);
+  const texts = {
+    'contracts/public.openapi.yaml': `openapi: 3.1.0
+info: {title: Public API, version: v1}
+paths: {}
+components:
+  schemas:
+    Request: {$ref: './schemas/request.schema.yaml#/$defs/request'}
+`,
+    'contracts/schemas/request.schema.yaml': '$defs: {request: {type: object}}\\n',
+  };
+  const result = await buildSnapshot(
+    component,
+    yaml.dump(declared),
+    { ref: branchCommit },
+    { commit: branchCommit },
+    async (sourcePath) => texts[sourcePath],
+  );
+  assert.equal(result.publicFiles.length, 2);
+
+  const incomplete = manifest([declared.sources[0]]);
+  await assert.rejects(
+    buildSnapshot(
+      component,
+      yaml.dump(incomplete),
+      { ref: branchCommit },
+      { commit: branchCommit },
+      async () => texts['contracts/public.openapi.yaml'],
+    ),
+    /undeclared raw OpenAPI \/ JSON Schema reference/,
+  );
+});
+
 test('v1alpha1 manifests are rejected rather than silently accepted', async () => {
   const legacy = {
     ...manifest([{ kind: 'markdown', path: 'docs/overview.md', role: 'overview', publish: ['body'] }]),
