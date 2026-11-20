@@ -267,6 +267,7 @@ test('released contract artifacts are pinned, hashed and append-only public file
   const declared = manifest([], [
     {
       releaseId: 'fabric-contracts-v1',
+      publicationStatus: 'PUBLISHED',
       releaseRecord: { path: 'docs/releases/fabric-v1.md', ref: releaseCommit },
       contracts: [
         {
