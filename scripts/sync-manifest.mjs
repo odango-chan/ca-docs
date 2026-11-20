@@ -717,8 +717,23 @@ export async function buildSnapshot(
       const contractRoot =
         'contracts/' + component.id + '/' + contract.contractId + '/' + contract.version;
       const artifactEntries = [];
-      for (const artifact of contract.artifacts) {
-        const artifactText = await readSource(artifact.path, contract.source.ref);
+      const artifactTexts = await Promise.all(
+        contract.artifacts.map(async (artifact) => ({
+          artifact,
+          text: await readSource(artifact.path, contract.source.ref),
+        })),
+      );
+      const artifactDocuments = new Map();
+      for (const { artifact, text } of artifactTexts) {
+        if (!['openapi', 'json-schema'].includes(artifact.kind)) continue;
+        const document = parseYamlDocument(text, artifact);
+        if (artifact.kind === 'openapi') assertPublicOpenApiServers(document, artifact.path);
+        artifactDocuments.set(artifact.path, document);
+      }
+      if (artifactDocuments.size > 0) {
+        assertReferenceClosure(artifactDocuments, artifactDocuments.keys(), 'released OpenAPI / JSON Schema');
+      }
+      for (const { artifact, text: artifactText } of artifactTexts) {
         const digest = sha256(artifactText);
         const publicPath = contractRoot + '/' + artifact.path;
         addPublicFile(publicFiles, publicPath, artifactText, digest);
